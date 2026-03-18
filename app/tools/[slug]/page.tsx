@@ -8,7 +8,7 @@ import {
   buildMetadata,
   buildSoftwareApplicationJsonLd,
 } from "@/lib/seo";
-import { getTool, tools } from "@/lib/tools";
+import { getPopularTools, getRecentTools, getTool, isExpandedSeoTool, tools } from "@/lib/tools";
 
 export function generateStaticParams() {
   return tools.map((tool) => ({ slug: tool.slug }));
@@ -29,7 +29,12 @@ export async function generateMetadata({
     title: tool.seoTitle,
     description: tool.seoDescription,
     pathname: `/tools/${tool.slug}`,
-    keywords: [...tool.keywords, tool.name, tool.category.replace(/-/g, " ")],
+    keywords: [
+      ...tool.keywords,
+      tool.name,
+      tool.category.replace(/-/g, " "),
+      ...(isExpandedSeoTool(tool) ? [`how to use ${tool.name.toLowerCase()}`, `${tool.name.toLowerCase()} examples`] : []),
+    ],
   });
 }
 
@@ -47,6 +52,8 @@ export default async function ToolDetailPage({
   const relatedTools = tool.relatedToolSlugs
     .map((slug) => getTool(slug))
     .filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate));
+  const categoryPopularTools = getPopularTools(4, tool.category).filter((item) => item.slug !== tool.slug);
+  const categoryRecentTools = getRecentTools(4, tool.category).filter((item) => item.slug !== tool.slug);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Home", pathname: "/" },
     { name: tool.category.replace(/-/g, " "), pathname: `/category/${tool.category}` },
@@ -89,7 +96,12 @@ export default async function ToolDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
       />
-      <ToolPage tool={tool} relatedTools={relatedTools} />
+      <ToolPage
+        tool={tool}
+        relatedTools={relatedTools}
+        categoryPopularTools={categoryPopularTools}
+        categoryRecentTools={categoryRecentTools}
+      />
     </>
   );
 }

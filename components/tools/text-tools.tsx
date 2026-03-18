@@ -5,6 +5,7 @@ import {
   buttonClass,
   EmptyState,
   Field,
+  inputClass,
   Notice,
   OutputBlock,
   secondaryButtonClass,
@@ -50,6 +51,30 @@ const loremWords = "lorem ipsum dolor sit amet consectetur adipiscing elit sed d
 
 function getRandomInt(max: number) {
   return crypto.getRandomValues(new Uint32Array(1))[0] % max;
+}
+
+function extractNormalizedWords(value: string) {
+  return value.toLowerCase().match(/[a-z0-9']+/g) ?? [];
+}
+
+function estimateSentenceCount(value: string) {
+  return value
+    .split(/(?<=[.!?])\s+/)
+    .map((sentence) => sentence.trim())
+    .filter((sentence) => /[a-z0-9]/i.test(sentence)).length;
+}
+
+function formatDurationFromMinutes(minutes: number) {
+  const totalSeconds = Math.max(0, Math.round(minutes * 60));
+  const wholeMinutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  if (wholeMinutes === 0) {
+    return `${seconds} sec`;
+  }
+  if (seconds === 0) {
+    return `${wholeMinutes} min`;
+  }
+  return `${wholeMinutes} min ${seconds} sec`;
 }
 
 export function WordCounterTool() {
@@ -536,6 +561,350 @@ export function TextDuplicateRemoverTool() {
           {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
         </>
       )}
+    </ToolShell>
+  );
+}
+
+export function TextCompareTool() {
+  const [leftText, setLeftText] = useState("");
+  const [rightText, setRightText] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  const comparison = useMemo(() => {
+    if (!leftText.trim() && !rightText.trim()) {
+      return null;
+    }
+
+    const leftLines = leftText.replace(/\r\n/g, "\n").split("\n");
+    const rightLines = rightText.replace(/\r\n/g, "\n").split("\n");
+    const maxLines = Math.max(leftLines.length, rightLines.length);
+    const diffLines: string[] = [];
+    let changedLines = 0;
+
+    for (let index = 0; index < maxLines; index += 1) {
+      const leftLine = leftLines[index] ?? "";
+      const rightLine = rightLines[index] ?? "";
+      if (leftLine === rightLine) {
+        diffLines.push(`= Line ${index + 1}: ${leftLine}`);
+        continue;
+      }
+      changedLines += 1;
+      if (leftLine) {
+        diffLines.push(`- Line ${index + 1}: ${leftLine}`);
+      }
+      if (rightLine) {
+        diffLines.push(`+ Line ${index + 1}: ${rightLine}`);
+      }
+      if (!leftLine && !rightLine) {
+        diffLines.push(`~ Line ${index + 1}: blank`);
+      }
+    }
+
+    return {
+      changedLines,
+      totalLines: maxLines,
+      identical: leftText === rightText,
+      output: diffLines.join("\n"),
+    };
+  }, [leftText, rightText]);
+
+  function handleCompare() {
+    if (!leftText.trim() && !rightText.trim()) {
+      setError("Enter text in at least one side before comparing.");
+      return;
+    }
+    setError("");
+  }
+
+  return (
+    <ToolShell title="Text Compare Tool" description="Compare two text blocks locally and inspect line-by-line differences in a simple browser-side view.">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Original text">
+          <textarea className={textareaClass} value={leftText} onChange={(event) => setLeftText(event.target.value)} placeholder="Paste the first text block here." />
+        </Field>
+        <Field label="Updated text">
+          <textarea className={textareaClass} value={rightText} onChange={(event) => setRightText(event.target.value)} placeholder="Paste the second text block here." />
+        </Field>
+      </div>
+      <button type="button" className={buttonClass} onClick={handleCompare}>Compare text</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!comparison && !error ? (
+        <EmptyState title="Add two text blocks to compare them" description="The comparison stays in the browser and highlights line-level additions, removals, and changes." />
+      ) : comparison ? (
+        <>
+          <div className="grid gap-3 md:grid-cols-3">
+            <OutputBlock title="Compared lines" value={String(comparison.totalLines)} multiline={false} />
+            <OutputBlock title="Changed lines" value={String(comparison.changedLines)} multiline={false} />
+            <OutputBlock title="Match status" value={comparison.identical ? "Exact match" : "Differences found"} multiline={false} />
+          </div>
+          <OutputBlock title="Line-by-line diff" value={comparison.output} />
+          <button type="button" className={buttonClass} onClick={() => copy("text comparison", comparison.output)}>
+            Copy output
+          </button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function WordFrequencyCounterTool() {
+  const [text, setText] = useState("");
+  const [minLength, setMinLength] = useState(3);
+  const [limit, setLimit] = useState(10);
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  const analysis = useMemo(() => {
+    const words = extractNormalizedWords(text).filter((word) => word.length >= minLength);
+    if (!words.length) {
+      return null;
+    }
+
+    const counts = new Map<string, number>();
+    for (const word of words) {
+      counts.set(word, (counts.get(word) ?? 0) + 1);
+    }
+
+    const topWords = [...counts.entries()]
+      .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+      .slice(0, limit)
+      .map(([word, count]) => ({
+        word,
+        count,
+        density: ((count / words.length) * 100).toFixed(2),
+      }));
+
+    return {
+      totalWords: words.length,
+      uniqueWords: counts.size,
+      output: topWords.map((entry, index) => `${index + 1}. ${entry.word} - ${entry.count} (${entry.density}%)`).join("\n"),
+    };
+  }, [limit, minLength, text]);
+
+  function handleAnalyze() {
+    if (!text.trim()) {
+      setError("Paste text before running the frequency analysis.");
+      return;
+    }
+    setError("");
+  }
+
+  return (
+    <ToolShell title="Word Frequency Counter" description="Count repeated words locally, rank the most common terms, and copy a quick frequency report.">
+      <Field label="Text to analyze">
+        <textarea className={textareaClass} value={text} onChange={(event) => setText(event.target.value)} placeholder="Paste the text you want to analyze." />
+      </Field>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Minimum word length">
+          <input className={inputClass} type="number" min="1" max="12" value={minLength} onChange={(event) => setMinLength(Number(event.target.value))} />
+        </Field>
+        <Field label="Top results to show">
+          <input className={inputClass} type="number" min="3" max="25" value={limit} onChange={(event) => setLimit(Number(event.target.value))} />
+        </Field>
+      </div>
+      <button type="button" className={buttonClass} onClick={handleAnalyze}>Analyze frequency</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!analysis && !error ? (
+        <EmptyState title="No frequency report yet" description="Enter text and run the analysis to see the most repeated words and their share of the text." />
+      ) : analysis ? (
+        <>
+          <div className="grid gap-3 md:grid-cols-2">
+            <OutputBlock title="Counted words" value={String(analysis.totalWords)} multiline={false} />
+            <OutputBlock title="Unique words" value={String(analysis.uniqueWords)} multiline={false} />
+          </div>
+          <OutputBlock title="Top repeated words" value={analysis.output} />
+          <button type="button" className={buttonClass} onClick={() => copy("word frequency report", analysis.output)}>
+            Copy output
+          </button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function PalindromeCheckerTool() {
+  const [text, setText] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  const result = useMemo(() => {
+    const normalized = text.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (!normalized) {
+      return null;
+    }
+    const reversed = [...normalized].reverse().join("");
+    const isPalindrome = normalized === reversed;
+    const output = [
+      `Input: ${text}`,
+      `Normalized: ${normalized}`,
+      `Reversed: ${reversed}`,
+      `Result: ${isPalindrome ? "Palindrome" : "Not a palindrome"}`,
+    ].join("\n");
+
+    return { normalized, reversed, isPalindrome, output };
+  }, [text]);
+
+  function handleCheck() {
+    if (!text.trim()) {
+      setError("Enter a word or phrase before checking it.");
+      return;
+    }
+    setError("");
+  }
+
+  return (
+    <ToolShell title="Palindrome Checker" description="Check whether a word or phrase reads the same backward after normalizing case, spaces, and punctuation.">
+      <Field label="Word or phrase">
+        <textarea className={textareaClass} value={text} onChange={(event) => setText(event.target.value)} placeholder="Never odd or even" />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleCheck}>Check palindrome</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!result && !error ? (
+        <EmptyState title="Enter text to test it" description="The checker ignores casing and punctuation so you can test phrases as well as single words." />
+      ) : result ? (
+        <>
+          <div className="grid gap-3 md:grid-cols-3">
+            <OutputBlock title="Status" value={result.isPalindrome ? "Palindrome" : "Not a palindrome"} multiline={false} />
+            <OutputBlock title="Normalized length" value={String(result.normalized.length)} multiline={false} />
+            <OutputBlock title="Normalized text" value={result.normalized} multiline={false} />
+          </div>
+          <OutputBlock title="Detailed result" value={result.output} />
+          <button type="button" className={buttonClass} onClick={() => copy("palindrome result", result.output)}>
+            Copy output
+          </button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function SentenceCounterTool() {
+  const [text, setText] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  const metrics = useMemo(() => {
+    if (!text.trim()) {
+      return null;
+    }
+    const sentences = estimateSentenceCount(text);
+    const words = extractNormalizedWords(text).length;
+    const paragraphs = text.split(/\n\s*\n/).filter((paragraph) => paragraph.trim()).length;
+    const averageWords = sentences ? (words / sentences).toFixed(1) : "0.0";
+    const output = [
+      `Sentences: ${sentences}`,
+      `Words: ${words}`,
+      `Paragraphs: ${paragraphs}`,
+      `Average words per sentence: ${averageWords}`,
+    ].join("\n");
+    return { sentences, words, paragraphs, averageWords, output };
+  }, [text]);
+
+  function handleCount() {
+    if (!text.trim()) {
+      setError("Paste text before counting sentences.");
+      return;
+    }
+    setError("");
+  }
+
+  return (
+    <ToolShell title="Sentence Counter" description="Estimate the number of sentences in a text block locally and pair it with a few quick readability stats.">
+      <Field label="Text input">
+        <textarea className={textareaClass} value={text} onChange={(event) => setText(event.target.value)} placeholder="Paste a paragraph or article draft here." />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleCount}>Count sentences</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!metrics && !error ? (
+        <EmptyState title="No sentence count yet" description="Add some content and run the counter to estimate sentences, words, and average sentence length." />
+      ) : metrics ? (
+        <>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <OutputBlock title="Sentences" value={String(metrics.sentences)} multiline={false} />
+            <OutputBlock title="Words" value={String(metrics.words)} multiline={false} />
+            <OutputBlock title="Paragraphs" value={String(metrics.paragraphs)} multiline={false} />
+            <OutputBlock title="Avg words / sentence" value={metrics.averageWords} multiline={false} />
+          </div>
+          <button type="button" className={buttonClass} onClick={() => copy("sentence count report", metrics.output)}>
+            Copy output
+          </button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function ReadingTimeCalculatorTool() {
+  const [text, setText] = useState("");
+  const [wordsPerMinute, setWordsPerMinute] = useState(200);
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  const readingStats = useMemo(() => {
+    if (!text.trim()) {
+      return null;
+    }
+    const words = extractNormalizedWords(text).length;
+    const sentences = estimateSentenceCount(text);
+    const minutes = wordsPerMinute > 0 ? words / wordsPerMinute : 0;
+    const output = [
+      `Word count: ${words}`,
+      `Estimated reading time: ${formatDurationFromMinutes(minutes)}`,
+      `Reading speed: ${wordsPerMinute} words per minute`,
+      `Sentence count: ${sentences}`,
+    ].join("\n");
+    return {
+      words,
+      sentences,
+      minutes,
+      duration: formatDurationFromMinutes(minutes),
+      output,
+    };
+  }, [text, wordsPerMinute]);
+
+  function handleEstimate() {
+    if (!text.trim()) {
+      setError("Paste text before estimating reading time.");
+      return;
+    }
+    if (!Number.isFinite(wordsPerMinute) || wordsPerMinute < 80 || wordsPerMinute > 500) {
+      setError("Choose a reading speed between 80 and 500 words per minute.");
+      return;
+    }
+    setError("");
+  }
+
+  return (
+    <ToolShell title="Reading Time Calculator" description="Estimate reading time locally from word count and a chosen words-per-minute speed.">
+      <Field label="Content">
+        <textarea className={textareaClass} value={text} onChange={(event) => setText(event.target.value)} placeholder="Paste the article, email, or page copy you want to measure." />
+      </Field>
+      <Field label="Reading speed (words per minute)">
+        <input className={inputClass} type="number" min="80" max="500" value={wordsPerMinute} onChange={(event) => setWordsPerMinute(Number(event.target.value))} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleEstimate}>Estimate reading time</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!readingStats && !error ? (
+        <EmptyState title="No reading estimate yet" description="Enter content and a reading speed to generate an estimated reading duration you can copy." />
+      ) : readingStats ? (
+        <>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <OutputBlock title="Words" value={String(readingStats.words)} multiline={false} />
+            <OutputBlock title="Sentences" value={String(readingStats.sentences)} multiline={false} />
+            <OutputBlock title="Time" value={readingStats.duration} multiline={false} />
+            <OutputBlock title="Speed" value={`${wordsPerMinute} wpm`} multiline={false} />
+          </div>
+          <button type="button" className={buttonClass} onClick={() => copy("reading time report", readingStats.output)}>
+            Copy output
+          </button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
     </ToolShell>
   );
 }

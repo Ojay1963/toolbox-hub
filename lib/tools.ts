@@ -160,8 +160,31 @@ const popularToolPriority = new Map(
 );
 
 const implementedToolSlugs = new Set([
+  "barcode-generator",
+  "barcode-scanner",
+  "qr-code-scanner",
+  "color-contrast-checker",
+  "meeting-time-finder",
+  "work-hours-calculator",
+  "business-days-calculator",
+  "age-difference-calculator",
   "image-compressor",
   "image-format-converter",
+  "image-cropper-pro",
+  "gif-maker",
+  "video-to-gif-converter",
+  "image-color-palette-generator",
+  "exif-data-viewer",
+  "exif-data-remover",
+  "image-color-inverter",
+  "image-noise-reducer",
+  "image-histogram-analyzer",
+  "video-metadata-viewer",
+  "video-frame-extractor",
+  "video-resolution-checker",
+  "image-metadata-viewer",
+  "image-dpi-checker",
+  "image-border-generator",
   "image-color-picker",
   "blur-image-tool",
   "image-brightness-adjuster",
@@ -177,10 +200,20 @@ const implementedToolSlugs = new Set([
   "image-to-base64-converter",
   "pdf-merge",
   "pdf-split",
+  "pdf-compressor",
   "pdf-to-jpg",
   "jpg-to-pdf",
   "pdf-page-rotator",
   "pdf-page-number-adder",
+  "pdf-watermark-tool",
+  "pdf-metadata-editor",
+  "pdf-unlock-tool",
+  "pdf-page-extractor",
+  "pdf-page-reorder-tool",
+  "pdf-text-extractor",
+  "pdf-bookmark-extractor",
+  "pdf-page-size-checker",
+  "pdf-page-counter",
   "word-counter",
   "character-counter",
   "case-converter",
@@ -193,6 +226,11 @@ const implementedToolSlugs = new Set([
   "lorem-ipsum-generator",
   "text-replace-tool",
   "text-duplicate-remover",
+  "text-compare-tool",
+  "word-frequency-counter",
+  "palindrome-checker",
+  "sentence-counter",
+  "reading-time-calculator",
   "json-formatter",
   "json-to-csv-converter",
   "csv-to-json-converter",
@@ -204,6 +242,23 @@ const implementedToolSlugs = new Set([
   "html-decoder",
   "html-to-markdown-converter",
   "markdown-to-html-converter",
+  "yaml-formatter",
+  "xml-formatter",
+  "json-diff-checker",
+  "csv-formatter",
+  "csv-viewer",
+  "csv-diff-checker",
+  "html-preview-tool",
+  "meta-tag-generator",
+  "meta-tag-analyzer",
+  "keyword-density-checker",
+  "keyword-suggestion-generator",
+  "page-title-generator",
+  "description-generator",
+  "robots-txt-generator",
+  "sitemap-generator",
+  "url-slug-generator",
+  "open-graph-generator",
   "url-encoder",
   "url-decoder",
   "url-parser",
@@ -213,6 +268,29 @@ const implementedToolSlugs = new Set([
   "sha256-generator",
   "md5-generator",
   "hash-generator",
+  "bcrypt-generator",
+  "hmac-generator",
+  "sql-minifier",
+  "sql-beautifier",
+  "sql-query-formatter",
+  "cron-expression-generator",
+  "cron-expression-parser",
+  "json-schema-validator",
+  "json-key-extractor",
+  "xml-to-json-converter",
+  "json-to-xml-converter",
+  "random-token-generator",
+  "secure-password-strength-checker",
+  "secret-key-generator",
+  "email-validator",
+  "file-hash-checker",
+  "file-checksum-generator",
+  "phone-number-formatter",
+  "uuid-validator",
+  "random-api-key-generator",
+  "secure-token-generator",
+  "password-entropy-calculator",
+  "hash-identifier",
   "password-generator",
   "qr-code-generator",
   "uuid-generator",
@@ -221,8 +299,19 @@ const implementedToolSlugs = new Set([
   "username-generator",
   "nickname-generator",
   "random-color-generator",
+  "random-color-palette-generator",
   "random-password-phrase-generator",
   "random-quote-generator",
+  "countdown-timer-generator",
+  "blog-title-generator",
+  "youtube-tag-generator",
+  "instagram-hashtag-generator",
+  "product-name-generator",
+  "domain-name-generator",
+  "random-team-generator",
+  "dice-roller",
+  "coin-flip-generator",
+  "wheel-spinner-random-picker",
   "age-calculator",
   "bmi-calculator",
   "loan-calculator",
@@ -235,11 +324,15 @@ const implementedToolSlugs = new Set([
   "sales-tax-calculator",
   "simple-interest-calculator",
   "compound-interest-calculator",
+  "unit-price-calculator",
+  "time-duration-calculator",
   "length-converter",
   "weight-converter",
   "temperature-converter",
   "time-converter",
   "currency-converter",
+  "timezone-converter",
+  "unix-timestamp-converter",
   "binary-to-decimal-converter",
   "decimal-to-binary-converter",
   "hex-to-rgb-converter",
@@ -248,7 +341,9 @@ const implementedToolSlugs = new Set([
   "binary-to-text-converter",
   "ip-address-lookup",
   "http-status-code-checker",
+  "url-status-checker",
   "url-redirect-checker",
+  "webpage-source-viewer",
   "user-agent-parser",
   "mime-type-lookup",
 ]);
@@ -257,12 +352,25 @@ const implementationStatusOverrides = new Map<string, ImplementationStatus>([
   ["currency-converter", "reduced-scope-local"],
   ["ip-address-lookup", "reduced-scope-local"],
   ["http-status-code-checker", "reduced-scope-local"],
+  ["url-status-checker", "reduced-scope-local"],
   ["url-redirect-checker", "reduced-scope-local"],
+  ["webpage-source-viewer", "reduced-scope-local"],
   ["pdf-compressor", "reduced-scope-local"],
+  ["pdf-unlock-tool", "reduced-scope-local"],
   ["protect-pdf", "coming-soon"],
   ["pdf-to-word", "coming-soon"],
   ["word-to-pdf", "coming-soon"],
 ]);
+
+function getToolOrderIndex(slug: string) {
+  return toolDraftOrder.get(slug) ?? Number.MAX_SAFE_INTEGER;
+}
+
+export function isExpandedSeoTool(toolOrSlug: Pick<ToolDefinition, "slug"> | string) {
+  const slug = typeof toolOrSlug === "string" ? toolOrSlug : toolOrSlug.slug;
+  const order = getToolOrderIndex(slug);
+  return order >= 150 && order < 200;
+}
 
 function getCategoryName(slug: ToolCategorySlug) {
   return categories.find((category) => category.slug === slug)?.name ?? slug.replace(/-/g, " ");
@@ -281,8 +389,7 @@ function extractTopicTokens(tool: ToolDraft) {
 
 function buildRelatedToolSlugs(tool: ToolDraft) {
   const sourceTokens = extractTopicTokens(tool);
-
-  return toolDrafts
+  const sameCategoryMatches = toolDrafts
     .filter((candidate) => candidate.category === tool.category && candidate.slug !== tool.slug)
     .map((candidate) => {
       const candidateTokens = extractTopicTokens(candidate);
@@ -296,8 +403,26 @@ function buildRelatedToolSlugs(tool: ToolDraft) {
       }
       return getPopularityScore(right.candidate as ToolDefinition) - getPopularityScore(left.candidate as ToolDefinition);
     })
-    .slice(0, 4)
     .map(({ candidate }) => candidate.slug);
+
+  const crossCategoryMatches = toolDrafts
+    .filter((candidate) => candidate.category !== tool.category && candidate.slug !== tool.slug)
+    .map((candidate) => {
+      const candidateTokens = extractTopicTokens(candidate);
+      const overlap = Array.from(sourceTokens).filter((token) => candidateTokens.has(token)).length;
+      return { candidate, overlap };
+    })
+    .filter(({ overlap }) => overlap > 0)
+    .sort((left, right) => {
+      const overlapDifference = right.overlap - left.overlap;
+      if (overlapDifference !== 0) {
+        return overlapDifference;
+      }
+      return getPopularityScore(right.candidate as ToolDefinition) - getPopularityScore(left.candidate as ToolDefinition);
+    })
+    .map(({ candidate }) => candidate.slug);
+
+  return [...new Set([...sameCategoryMatches, ...crossCategoryMatches])].slice(0, isExpandedSeoTool(tool.slug) ? 8 : 6);
 }
 
 function enrichHowToUse(tool: ToolDraft, implementationStatus: ImplementationStatus) {
@@ -324,7 +449,11 @@ function enrichHowToUse(tool: ToolDraft, implementationStatus: ImplementationSta
     );
   }
 
-  return steps.slice(0, 5);
+  if (!steps.some((step) => /related tool|category page|same category/i.test(step))) {
+    steps.push(`Use the related tools area or the ${categoryName.toLowerCase()} page if you need a nearby workflow after this step.`);
+  }
+
+  return steps.slice(0, isExpandedSeoTool(tool) ? 6 : 5);
 }
 
 function enrichFaq(tool: ToolDraft, implementationStatus: ImplementationStatus) {
@@ -344,7 +473,24 @@ function enrichFaq(tool: ToolDraft, implementationStatus: ImplementationStatus) 
       question: `Are there related tools if ${tool.name.toLowerCase()} is not the exact fit?`,
       answer: `Yes. Each ${tool.name} page links to related tools and its parent category so you can move to a similar workflow quickly.`,
     },
+    {
+      question: `What kind of task is ${tool.name.toLowerCase()} best for?`,
+      answer: `${tool.name} is best used for focused ${getCategoryName(tool.category).toLowerCase()} workflows where you want a quick browser-based result, a clear explanation of scope, and easy links to nearby tools.`,
+    },
   ];
+
+  if (isExpandedSeoTool(tool)) {
+    extraFaq.unshift(
+      {
+        question: `What output should I expect from ${tool.name.toLowerCase()}?`,
+        answer: `${tool.name} is designed to return a focused result for this workflow, plus internal links to nearby tools if you need a related next step.`,
+      },
+      {
+        question: `Where can I find similar ${categoryName.toLowerCase()} after using ${tool.name.toLowerCase()}?`,
+        answer: `Use the related tools area, the category page, and the internal links block to continue into nearby ${categoryName.toLowerCase()} workflows without starting over.`,
+      },
+    );
+  }
 
   if (implementationStatus === "reduced-scope-local") {
     extraFaq.unshift({
@@ -366,11 +512,14 @@ function enrichFaq(tool: ToolDraft, implementationStatus: ImplementationStatus) 
     }
   }
 
-  return faq.slice(0, 4);
+  return faq.slice(0, isExpandedSeoTool(tool) ? 6 : 5);
 }
 
 function enrichSeoTitle(tool: ToolDraft) {
   const title = tool.seoTitle.trim();
+  if (isExpandedSeoTool(tool) && title.length < 55) {
+    return `${tool.name} Online Free - ${getCategoryName(tool.category)} | Toolbox Hub`;
+  }
   if (title.length >= 45) {
     return title;
   }
@@ -379,6 +528,9 @@ function enrichSeoTitle(tool: ToolDraft) {
 
 function enrichSeoDescription(tool: ToolDraft, implementationStatus: ImplementationStatus) {
   const base = tool.seoDescription.trim();
+  if (isExpandedSeoTool(tool) && base.length >= 110) {
+    return `${base} Includes how-to steps, FAQ answers, and links to related tools in the same topic cluster.`;
+  }
   if (base.length >= 130) {
     return base;
   }
@@ -390,7 +542,7 @@ function enrichSeoDescription(tool: ToolDraft, implementationStatus: Implementat
         ? " Includes clear reduced-scope notes."
         : " Browser-first and easy to use.";
 
-  return `${tool.shortDescription} Use ${tool.name.toLowerCase()} online with how-to steps, FAQs, and related tools.${scopeLine}`;
+  return `${tool.shortDescription} Use ${tool.name.toLowerCase()} online with how-to steps, FAQs, related tools, and links to the ${getCategoryName(tool.category).toLowerCase()} directory.${scopeLine}`;
 }
 
 function enrichLongDescription(tool: ToolDraft, implementationStatus: ImplementationStatus) {
@@ -403,10 +555,28 @@ function enrichLongDescription(tool: ToolDraft, implementationStatus: Implementa
         : ` The page includes practical guidance, related tools, and internal links so visitors can complete nearby tasks without starting over.`;
 
   if (tool.longDescription.length > 240) {
-    return `${tool.longDescription}${scopeSentence}`;
+    return `${tool.longDescription}${scopeSentence}${isExpandedSeoTool(tool) ? ` The page also strengthens internal linking so visitors can keep exploring related ${categoryName.toLowerCase()} tasks.` : ""}`;
   }
 
   return `${tool.longDescription} ${tool.name} belongs to the ${categoryName.toLowerCase()} section, which helps users discover similar workflows, related conversions, and alternative tools from the same route structure.${scopeSentence}`;
+}
+
+function enrichKeywords(tool: ToolDraft) {
+  const categoryName = getCategoryName(tool.category);
+  const extraKeywords = [
+    `${tool.name.toLowerCase()} online`,
+    `free ${tool.name.toLowerCase()}`,
+    `${categoryName.toLowerCase()} online`,
+    ...(isExpandedSeoTool(tool)
+      ? [
+        `how to use ${tool.name.toLowerCase()}`,
+        `${tool.name.toLowerCase()} faq`,
+        `${tool.name.toLowerCase()} tool`,
+      ]
+      : []),
+  ];
+
+  return [...new Set([...tool.keywords, ...extraKeywords])];
 }
 
 export const tools: ToolDefinition[] = toolDrafts.map((tool) => ({
@@ -419,21 +589,30 @@ export const tools: ToolDefinition[] = toolDrafts.map((tool) => ({
   seoTitle: enrichSeoTitle(tool),
   seoDescription: enrichSeoDescription(tool, tool.implementationStatus),
   longDescription: enrichLongDescription(tool, tool.implementationStatus),
+  keywords: enrichKeywords(tool),
   howToUse: enrichHowToUse(tool, tool.implementationStatus),
   faq: enrichFaq(tool, tool.implementationStatus),
   relatedToolSlugs: buildRelatedToolSlugs(tool),
 }));
+
+const toolBySlugMap = new Map(tools.map((tool) => [tool.slug, tool]));
+const toolsByCategoryMap = new Map<ToolCategorySlug, ToolDefinition[]>(
+  categories.map((category) => [category.slug, tools.filter((tool) => tool.category === category.slug)]),
+);
+const popularToolsCache = new Map<string, ToolDefinition[]>();
+const recentToolsCache = new Map<string, ToolDefinition[]>();
+const trendingToolsCache = new Map<string, ToolDefinition[]>();
 
 export function getCategory(slug: string) {
   return categories.find((category) => category.slug === slug);
 }
 
 export function getTool(slug: string) {
-  return tools.find((tool) => tool.slug === slug);
+  return toolBySlugMap.get(slug);
 }
 
 export function getToolsByCategory(category: ToolCategorySlug) {
-  return tools.filter((tool) => tool.category === category);
+  return toolsByCategoryMap.get(category) ?? [];
 }
 
 function getPopularityScore(tool: ToolDefinition) {
@@ -454,7 +633,11 @@ function getPopularityScore(tool: ToolDefinition) {
 }
 
 export function getPopularTools(limit = 8, category?: ToolCategorySlug) {
-  return tools
+  const cacheKey = `${category ?? "all"}:${limit}`;
+  const cached = popularToolsCache.get(cacheKey);
+  if (cached) return cached;
+
+  const result = tools
     .filter((tool) => (category ? tool.category === category : true))
     .sort((left, right) => {
       const popularityDifference = getPopularityScore(right) - getPopularityScore(left);
@@ -464,11 +647,51 @@ export function getPopularTools(limit = 8, category?: ToolCategorySlug) {
       return left.name.localeCompare(right.name);
     })
     .slice(0, limit);
+
+  popularToolsCache.set(cacheKey, result);
+  return result;
 }
 
 export function getRecentTools(limit = 8, category?: ToolCategorySlug) {
-  return [...tools]
+  const cacheKey = `${category ?? "all"}:${limit}`;
+  const cached = recentToolsCache.get(cacheKey);
+  if (cached) return cached;
+
+  const result = [...tools]
     .filter((tool) => (category ? tool.category === category : true))
     .sort((left, right) => (toolDraftOrder.get(right.slug) ?? 0) - (toolDraftOrder.get(left.slug) ?? 0))
     .slice(0, limit);
+
+  recentToolsCache.set(cacheKey, result);
+  return result;
+}
+
+export function getTrendingTools(limit = 8, category?: ToolCategorySlug) {
+  const cacheKey = `${category ?? "all"}:${limit}`;
+  const cached = trendingToolsCache.get(cacheKey);
+  if (cached) return cached;
+
+  const result = [...tools]
+    .filter((tool) => (category ? tool.category === category : true))
+    .map((tool) => {
+      const popularityScore = getPopularityScore(tool);
+      const recencyBoost = Math.max(0, 80 - ((toolDraftOrder.get(tool.slug) ?? tools.length) * 0.35));
+      const implementationBoost =
+        tool.implementationStatus === "working-local"
+          ? 35
+          : tool.implementationStatus === "reduced-scope-local"
+            ? 15
+            : 0;
+
+      return {
+        tool,
+        score: popularityScore + recencyBoost + implementationBoost,
+      };
+    })
+    .sort((left, right) => right.score - left.score || left.tool.name.localeCompare(right.tool.name))
+    .slice(0, limit)
+    .map((entry) => entry.tool);
+
+  trendingToolsCache.set(cacheKey, result);
+  return result;
 }

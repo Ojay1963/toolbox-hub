@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { FaqList } from "@/components/ui/faq-list";
-import { SearchBox } from "@/components/ui/search-box";
 import { ToolCard } from "@/components/ui/tool-card";
 import {
   buildBreadcrumbJsonLd,
@@ -11,7 +11,10 @@ import {
   buildFaqJsonLd,
   buildMetadata,
 } from "@/lib/seo";
-import { categories, getCategory, getPopularTools, getRecentTools, getToolsByCategory } from "@/lib/tools";
+import { categories, getCategory, getPopularTools, getRecentTools, getToolsByCategory, getTrendingTools } from "@/lib/tools";
+
+const SearchBox = dynamic(() => import("@/components/ui/search-box").then((module) => module.SearchBox));
+const CategoryDirectory = dynamic(() => import("@/components/ui/category-directory").then((module) => module.CategoryDirectory));
 
 export function generateStaticParams() {
   return categories.map((category) => ({ slug: category.slug }));
@@ -60,6 +63,7 @@ export default async function CategoryPage({
   ).length;
   const popularInCategory = getPopularTools(6, category.slug);
   const recentInCategory = getRecentTools(4, category.slug);
+  const trendingInCategory = getTrendingTools(4, category.slug);
   const relatedCategories = categories.filter((item) => item.slug !== category.slug).slice(0, 4);
   const featuredLinks = popularInCategory.slice(0, 4);
   const categoryFaq = [
@@ -150,6 +154,8 @@ export default async function CategoryPage({
           title={`Search inside ${category.name}`}
           description={`Search only within ${category.name.toLowerCase()} so it is easier to find the right tool without leaving this section.`}
           maxResults={6}
+          compact
+          showStatusFilter
           suggestedTools={[...popularInCategory, ...recentInCategory].filter(
             (tool, index, collection) => collection.findIndex((candidate) => candidate.slug === tool.slug) === index,
           )}
@@ -161,10 +167,10 @@ export default async function CategoryPage({
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
-                Tool grid
+                Featured tools
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight">
-                {categoryTools.length} tools in this category
+                Start with the strongest options
               </h2>
             </div>
             <Link href="/" className="text-sm font-semibold text-[color:var(--primary)]">
@@ -172,19 +178,16 @@ export default async function CategoryPage({
             </Link>
           </div>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {categoryTools.map((tool) => (
+            {popularInCategory.map((tool) => (
               <ToolCard key={tool.slug} tool={tool} />
             ))}
           </div>
-          <div className="mt-8 rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-6 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
-              Popular in this category
-            </p>
-            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {popularInCategory.map((tool) => (
-                <ToolCard key={`popular-${tool.slug}`} tool={tool} />
-              ))}
-            </div>
+          <div className="mt-8">
+            <CategoryDirectory
+              tools={categoryTools}
+              title={`${categoryTools.length} tools with lighter filtering`}
+              description="Search inside this category, filter by implementation status, and reveal more results only when you need them."
+            />
           </div>
         </section>
         <div className="space-y-6">
@@ -214,6 +217,24 @@ export default async function CategoryPage({
             <h2 className="text-lg font-bold tracking-tight">Internal links</h2>
             <div className="mt-4 space-y-3">
               {crossLinks.map((tool) => (
+                <Link
+                  key={tool.slug}
+                  href={`/tools/${tool.slug}`}
+                  className="block text-sm text-[color:var(--muted)] transition hover:text-[color:var(--primary)]"
+                >
+                  {tool.name}
+                </Link>
+              ))}
+            </div>
+          </section>
+          <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
+            <h2 className="text-lg font-bold tracking-tight">Trending in {category.name}</h2>
+            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+              A shorter list of strong and recently improved tools helps reduce choice overload in
+              this section.
+            </p>
+            <div className="mt-4 space-y-3">
+              {trendingInCategory.map((tool) => (
                 <Link
                   key={tool.slug}
                   href={`/tools/${tool.slug}`}

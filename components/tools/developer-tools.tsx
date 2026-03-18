@@ -1,5 +1,4 @@
 "use client";
-
 import { useMemo, useState } from "react";
 import {
   buttonClass,
@@ -107,6 +106,148 @@ function parseCsv(value: string) {
       return record;
     }, {});
   });
+}
+
+function formatCsv(value: string) {
+  const rows = value
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .filter((line) => line.trim() !== "");
+
+  if (!rows.length) {
+    throw new Error("Paste CSV content before formatting it.");
+  }
+
+  return rows.map((row) => parseCsvRow(row).map((cell) => escapeCsvValue(cell.trim())).join(",")).join("\n");
+}
+
+function formatYaml(value: string) {
+  const normalized = value.replace(/\r\n/g, "\n");
+  if (!normalized.trim()) {
+    throw new Error("Paste YAML content before formatting it.");
+  }
+
+  const lines = normalized.split("\n");
+  let previousIndent = 0;
+  let blankCount = 0;
+
+  const formatted = lines.map((line, index) => {
+    if (/\t/.test(line)) {
+      throw new Error(`Line ${index + 1} uses tabs. Use spaces for YAML indentation.`);
+    }
+
+    const trimmed = line.trimEnd();
+    if (!trimmed.trim()) {
+      blankCount += 1;
+      return blankCount > 1 ? null : "";
+    }
+
+    blankCount = 0;
+    const leadingSpaces = trimmed.match(/^ */)?.[0].length ?? 0;
+    if (leadingSpaces % 2 !== 0) {
+      throw new Error(`Line ${index + 1} has odd indentation. Use multiples of 2 spaces.`);
+    }
+
+    if (leadingSpaces > previousIndent + 2 && !trimmed.trimStart().startsWith("- ")) {
+      throw new Error(`Line ${index + 1} jumps indentation too far for this reduced-scope formatter.`);
+    }
+
+    previousIndent = leadingSpaces;
+    return `${" ".repeat(leadingSpaces)}${trimmed.trimStart()}`;
+  }).filter((line): line is string => line !== null);
+
+  return formatted.join("\n").trim();
+}
+
+function formatXml(value: string) {
+  if (!value.trim()) {
+    throw new Error("Paste XML content before formatting it.");
+  }
+
+  const parser = new DOMParser();
+  const documentNode = parser.parseFromString(value, "application/xml");
+  const parserError = documentNode.querySelector("parsererror");
+  if (parserError) {
+    throw new Error("Enter valid XML before formatting it.");
+  }
+
+  const serializer = new XMLSerializer();
+  const xml = serializer.serializeToString(documentNode);
+  const segments = xml.replace(/>\s*</g, "><").replace(/(>)(<)(\/*)/g, "$1\n$2$3").split("\n");
+  let indent = 0;
+
+  return segments
+    .map((segment) => {
+      const trimmed = segment.trim();
+      if (!trimmed) {
+        return null;
+      }
+
+      if (/^<\//.test(trimmed)) {
+        indent = Math.max(0, indent - 1);
+      }
+
+      const line = `${"  ".repeat(indent)}${trimmed}`;
+
+      if (/^<[^!?][^>]*[^/]>\s*$/.test(trimmed) && !/^<.*<\/.*>$/.test(trimmed) && !/^<\//.test(trimmed)) {
+        indent += 1;
+      }
+
+      return line;
+    })
+    .filter((line): line is string => Boolean(line))
+    .join("\n");
+}
+
+type JsonDiffEntry = {
+  path: string;
+  left: string;
+  right: string;
+  kind: "added" | "removed" | "changed";
+};
+
+function stringifyDiffValue(value: unknown) {
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
+function diffJsonValues(left: unknown, right: unknown, path = "$"): JsonDiffEntry[] {
+  if (Object.is(left, right)) {
+    return [];
+  }
+
+  if (Array.isArray(left) && Array.isArray(right)) {
+    const max = Math.max(left.length, right.length);
+    const diffs: JsonDiffEntry[] = [];
+    for (let index = 0; index < max; index += 1) {
+      if (index >= left.length) {
+        diffs.push({ path: `${path}[${index}]`, left: "(missing)", right: stringifyDiffValue(right[index]), kind: "added" });
+      } else if (index >= right.length) {
+        diffs.push({ path: `${path}[${index}]`, left: stringifyDiffValue(left[index]), right: "(missing)", kind: "removed" });
+      } else {
+        diffs.push(...diffJsonValues(left[index], right[index], `${path}[${index}]`));
+      }
+    }
+    return diffs;
+  }
+
+  if (left && right && typeof left === "object" && typeof right === "object" && !Array.isArray(left) && !Array.isArray(right)) {
+    const keys = new Set([...Object.keys(left as Record<string, unknown>), ...Object.keys(right as Record<string, unknown>)]);
+    const diffs: JsonDiffEntry[] = [];
+    for (const key of keys) {
+      const leftRecord = left as Record<string, unknown>;
+      const rightRecord = right as Record<string, unknown>;
+      if (!(key in leftRecord)) {
+        diffs.push({ path: `${path}.${key}`, left: "(missing)", right: stringifyDiffValue(rightRecord[key]), kind: "added" });
+      } else if (!(key in rightRecord)) {
+        diffs.push({ path: `${path}.${key}`, left: stringifyDiffValue(leftRecord[key]), right: "(missing)", kind: "removed" });
+      } else {
+        diffs.push(...diffJsonValues(leftRecord[key], rightRecord[key], `${path}.${key}`));
+      }
+    }
+    return diffs;
+  }
+
+  return [{ path, left: stringifyDiffValue(left), right: stringifyDiffValue(right), kind: "changed" }];
 }
 
 function escapeCsvValue(value: unknown) {
@@ -302,12 +443,830 @@ function htmlToMarkdown(value: string) {
   return content;
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function escapeXml(value: string) {
+  return escapeHtml(value).replace(/'/g, "&apos;");
+}
+
+function createSlug(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+function analyzeKeywordDensity(content: string, focusKeyword: string) {
+  const words = content
+    .toLowerCase()
+    .match(/[a-z0-9]+/g) ?? [];
+
+  if (!words.length) {
+    throw new Error("Paste content with readable words before checking keyword density.");
+  }
+
+  const counts = new Map<string, number>();
+  words.forEach((word) => {
+    counts.set(word, (counts.get(word) ?? 0) + 1);
+  });
+
+  const topTerms = [...counts.entries()]
+    .filter(([word]) => word.length > 2)
+    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))
+    .slice(0, 10)
+    .map(([word, count]) => ({
+      word,
+      count,
+      density: (count / words.length) * 100,
+    }));
+
+  const normalizedFocus = createSlug(focusKeyword).replace(/-/g, " ").trim();
+  const focusMatches = normalizedFocus
+    ? (content.toLowerCase().match(new RegExp(normalizedFocus.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) ?? []).length
+    : 0;
+
+  return {
+    totalWords: words.length,
+    uniqueWords: counts.size,
+    focusKeyword: normalizedFocus,
+    focusMatches,
+    focusDensity: normalizedFocus ? (focusMatches / words.length) * 100 : 0,
+    topTerms,
+  };
+}
+
+function getCryptoRandomString(length: number, alphabet: string) {
+  const safeLength = Math.max(1, length);
+  const values = crypto.getRandomValues(new Uint32Array(safeLength));
+  return Array.from(values, (value) => alphabet[value % alphabet.length]).join("");
+}
+
+function validateEmailFormat(value: string) {
+  const normalized = value.trim();
+  if (!normalized) {
+    throw new Error("Enter an email address before validating it.");
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if (!emailPattern.test(normalized)) {
+    return {
+      valid: false,
+      normalized,
+      note: "The address does not match a common email format.",
+    };
+  }
+
+  const [localPart, domain] = normalized.split("@");
+  return {
+    valid: true,
+    normalized: `${localPart}@${domain.toLowerCase()}`,
+    note: "This passes client-side format checks only. It does not verify mailbox existence.",
+  };
+}
+
+function formatPhoneNumberValue(value: string, style: "us" | "international") {
+  const digits = value.replace(/\D/g, "");
+  if (!digits) {
+    throw new Error("Enter a phone number before formatting it.");
+  }
+
+  if (style === "us") {
+    const normalized = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+    if (normalized.length !== 10) {
+      throw new Error("US format expects 10 digits, or 11 digits starting with country code 1.");
+    }
+    return {
+      digits,
+      formatted: `(${normalized.slice(0, 3)}) ${normalized.slice(3, 6)}-${normalized.slice(6)}`,
+      note: "Formatted with a US-style local pattern.",
+    };
+  }
+
+  if (digits.length < 8 || digits.length > 15) {
+    throw new Error("International format expects a value between 8 and 15 digits.");
+  }
+
+  return {
+    digits,
+    formatted: `+${digits}`,
+    note: "Formatted as a clean E.164-style international number.",
+  };
+}
+
+function inspectUuid(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) {
+    throw new Error("Paste a UUID before validating it.");
+  }
+
+  const match = normalized.match(/^[0-9a-f]{8}-[0-9a-f]{4}-([1-8])[0-9a-f]{3}-([89ab])[0-9a-f]{3}-[0-9a-f]{12}$/i);
+  return {
+    normalized,
+    valid: Boolean(match),
+    version: match?.[1] ?? "Unknown",
+    variant: match ? "RFC 4122 / modern UUID variant" : "Unknown",
+  };
+}
+
+function calculatePasswordEntropy(password: string) {
+  const hasLower = /[a-z]/.test(password);
+  const hasUpper = /[A-Z]/.test(password);
+  const hasDigits = /\d/.test(password);
+  const hasSymbols = /[^A-Za-z0-9\s]/.test(password);
+  const hasSpaces = /\s/.test(password);
+
+  let poolSize = 0;
+  if (hasLower) poolSize += 26;
+  if (hasUpper) poolSize += 26;
+  if (hasDigits) poolSize += 10;
+  if (hasSymbols) poolSize += 33;
+  if (hasSpaces) poolSize += 1;
+
+  const entropy = poolSize > 0 ? password.length * Math.log2(poolSize) : 0;
+  const strength =
+    entropy >= 80 ? "Very strong" :
+    entropy >= 60 ? "Strong" :
+    entropy >= 40 ? "Moderate" :
+    entropy >= 28 ? "Weak" :
+    "Very weak";
+
+  return {
+    entropy,
+    poolSize,
+    length: password.length,
+    strength,
+    characterSets: [
+      hasLower ? "lowercase" : "",
+      hasUpper ? "uppercase" : "",
+      hasDigits ? "digits" : "",
+      hasSymbols ? "symbols" : "",
+      hasSpaces ? "spaces" : "",
+    ].filter(Boolean),
+  };
+}
+
+function identifyHashCandidates(value: string) {
+  const normalized = value.trim();
+  if (!normalized) {
+    throw new Error("Paste a hash-like value before identifying it.");
+  }
+
+  const candidates: string[] = [];
+  const hexOnly = /^[a-f0-9]+$/i.test(normalized);
+  const base64Like = /^[A-Za-z0-9+/=]+$/.test(normalized);
+  const bcryptLike = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(normalized);
+
+  if (bcryptLike) {
+    candidates.push("bcrypt");
+  }
+  if (hexOnly && normalized.length === 32) {
+    candidates.push("MD5");
+  }
+  if (hexOnly && normalized.length === 40) {
+    candidates.push("SHA-1");
+  }
+  if (hexOnly && normalized.length === 56) {
+    candidates.push("SHA-224 / SHA3-224");
+  }
+  if (hexOnly && normalized.length === 64) {
+    candidates.push("SHA-256 / SHA3-256 / BLAKE2s");
+  }
+  if (hexOnly && normalized.length === 96) {
+    candidates.push("SHA-384 / SHA3-384");
+  }
+  if (hexOnly && normalized.length === 128) {
+    candidates.push("SHA-512 / SHA3-512 / BLAKE2b");
+  }
+  if (base64Like && normalized.length >= 20) {
+    candidates.push("Base64-encoded digest or token");
+  }
+  if (/^[A-F0-9]+$/.test(normalized) && normalized.length % 2 === 0) {
+    candidates.push("Uppercase hexadecimal digest");
+  }
+
+  return [...new Set(candidates)];
+}
+
+const keywordSuggestionModifiers = [
+  "best",
+  "for beginners",
+  "tips",
+  "guide",
+  "examples",
+  "tools",
+  "checklist",
+  "ideas",
+  "template",
+  "strategy",
+];
+
+const pageTitleTemplates = [
+  "{keyword} | Free Online Tool",
+  "{keyword}: Simple Guide for Beginners",
+  "Best {keyword} Tips for 2026",
+  "{keyword} Checklist and Examples",
+  "Free {keyword} Tool | Fast Browser Workflow",
+];
+
+const descriptionTemplates = [
+  "Use {keyword} to simplify your workflow with a fast browser-based tool and clear copy-ready output.",
+  "Generate better {keyword} ideas locally with a practical browser-first workflow and easy next steps.",
+  "Plan your {keyword} content faster with a lightweight local tool built for drafting and SEO brainstorming.",
+  "Create a polished {keyword} draft with clear examples, structured output, and easy copy actions.",
+];
+
+function toKeywordParts(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .split(/\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function buildKeywordSuggestions(seed: string) {
+  const parts = toKeywordParts(seed);
+  if (!parts.length) {
+    throw new Error("Enter a seed keyword or phrase first.");
+  }
+
+  const base = parts.join(" ");
+  const first = parts[0];
+  const joined = parts.join("");
+  const suggestions = [
+    base,
+    ...keywordSuggestionModifiers.map((modifier) => `${base} ${modifier}`),
+    `how to ${base}`,
+    `${base} near me`,
+    `${base} online`,
+    `${base} free`,
+    `${first} ${pickKeywordModifier(joined)}`,
+  ];
+
+  return [...new Set(suggestions)].slice(0, 14);
+}
+
+function pickKeywordModifier(seed: string) {
+  const index = seed.length % keywordSuggestionModifiers.length;
+  return keywordSuggestionModifiers[index];
+}
+
+function parseMetaTagAttributes(tag: string) {
+  const attributes = new Map<string, string>();
+  for (const match of tag.matchAll(/([a-zA-Z:-]+)\s*=\s*"([^"]*)"/g)) {
+    attributes.set(match[1].toLowerCase(), match[2]);
+  }
+  return attributes;
+}
+
+function analyzeMetaTags(markup: string) {
+  if (!markup.trim()) {
+    throw new Error("Paste page head markup or meta tags before analyzing them.");
+  }
+
+  const titleMatch = markup.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  const metaTags = [...markup.matchAll(/<meta\b[^>]*>/gi)].map((match) => match[0]);
+  const canonicalMatch = markup.match(/<link\b[^>]*rel="canonical"[^>]*href="([^"]+)"[^>]*>/i);
+
+  const title = titleMatch?.[1]?.trim() ?? "";
+  const description = metaTags
+    .map(parseMetaTagAttributes)
+    .find((attributes) => attributes.get("name")?.toLowerCase() === "description")
+    ?.get("content") ?? "";
+  const robots = metaTags
+    .map(parseMetaTagAttributes)
+    .find((attributes) => attributes.get("name")?.toLowerCase() === "robots")
+    ?.get("content") ?? "";
+  const ogTitle = metaTags
+    .map(parseMetaTagAttributes)
+    .find((attributes) => attributes.get("property")?.toLowerCase() === "og:title")
+    ?.get("content") ?? "";
+
+  const findings = [
+    `Title: ${title || "Missing"}`,
+    `Title length: ${title.length} characters`,
+    `Meta description: ${description || "Missing"}`,
+    `Description length: ${description.length} characters`,
+    `Canonical URL: ${canonicalMatch?.[1] || "Missing"}`,
+    `Robots tag: ${robots || "Missing"}`,
+    `Open Graph title: ${ogTitle || "Missing"}`,
+  ];
+
+  const suggestions: string[] = [];
+  if (!title) suggestions.push("Add a <title> tag.");
+  if (title && (title.length < 30 || title.length > 60)) suggestions.push("Keep the title closer to 30-60 characters.");
+  if (!description) suggestions.push("Add a meta description.");
+  if (description && (description.length < 120 || description.length > 160)) suggestions.push("Keep the description closer to 120-160 characters.");
+  if (!canonicalMatch?.[1]) suggestions.push("Add a canonical URL if the page needs one.");
+  if (!ogTitle) suggestions.push("Add Open Graph tags for better social sharing.");
+
+  return {
+    findings,
+    suggestions,
+  };
+}
+
+function buildPageTitles(keyword: string, brand: string) {
+  const cleanedKeyword = keyword.trim();
+  if (!cleanedKeyword) {
+    throw new Error("Enter a topic or keyword first.");
+  }
+  const brandSuffix = brand.trim() ? ` | ${brand.trim()}` : "";
+  return [...new Set(pageTitleTemplates.map((template) => template.replaceAll("{keyword}", cleanedKeyword) + brandSuffix))].slice(0, 6);
+}
+
+function buildDescriptions(keyword: string, audience: string) {
+  const cleanedKeyword = keyword.trim();
+  if (!cleanedKeyword) {
+    throw new Error("Enter a topic, keyword, or product first.");
+  }
+  const audienceSuffix = audience.trim() ? ` Built with ${audience.trim()} in mind.` : "";
+  return [...new Set(descriptionTemplates.map((template) => template.replaceAll("{keyword}", cleanedKeyword) + audienceSuffix))].slice(0, 6);
+}
+
+function highlightJson(value: string) {
+  return escapeHtml(value).replace(
+    /("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false|null)\b|-?\b\d+(?:\.\d+)?(?:e[+-]?\d+)?\b/gi,
+    (match, stringValue, keySuffix, literal) => {
+      if (stringValue && keySuffix) {
+        return `<span class="text-sky-700">${stringValue}</span><span class="text-slate-500">${keySuffix}</span>`;
+      }
+      if (stringValue) {
+        return `<span class="text-emerald-700">${stringValue}</span>`;
+      }
+      if (literal) {
+        return `<span class="text-fuchsia-700">${literal}</span>`;
+      }
+      return `<span class="text-amber-700">${match}</span>`;
+    },
+  );
+}
+
+function highlightXml(value: string) {
+  return escapeHtml(value)
+    .replace(/(&lt;\/?)([\w:-]+)(.*?)(\/?&gt;)/g, (_, open, tag, attrs, close) => {
+      const highlightedAttrs = attrs.replace(
+        /([\w:-]+)=(&quot;.*?&quot;)/g,
+        '<span class="text-amber-700">$1</span>=<span class="text-emerald-700">$2</span>',
+      );
+      return `<span class="text-sky-700">${open}${tag}</span>${highlightedAttrs}<span class="text-sky-700">${close}</span>`;
+    });
+}
+
+function highlightSql(value: string) {
+  const keywords = /\b(SELECT|FROM|WHERE|GROUP BY|ORDER BY|HAVING|LIMIT|OFFSET|JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|ON|INSERT INTO|VALUES|UPDATE|SET|DELETE FROM|CREATE|TABLE|ALTER|DROP|AND|OR|NOT|IN|AS|CASE|WHEN|THEN|ELSE|END|DISTINCT|UNION|ALL)\b/gi;
+  return escapeHtml(value)
+    .replace(/(--.*$)/gm, '<span class="text-slate-400">$1</span>')
+    .replace(/("(?:[^"]|"")*"|'(?:[^']|'')*')/g, '<span class="text-emerald-700">$1</span>')
+    .replace(/\b\d+(?:\.\d+)?\b/g, '<span class="text-amber-700">$&</span>')
+    .replace(keywords, '<span class="text-sky-700 font-semibold">$1</span>');
+}
+
+function getHighlightedMarkup(value: string, language: "json" | "xml" | "sql" | "text") {
+  if (language === "json") return highlightJson(value);
+  if (language === "xml") return highlightXml(value);
+  if (language === "sql") return highlightSql(value);
+  return escapeHtml(value);
+}
+
+function CodeOutputBlock({
+  title,
+  value,
+  language,
+}: {
+  title: string;
+  value: string;
+  language: "json" | "xml" | "sql" | "text";
+}) {
+  return (
+    <div className="rounded-2xl bg-stone-50 p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
+        {title}
+      </p>
+      <pre
+        className="mt-2 overflow-x-auto whitespace-pre-wrap break-words rounded-xl bg-white p-4 text-sm leading-7 text-slate-700"
+        dangerouslySetInnerHTML={{ __html: getHighlightedMarkup(value, language) }}
+      />
+    </div>
+  );
+}
+
+function removeSqlComments(value: string) {
+  return value
+    .replace(/--.*$/gm, "")
+    .replace(/\/\*[\s\S]*?\*\//g, "");
+}
+
+function minifySql(value: string) {
+  const cleaned = removeSqlComments(value)
+    .replace(/\s+/g, " ")
+    .replace(/\s*([(),=<>+-])\s*/g, "$1")
+    .trim();
+
+  if (!cleaned) {
+    throw new Error("Paste an SQL query before formatting it.");
+  }
+
+  return cleaned.replace(/\s*,/g, ",");
+}
+
+function beautifySql(value: string) {
+  const minified = minifySql(value);
+  const keywordBreaks = [
+    "SELECT",
+    "FROM",
+    "WHERE",
+    "GROUP BY",
+    "ORDER BY",
+    "HAVING",
+    "LIMIT",
+    "OFFSET",
+    "INSERT INTO",
+    "VALUES",
+    "UPDATE",
+    "SET",
+    "DELETE FROM",
+    "LEFT JOIN",
+    "RIGHT JOIN",
+    "INNER JOIN",
+    "OUTER JOIN",
+    "JOIN",
+    "ON",
+    "UNION ALL",
+    "UNION",
+  ];
+
+  let formatted = minified;
+  for (const keyword of keywordBreaks.sort((left, right) => right.length - left.length)) {
+    const pattern = new RegExp(`\\b${keyword.replace(/\s+/g, "\\s+")}\\b`, "gi");
+    formatted = formatted.replace(pattern, `\n${keyword.toUpperCase()}`);
+  }
+
+  formatted = formatted
+    .replace(/\b(AND|OR)\b/gi, "\n  $1")
+    .replace(/,/g, ",\n  ")
+    .replace(/\n{2,}/g, "\n")
+    .trim();
+
+  return formatted;
+}
+
+function formatCronField(value: string, min: number, max: number, label: string) {
+  if (!/^(\*|\*\/\d+|\d+|\d+(?:,\d+)+)$/.test(value)) {
+    throw new Error(`Unsupported ${label} field syntax: ${value}`);
+  }
+
+  if (value === "*") return `every ${label}`;
+  if (value.startsWith("*/")) return `every ${value.slice(2)} ${label}${value.slice(2) === "1" ? "" : "s"}`;
+
+  const numbers = value.split(",").map(Number);
+  if (numbers.some((number) => Number.isNaN(number) || number < min || number > max)) {
+    throw new Error(`${label} field must stay between ${min} and ${max}.`);
+  }
+
+  return numbers.length === 1
+    ? `${label} ${numbers[0]}`
+    : `${label}s ${numbers.join(", ")}`;
+}
+
+function parseCronExpression(value: string) {
+  const fields = value.trim().split(/\s+/);
+  if (fields.length !== 5) {
+    throw new Error("Use the standard 5-field cron format: minute hour day month weekday.");
+  }
+
+  const [minute, hour, day, month, weekday] = fields;
+  const summary = [
+    `Minutes: ${formatCronField(minute, 0, 59, "minute")}`,
+    `Hours: ${formatCronField(hour, 0, 23, "hour")}`,
+    `Days of month: ${formatCronField(day, 1, 31, "day")}`,
+    `Months: ${formatCronField(month, 1, 12, "month")}`,
+    `Weekdays: ${formatCronField(weekday, 0, 6, "weekday")}`,
+  ];
+
+  return {
+    expression: fields.join(" "),
+    description:
+      minute === "*" && hour === "*" && day === "*" && month === "*" && weekday === "*"
+        ? "Runs every minute."
+        : `Runs with minute field "${minute}", hour field "${hour}", day field "${day}", month field "${month}", and weekday field "${weekday}".`,
+    output: summary.join("\n"),
+  };
+}
+
+type ReducedJsonSchema = {
+  type?: string | string[];
+  required?: string[];
+  properties?: Record<string, ReducedJsonSchema>;
+  items?: ReducedJsonSchema;
+  enum?: unknown[];
+  minLength?: number;
+  maxLength?: number;
+  minimum?: number;
+  maximum?: number;
+  pattern?: string;
+  minItems?: number;
+  maxItems?: number;
+};
+
+function getJsonType(value: unknown) {
+  if (Array.isArray(value)) return "array";
+  if (value === null) return "null";
+  return typeof value;
+}
+
+function validateJsonAgainstSchema(data: unknown, schema: ReducedJsonSchema, path = "$") {
+  const errors: string[] = [];
+  const expectedTypes = Array.isArray(schema.type) ? schema.type : schema.type ? [schema.type] : [];
+  const actualType = getJsonType(data);
+
+  if (expectedTypes.length && !expectedTypes.includes(actualType)) {
+    errors.push(`${path}: expected type ${expectedTypes.join(" or ")}, received ${actualType}.`);
+    return errors;
+  }
+
+  if (schema.enum && !schema.enum.some((item) => JSON.stringify(item) === JSON.stringify(data))) {
+    errors.push(`${path}: value is not one of the allowed enum options.`);
+  }
+
+  if (typeof data === "string") {
+    if (schema.minLength !== undefined && data.length < schema.minLength) {
+      errors.push(`${path}: string is shorter than minLength ${schema.minLength}.`);
+    }
+    if (schema.maxLength !== undefined && data.length > schema.maxLength) {
+      errors.push(`${path}: string is longer than maxLength ${schema.maxLength}.`);
+    }
+    if (schema.pattern) {
+      const regex = new RegExp(schema.pattern);
+      if (!regex.test(data)) {
+        errors.push(`${path}: string does not match pattern ${schema.pattern}.`);
+      }
+    }
+  }
+
+  if (typeof data === "number") {
+    if (schema.minimum !== undefined && data < schema.minimum) {
+      errors.push(`${path}: number is less than minimum ${schema.minimum}.`);
+    }
+    if (schema.maximum !== undefined && data > schema.maximum) {
+      errors.push(`${path}: number is greater than maximum ${schema.maximum}.`);
+    }
+  }
+
+  if (Array.isArray(data)) {
+    if (schema.minItems !== undefined && data.length < schema.minItems) {
+      errors.push(`${path}: array has fewer than ${schema.minItems} items.`);
+    }
+    if (schema.maxItems !== undefined && data.length > schema.maxItems) {
+      errors.push(`${path}: array has more than ${schema.maxItems} items.`);
+    }
+    if (schema.items) {
+      data.forEach((item, index) => {
+        errors.push(...validateJsonAgainstSchema(item, schema.items as ReducedJsonSchema, `${path}[${index}]`));
+      });
+    }
+  }
+
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    const record = data as Record<string, unknown>;
+    for (const requiredKey of schema.required ?? []) {
+      if (!(requiredKey in record)) {
+        errors.push(`${path}: missing required property "${requiredKey}".`);
+      }
+    }
+    for (const [key, propertySchema] of Object.entries(schema.properties ?? {})) {
+      if (key in record) {
+        errors.push(...validateJsonAgainstSchema(record[key], propertySchema, `${path}.${key}`));
+      }
+    }
+  }
+
+  return errors;
+}
+
+function extractJsonPaths(value: unknown, path = "$", paths = new Set<string>()) {
+  paths.add(path);
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => extractJsonPaths(item, `${path}[${index}]`, paths));
+  } else if (value && typeof value === "object") {
+    Object.entries(value as Record<string, unknown>).forEach(([key, child]) => {
+      extractJsonPaths(child, `${path}.${key}`, paths);
+    });
+  }
+  return paths;
+}
+
+function xmlNodeToJson(node: Element): unknown {
+  const attributes = Array.from(node.attributes);
+  const children = Array.from(node.children);
+  const textContent = node.textContent?.trim() ?? "";
+
+  if (!attributes.length && !children.length) {
+    return textContent;
+  }
+
+  const result: Record<string, unknown> = {};
+  if (attributes.length) {
+    result["@attributes"] = attributes.reduce<Record<string, string>>((record, attribute) => {
+      record[attribute.name] = attribute.value;
+      return record;
+    }, {});
+  }
+
+  if (textContent && !children.length) {
+    result["#text"] = textContent;
+  }
+
+  for (const child of children) {
+    const childValue = xmlNodeToJson(child);
+    if (child.tagName in result) {
+      const existing = result[child.tagName];
+      result[child.tagName] = Array.isArray(existing) ? [...existing, childValue] : [existing, childValue];
+    } else {
+      result[child.tagName] = childValue;
+    }
+  }
+
+  return result;
+}
+
+function jsonValueToXml(value: unknown, nodeName: string, depth = 0): string {
+  const indent = "  ".repeat(depth);
+  const nextIndent = "  ".repeat(depth + 1);
+
+  if (Array.isArray(value)) {
+    return value.map((item) => jsonValueToXml(item, nodeName, depth)).join("\n");
+  }
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    const attributes = record["@attributes"] && typeof record["@attributes"] === "object"
+      ? Object.entries(record["@attributes"] as Record<string, unknown>)
+          .map(([key, attributeValue]) => `${key}="${escapeXml(String(attributeValue))}"`)
+          .join(" ")
+      : "";
+    const attributeText = attributes ? ` ${attributes}` : "";
+
+    const childEntries = Object.entries(record).filter(([key]) => key !== "@attributes");
+    if (!childEntries.length) {
+      return `${indent}<${nodeName}${attributeText} />`;
+    }
+
+    const childContent = childEntries
+      .map(([key, child]) => {
+        if (key === "#text") {
+          return `${nextIndent}${escapeXml(String(child))}`;
+        }
+        return jsonValueToXml(child, key, depth + 1);
+      })
+      .join("\n");
+
+    return `${indent}<${nodeName}${attributeText}>\n${childContent}\n${indent}</${nodeName}>`;
+  }
+
+  return `${indent}<${nodeName}>${escapeXml(String(value ?? ""))}</${nodeName}>`;
+}
+
+function buildMetaTags(input: {
+  title: string;
+  description: string;
+  canonicalUrl: string;
+  robots: string;
+  keywords: string;
+  author: string;
+}) {
+  const lines = [
+    "<title>",
+    `${escapeHtml(input.title)}</title>`,
+    `<meta name="description" content="${escapeHtml(input.description)}" />`,
+  ];
+
+  if (input.keywords.trim()) {
+    lines.push(`<meta name="keywords" content="${escapeHtml(input.keywords.trim())}" />`);
+  }
+  if (input.author.trim()) {
+    lines.push(`<meta name="author" content="${escapeHtml(input.author.trim())}" />`);
+  }
+  if (input.robots.trim()) {
+    lines.push(`<meta name="robots" content="${escapeHtml(input.robots.trim())}" />`);
+  }
+  if (input.canonicalUrl.trim()) {
+    lines.push(`<link rel="canonical" href="${escapeHtml(input.canonicalUrl.trim())}" />`);
+  }
+
+  return lines.join("\n");
+}
+
+function buildOpenGraphTags(input: {
+  title: string;
+  description: string;
+  url: string;
+  imageUrl: string;
+  siteName: string;
+  type: string;
+}) {
+  const lines = [
+    `<meta property="og:title" content="${escapeHtml(input.title)}" />`,
+    `<meta property="og:description" content="${escapeHtml(input.description)}" />`,
+    `<meta property="og:type" content="${escapeHtml(input.type)}" />`,
+  ];
+
+  if (input.url.trim()) {
+    lines.push(`<meta property="og:url" content="${escapeHtml(input.url.trim())}" />`);
+  }
+  if (input.imageUrl.trim()) {
+    lines.push(`<meta property="og:image" content="${escapeHtml(input.imageUrl.trim())}" />`);
+  }
+  if (input.siteName.trim()) {
+    lines.push(`<meta property="og:site_name" content="${escapeHtml(input.siteName.trim())}" />`);
+  }
+
+  return lines.join("\n");
+}
+
+function buildRobotsTxt(input: {
+  userAgent: string;
+  allow: string;
+  disallow: string;
+  sitemapUrl: string;
+}) {
+  const lines = [`User-agent: ${input.userAgent.trim() || "*"}`];
+
+  const allowRules = input.allow
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const disallowRules = input.disallow
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (!allowRules.length && !disallowRules.length) {
+    lines.push("Allow: /");
+  } else {
+    allowRules.forEach((rule) => lines.push(`Allow: ${rule}`));
+    disallowRules.forEach((rule) => lines.push(`Disallow: ${rule}`));
+  }
+
+  if (input.sitemapUrl.trim()) {
+    lines.push("", `Sitemap: ${input.sitemapUrl.trim()}`);
+  }
+
+  return lines.join("\n");
+}
+
+function buildSitemapXml(urlLines: string[], changefreq: string, priority: string) {
+  const urls = urlLines
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        return new URL(line).toString();
+      } catch {
+        throw new Error(`Enter valid absolute URLs. "${line}" is not valid.`);
+      }
+    });
+
+  if (!urls.length) {
+    throw new Error("Add at least one valid URL before generating a sitemap.");
+  }
+
+  const safePriority = Number(priority);
+  const priorityTag =
+    Number.isFinite(safePriority) && safePriority >= 0 && safePriority <= 1
+      ? `    <priority>${safePriority.toFixed(1)}</priority>\n`
+      : "";
+  const changefreqTag = changefreq ? `    <changefreq>${escapeXml(changefreq)}</changefreq>\n` : "";
+
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...urls.map((url) => [
+      "  <url>",
+      `    <loc>${escapeXml(url)}</loc>`,
+      changefreqTag.trimEnd(),
+      priorityTag.trimEnd(),
+      "  </url>",
+    ].filter(Boolean).join("\n")),
+    "</urlset>",
+  ].join("\n");
+}
+
 function leftRotate(value: number, shift: number) {
   return (value << shift) | (value >>> (32 - shift));
 }
 
-function md5(value: string) {
-  const message = new TextEncoder().encode(value);
+function md5Bytes(message: Uint8Array) {
   const originalBitLength = message.length * 8;
   const withPaddingLength = (((message.length + 8) >> 6) + 1) * 64;
   const bytes = new Uint8Array(withPaddingLength);
@@ -381,9 +1340,69 @@ function md5(value: string) {
     .join("");
 }
 
+function md5(value: string) {
+  return md5Bytes(new TextEncoder().encode(value));
+}
+
 async function digestValue(value: string, algorithm: AlgorithmIdentifier) {
   const digest = await crypto.subtle.digest(algorithm, new TextEncoder().encode(value));
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function digestFile(file: File, algorithm: "MD5" | "SHA-1" | "SHA-256" | "SHA-384" | "SHA-512") {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (algorithm === "MD5") {
+    return md5Bytes(bytes);
+  }
+
+  const digest = await crypto.subtle.digest(algorithm, bytes);
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+async function signHmac(value: string, secretValue: string, hash: "SHA-256" | "SHA-384" | "SHA-512") {
+  const cryptoKey = await crypto.subtle.importKey(
+    "raw",
+    new TextEncoder().encode(secretValue),
+    { name: "HMAC", hash },
+    false,
+    ["sign"],
+  );
+
+  const signature = await crypto.subtle.sign("HMAC", cryptoKey, new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(signature), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+function bytesToBase64Url(bytes: Uint8Array) {
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function generateRandomString(length: number, alphabet: string) {
+  const safeLength = Math.max(1, length);
+  const randomValues = crypto.getRandomValues(new Uint32Array(safeLength));
+  return Array.from(randomValues, (value) => alphabet[value % alphabet.length]).join("");
+}
+
+function scorePasswordStrength(value: string) {
+  const checks = [
+    { label: "At least 12 characters", passed: value.length >= 12 },
+    { label: "Contains lowercase letters", passed: /[a-z]/.test(value) },
+    { label: "Contains uppercase letters", passed: /[A-Z]/.test(value) },
+    { label: "Contains numbers", passed: /\d/.test(value) },
+    { label: "Contains symbols", passed: /[^A-Za-z0-9]/.test(value) },
+    { label: "No repeated character runs", passed: !/(.)\1{2,}/.test(value) },
+  ];
+
+  const score = checks.filter((check) => check.passed).length;
+  const label =
+    score <= 2 ? "Weak" :
+    score <= 4 ? "Moderate" :
+    score === 5 ? "Strong" :
+    "Very strong";
+
+  return { checks, score, label };
 }
 
 export function JsonFormatterTool() {
@@ -765,6 +1784,109 @@ export function CsvToJsonConverterTool() {
   );
 }
 
+export function YamlFormatterTool() {
+  return (
+    <TransformTool
+      title="YAML Formatter"
+      description="Format YAML locally with whitespace cleanup and reduced-scope indentation validation for common YAML structures."
+      inputLabel="YAML input"
+      placeholder={`site:\n  name: Toolbox Hub\n  tools:\n    - formatter\n    - parser`}
+      actionLabel="Format YAML"
+      transform={formatYaml}
+    />
+  );
+}
+
+export function XmlFormatterTool() {
+  return (
+    <TransformTool
+      title="XML Formatter"
+      description="Pretty-print XML locally with validation and readable indentation."
+      inputLabel="XML input"
+      placeholder={`<tools><tool name="Word Counter" /><tool name="JSON Formatter" /></tools>`}
+      actionLabel="Format XML"
+      transform={formatXml}
+    />
+  );
+}
+
+export function CsvFormatterTool() {
+  return (
+    <TransformTool
+      title="CSV Formatter"
+      description="Format CSV rows locally with consistent quoting and cleaned spacing for common spreadsheet-style data."
+      inputLabel="CSV input"
+      placeholder={`name, category\nToolbox Hub, Developer\nWord Counter, Text`}
+      actionLabel="Format CSV"
+      transform={formatCsv}
+    />
+  );
+}
+
+export function CsvViewerTool() {
+  const [input, setInput] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  const { rows, headers, error } = useMemo(() => {
+    const value = input.trim();
+    if (!value) {
+      return { rows: [] as Array<Record<string, string>>, headers: [] as string[], error: "" };
+    }
+
+    try {
+      const parsed = parseCsv(value);
+      return {
+        rows: parsed,
+        headers: parsed.length ? Object.keys(parsed[0]) : parseCsvRow(value.replace(/\r\n/g, "\n").split("\n")[0]).map((header) => header.trim()),
+        error: "",
+      };
+    } catch (parseError) {
+      return {
+        rows: [] as Array<Record<string, string>>,
+        headers: [] as string[],
+        error: parseError instanceof Error ? parseError.message : "Unable to parse that CSV input.",
+      };
+    }
+  }, [input]);
+
+  return (
+    <ToolShell title="CSV Viewer" description="View CSV data locally as a readable table with validation for common row and header issues.">
+      <Field label="CSV input">
+        <textarea className={textareaClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder={`name,category\nToolbox Hub,Developer\nWord Counter,Text`} />
+      </Field>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!input.trim() ? (
+        <EmptyState title="Paste CSV to view it as a table" description="The viewer parses CSV locally and renders the rows without uploading any data." />
+      ) : rows.length ? (
+        <>
+          <div className="overflow-x-auto rounded-2xl border border-[color:var(--border)] bg-white">
+            <table className="min-w-full divide-y divide-[color:var(--border)] text-sm">
+              <thead className="bg-stone-50">
+                <tr>
+                  {headers.map((header) => (
+                    <th key={header} className="px-4 py-3 text-left font-semibold text-[color:var(--foreground)]">{header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[color:var(--border)]">
+                {rows.map((row, rowIndex) => (
+                  <tr key={`row-${rowIndex + 1}`}>
+                    {headers.map((header) => (
+                      <td key={`${rowIndex + 1}-${header}`} className="px-4 py-3 text-slate-700">{row[header]}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <button type="button" className={buttonClass} onClick={() => copy("CSV JSON preview", JSON.stringify(rows, null, 2))}>Copy parsed rows as JSON</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
 export function HtmlEncoderTool() {
   return (
     <TransformTool
@@ -775,6 +1897,32 @@ export function HtmlEncoderTool() {
       actionLabel="Encode HTML"
       transform={htmlEncode}
     />
+  );
+}
+
+export function HtmlPreviewTool() {
+  const [input, setInput] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  return (
+    <ToolShell title="HTML Preview Tool" description="Preview HTML snippets locally with a live rendered panel and copy-ready source.">
+      <Field label="HTML input">
+        <textarea className={textareaClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder={`<section>\n  <h2>Hello</h2>\n  <p>This is a preview.</p>\n</section>`} />
+      </Field>
+      {!input.trim() ? (
+        <EmptyState title="Paste HTML to preview it" description="Enter HTML markup and the tool will render a local preview directly in the browser." />
+      ) : (
+        <>
+          <OutputBlock title="HTML source" value={input} />
+          <div className="rounded-2xl bg-stone-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">Rendered preview</p>
+            <div className="prose prose-sm mt-3 max-w-none rounded-2xl border border-[color:var(--border)] bg-white p-4 text-slate-700" dangerouslySetInnerHTML={{ __html: input }} />
+          </div>
+          <button type="button" className={buttonClass} onClick={() => copy("HTML source", input)}>Copy HTML</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      )}
+    </ToolShell>
   );
 }
 
@@ -954,6 +2102,66 @@ export function UrlParserTool() {
           <button type="button" className={buttonClass} onClick={() => copy("parsed URL JSON", JSON.stringify(parsed, null, 2))}>
             Copy parsed result
           </button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function JsonDiffCheckerTool() {
+  const [leftInput, setLeftInput] = useState("");
+  const [rightInput, setRightInput] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  const { diffs, error } = useMemo(() => {
+    if (!leftInput.trim() && !rightInput.trim()) {
+      return { diffs: [] as JsonDiffEntry[], error: "" };
+    }
+
+    if (!leftInput.trim() || !rightInput.trim()) {
+      return { diffs: [] as JsonDiffEntry[], error: "Paste JSON into both inputs before comparing them." };
+    }
+
+    try {
+      const left = JSON.parse(leftInput);
+      const right = JSON.parse(rightInput);
+      return { diffs: diffJsonValues(left, right), error: "" };
+    } catch (parseError) {
+      return {
+        diffs: [] as JsonDiffEntry[],
+        error: parseError instanceof Error ? parseError.message : "Enter valid JSON in both inputs before comparing them.",
+      };
+    }
+  }, [leftInput, rightInput]);
+
+  const output = useMemo(
+    () =>
+      diffs.length
+        ? diffs
+            .map((diff) => `${diff.kind.toUpperCase()} ${diff.path}\nLeft: ${diff.left}\nRight: ${diff.right}`)
+            .join("\n\n")
+        : "No differences found.",
+    [diffs],
+  );
+
+  return (
+    <ToolShell title="JSON Diff Checker" description="Compare two JSON values locally and highlight added, removed, and changed paths in a readable format.">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Field label="Left JSON">
+          <textarea className={textareaClass} value={leftInput} onChange={(event) => setLeftInput(event.target.value)} placeholder={`{"name":"Toolbox Hub","tools":100}`} />
+        </Field>
+        <Field label="Right JSON">
+          <textarea className={textareaClass} value={rightInput} onChange={(event) => setRightInput(event.target.value)} placeholder={`{"name":"Toolbox Hub","tools":150}`} />
+        </Field>
+      </div>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!leftInput.trim() && !rightInput.trim() ? (
+        <EmptyState title="Paste two JSON values to compare them" description="The diff checker runs locally and focuses on actual value differences, not just formatting." />
+      ) : !error ? (
+        <>
+          <OutputBlock title={diffs.length ? `Differences found: ${diffs.length}` : "Comparison result"} value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("JSON diff result", output)}>Copy diff result</button>
           {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
         </>
       ) : null}
@@ -1239,5 +2447,1751 @@ export function HashGeneratorTool() {
       title="Hash Generator"
       description="Generate MD5, SHA-1, SHA-256, SHA-384, or SHA-512 hashes locally without external services."
     />
+  );
+}
+
+function FileHashTool({
+  title,
+  description,
+  mode,
+}: {
+  title: string;
+  description: string;
+  mode: "checker" | "generator";
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [algorithm, setAlgorithm] = useState<"MD5" | "SHA-1" | "SHA-256" | "SHA-384" | "SHA-512">("SHA-256");
+  const [expectedHash, setExpectedHash] = useState("");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const [isWorking, setIsWorking] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
+
+  async function handleGenerate() {
+    if (!file) {
+      setError("Upload a file before generating a checksum.");
+      setOutput("");
+      return;
+    }
+
+    setIsWorking(true);
+    try {
+      const hash = await digestFile(file, algorithm);
+      const lines = [
+        `File: ${file.name}`,
+        `Size: ${file.size.toLocaleString()} bytes`,
+        `Algorithm: ${algorithm}`,
+        `Digest: ${hash}`,
+      ];
+      if (mode === "checker") {
+        const normalizedExpected = expectedHash.trim().toLowerCase();
+        if (!normalizedExpected) {
+          throw new Error("Enter the expected hash before checking the file.");
+        }
+        const matches = normalizedExpected === hash.toLowerCase();
+        lines.push(`Match: ${matches ? "Yes" : "No"}`);
+        setOutput(lines.join("\n"));
+      } else {
+        setOutput(lines.join("\n"));
+      }
+      setError("");
+    } catch (hashError) {
+      setError(hashError instanceof Error ? hashError.message : "Unable to compute the file hash.");
+      setOutput("");
+    } finally {
+      setIsWorking(false);
+    }
+  }
+
+  return (
+    <ToolShell title={title} description={description}>
+      <Field label="Upload file" hint="The file is hashed locally in your browser and is not uploaded anywhere.">
+        <input type="file" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <Field label="Hash algorithm">
+        <select
+          className={inputClass}
+          value={algorithm}
+          onChange={(event) => setAlgorithm(event.target.value as "MD5" | "SHA-1" | "SHA-256" | "SHA-384" | "SHA-512")}
+        >
+          <option value="MD5">MD5</option>
+          <option value="SHA-1">SHA-1</option>
+          <option value="SHA-256">SHA-256</option>
+          <option value="SHA-384">SHA-384</option>
+          <option value="SHA-512">SHA-512</option>
+        </select>
+      </Field>
+      {mode === "checker" ? (
+        <Field label="Expected hash" hint="Paste the digest you want to compare against. Uppercase and lowercase are treated the same.">
+          <input className={inputClass} value={expectedHash} onChange={(event) => setExpectedHash(event.target.value)} placeholder="Paste expected checksum" />
+        </Field>
+      ) : null}
+      <button type="button" className={buttonClass} onClick={handleGenerate} disabled={isWorking}>
+        {isWorking ? "Computing hash..." : mode === "checker" ? "Check file hash" : "Generate checksum"}
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? (
+        <EmptyState title="Upload a file to begin" description="Choose a file, select a hash algorithm, and compute the digest locally in the browser." />
+      ) : output ? (
+        <>
+          <OutputBlock title={mode === "checker" ? "File hash check" : "File checksum"} value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy(mode === "checker" ? "file hash check" : "file checksum", output)}>
+            Copy output
+          </button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function FileHashCheckerTool() {
+  return (
+    <FileHashTool
+      title="File Hash Checker"
+      description="Upload a file, compute its digest locally, and compare it with an expected checksum without sending the file to a server."
+      mode="checker"
+    />
+  );
+}
+
+export function FileChecksumGeneratorTool() {
+  return (
+    <FileHashTool
+      title="File Checksum Generator"
+      description="Generate MD5 or SHA-family file checksums locally in the browser from uploaded file contents."
+      mode="generator"
+    />
+  );
+}
+
+export function BCryptGeneratorTool() {
+  const [input, setInput] = useState("");
+  const [rounds, setRounds] = useState(10);
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const [isWorking, setIsWorking] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
+
+  async function handleGenerate() {
+    if (!input) {
+      setError("Enter text before generating a bcrypt hash.");
+      setOutput("");
+      return;
+    }
+
+    const safeRounds = Math.max(4, Math.min(14, rounds));
+    setIsWorking(true);
+    try {
+      const bcrypt = await import("bcryptjs");
+      const salt = await bcrypt.genSalt(safeRounds);
+      const hash = await bcrypt.hash(input, salt);
+      setOutput(hash);
+      setError("");
+    } catch (bcryptError) {
+      setError(bcryptError instanceof Error ? bcryptError.message : "Unable to generate a bcrypt hash.");
+      setOutput("");
+    } finally {
+      setIsWorking(false);
+    }
+  }
+
+  return (
+    <ToolShell title="BCrypt Generator" description="Generate real bcrypt hashes locally with a lightweight bcrypt library and adjustable cost factor.">
+      <Field label="Input text">
+        <textarea className={textareaClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="Enter the value to hash." />
+      </Field>
+      <Field label="Cost factor" hint="Higher cost is slower but harder to brute force.">
+        <input className={inputClass} type="number" min="4" max="14" value={rounds} onChange={(event) => setRounds(Number(event.target.value))} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleGenerate} disabled={isWorking}>
+        {isWorking ? "Generating bcrypt..." : "Generate bcrypt hash"}
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!input ? (
+        <EmptyState title="Add text to hash" description="Enter text and choose a cost factor to generate a bcrypt hash locally in the browser." />
+      ) : output ? (
+        <>
+          <OutputBlock title="BCrypt output" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("bcrypt hash", output)}>Copy hash</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function HmacGeneratorTool() {
+  const [message, setMessage] = useState("");
+  const [secret, setSecret] = useState("");
+  const [algorithm, setAlgorithm] = useState<"SHA-256" | "SHA-384" | "SHA-512">("SHA-256");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const [isWorking, setIsWorking] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
+
+  async function handleGenerate() {
+    if (!message.trim()) {
+      setError("Enter a message before generating an HMAC.");
+      setOutput("");
+      return;
+    }
+
+    if (!secret) {
+      setError("Enter a secret key before generating an HMAC.");
+      setOutput("");
+      return;
+    }
+
+    setIsWorking(true);
+    try {
+      const signature = await signHmac(message, secret, algorithm);
+      setOutput(signature);
+      setError("");
+    } catch (hmacError) {
+      setError(hmacError instanceof Error ? hmacError.message : "Unable to generate that HMAC.");
+      setOutput("");
+    } finally {
+      setIsWorking(false);
+    }
+  }
+
+  return (
+    <ToolShell title="HMAC Generator" description="Generate HMAC digests locally using the Web Crypto API with your chosen SHA family algorithm.">
+      <Field label="Algorithm">
+        <select className={inputClass} value={algorithm} onChange={(event) => setAlgorithm(event.target.value as "SHA-256" | "SHA-384" | "SHA-512")}>
+          <option value="SHA-256">HMAC-SHA-256</option>
+          <option value="SHA-384">HMAC-SHA-384</option>
+          <option value="SHA-512">HMAC-SHA-512</option>
+        </select>
+      </Field>
+      <Field label="Secret key">
+        <input className={inputClass} value={secret} onChange={(event) => setSecret(event.target.value)} placeholder="Enter a secret key" />
+      </Field>
+      <Field label="Message">
+        <textarea className={textareaClass} value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Enter the message to sign." />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleGenerate} disabled={isWorking}>
+        {isWorking ? "Generating HMAC..." : "Generate HMAC"}
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!message && !secret ? (
+        <EmptyState title="Add a secret and message" description="Provide a secret key and message to generate an HMAC locally in the browser." />
+      ) : output ? (
+        <>
+          <OutputBlock title={`${algorithm} HMAC`} value={output} multiline={false} />
+          <button type="button" className={buttonClass} onClick={() => copy("HMAC output", output)}>Copy HMAC</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function RandomTokenGeneratorTool() {
+  const [length, setLength] = useState(32);
+  const [format, setFormat] = useState<"hex" | "base64url" | "alphanumeric">("hex");
+  const [output, setOutput] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    const safeLength = Math.max(8, Math.min(128, length));
+    if (format === "hex") {
+      const bytes = crypto.getRandomValues(new Uint8Array(Math.ceil(safeLength / 2)));
+      setOutput(Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("").slice(0, safeLength));
+      return;
+    }
+
+    if (format === "base64url") {
+      const bytes = crypto.getRandomValues(new Uint8Array(safeLength));
+      setOutput(bytesToBase64Url(bytes).slice(0, safeLength));
+      return;
+    }
+
+    setOutput(generateRandomString(safeLength, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"));
+  }
+
+  return (
+    <ToolShell title="Random Token Generator" description="Generate secure random tokens locally in multiple formats using browser-provided cryptographic randomness.">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Output format">
+          <select className={inputClass} value={format} onChange={(event) => setFormat(event.target.value as "hex" | "base64url" | "alphanumeric")}>
+            <option value="hex">Hex</option>
+            <option value="base64url">Base64URL</option>
+            <option value="alphanumeric">Alphanumeric</option>
+          </select>
+        </Field>
+        <Field label="Length">
+          <input className={inputClass} type="number" min="8" max="128" value={length} onChange={(event) => setLength(Number(event.target.value))} />
+        </Field>
+      </div>
+      <button type="button" className={buttonClass} onClick={handleGenerate}>Generate token</button>
+      {!output ? (
+        <EmptyState title="No token generated yet" description="Choose a format and length, then generate a secure random token locally." />
+      ) : (
+        <>
+          <OutputBlock title="Generated token" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("generated token", output)}>Copy token</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      )}
+    </ToolShell>
+  );
+}
+
+export function SecurePasswordStrengthCheckerTool() {
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
+
+  const result = useMemo(() => (password ? scorePasswordStrength(password) : null), [password]);
+  const summary = result
+    ? `${result.label} (${result.score}/6 checks passed)`
+    : "";
+
+  return (
+    <ToolShell title="Secure Password Strength Checker" description="Check password strength locally with clear rule-based feedback and no server upload.">
+      <Field label="Password to evaluate" hint="This analysis runs locally in your browser only.">
+        <input className={inputClass} type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Enter a password to check" />
+      </Field>
+      <label className="flex items-center gap-2 text-sm text-[color:var(--foreground)]">
+        <input type="checkbox" checked={showPassword} onChange={(event) => setShowPassword(event.target.checked)} />
+        Show password
+      </label>
+      {!password ? (
+        <EmptyState title="No password to evaluate yet" description="Enter a password to see a local strength summary and rule-by-rule feedback." />
+      ) : result ? (
+        <>
+          <OutputBlock title="Strength summary" value={summary} multiline={false} />
+          <div className="rounded-2xl bg-stone-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">Checks</p>
+            <ul className="mt-3 space-y-2 text-sm text-slate-700">
+              {result.checks.map((check) => (
+                <li key={check.label}>{check.passed ? "Pass" : "Needs work"}: {check.label}</li>
+              ))}
+            </ul>
+          </div>
+          <button type="button" className={buttonClass} onClick={() => copy("password strength summary", summary)}>Copy summary</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function SecretKeyGeneratorTool() {
+  const [length, setLength] = useState(48);
+  const [format, setFormat] = useState<"base64url" | "hex">("base64url");
+  const [output, setOutput] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    const safeLength = Math.max(16, Math.min(128, length));
+    if (format === "hex") {
+      const bytes = crypto.getRandomValues(new Uint8Array(Math.ceil(safeLength / 2)));
+      setOutput(Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("").slice(0, safeLength));
+      return;
+    }
+
+    const bytes = crypto.getRandomValues(new Uint8Array(safeLength));
+    setOutput(bytesToBase64Url(bytes).slice(0, safeLength));
+  }
+
+  return (
+    <ToolShell title="Secret Key Generator" description="Generate high-entropy secret keys locally for app configuration, signing secrets, and development workflows.">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Output format">
+          <select className={inputClass} value={format} onChange={(event) => setFormat(event.target.value as "base64url" | "hex")}>
+            <option value="base64url">Base64URL</option>
+            <option value="hex">Hex</option>
+          </select>
+        </Field>
+        <Field label="Length">
+          <input className={inputClass} type="number" min="16" max="128" value={length} onChange={(event) => setLength(Number(event.target.value))} />
+        </Field>
+      </div>
+      <button type="button" className={buttonClass} onClick={handleGenerate}>Generate secret key</button>
+      {!output ? (
+        <EmptyState title="No secret key generated yet" description="Choose a length and format, then generate a random secret locally in the browser." />
+      ) : (
+        <>
+          <OutputBlock title="Generated secret key" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("secret key", output)}>Copy key</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      )}
+    </ToolShell>
+  );
+}
+
+export function MetaTagGeneratorTool() {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [canonicalUrl, setCanonicalUrl] = useState("");
+  const [robots, setRobots] = useState("index,follow");
+  const [keywords, setKeywords] = useState("");
+  const [author, setAuthor] = useState("");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function loadExample() {
+    setTitle("Free PDF Watermark Tool | Toolbox Hub");
+    setDescription("Add text watermarks to PDF files online with a fast browser-side workflow.");
+    setCanonicalUrl("https://example.com/tools/pdf-watermark-tool");
+    setRobots("index,follow");
+    setKeywords("pdf watermark tool, add watermark to pdf, watermark pdf online");
+    setAuthor("Toolbox Hub");
+  }
+
+  function handleGenerate() {
+    if (!title.trim() || !description.trim()) {
+      setError("Enter a page title and meta description first.");
+      setOutput("");
+      return;
+    }
+
+    setOutput(buildMetaTags({ title, description, canonicalUrl, robots, keywords, author }));
+    setError("");
+  }
+
+  return (
+    <ToolShell title="Meta Tag Generator" description="Generate common SEO meta tags from a simple form and copy the output into your page head.">
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={secondaryButtonClass} onClick={loadExample}>Load example</button>
+      </div>
+      <Field label="Page title">
+        <input className={inputClass} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Enter the page title" />
+      </Field>
+      <Field label="Meta description">
+        <textarea className={textareaClass} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Summarize the page in about 150-160 characters." />
+      </Field>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Canonical URL">
+          <input className={inputClass} value={canonicalUrl} onChange={(event) => setCanonicalUrl(event.target.value)} placeholder="https://example.com/page" />
+        </Field>
+        <Field label="Robots directive">
+          <input className={inputClass} value={robots} onChange={(event) => setRobots(event.target.value)} placeholder="index,follow" />
+        </Field>
+        <Field label="Keywords">
+          <input className={inputClass} value={keywords} onChange={(event) => setKeywords(event.target.value)} placeholder="keyword one, keyword two" />
+        </Field>
+        <Field label="Author">
+          <input className={inputClass} value={author} onChange={(event) => setAuthor(event.target.value)} placeholder="Author or brand name" />
+        </Field>
+      </div>
+      <Notice>Example use case: generate title, description, canonical, robots, author, and keywords tags for a landing page or tool page.</Notice>
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={buttonClass} onClick={handleGenerate}>Generate meta tags</button>
+        {output ? <button type="button" className={secondaryButtonClass} onClick={() => copy("meta tags", output)}>Copy output</button> : null}
+      </div>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!title && !description ? (
+        <EmptyState title="No meta tags generated yet" description="Fill in the core fields or load the example to generate copy-ready SEO meta tags." />
+      ) : output ? (
+        <>
+          <OutputBlock title="Generated meta tags" value={output} />
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function KeywordDensityCheckerTool() {
+  const [content, setContent] = useState("");
+  const [focusKeyword, setFocusKeyword] = useState("");
+  const [report, setReport] = useState("");
+  const [topTerms, setTopTerms] = useState<Array<{ word: string; count: number; density: number }>>([]);
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function loadExample() {
+    setContent("A PDF watermark tool helps users add a watermark to PDF files online. A clear PDF watermark workflow can improve document labeling for teams that need fast browser-based PDF editing.");
+    setFocusKeyword("pdf watermark");
+  }
+
+  function handleAnalyze() {
+    try {
+      const result = analyzeKeywordDensity(content, focusKeyword);
+      const lines = [
+        `Total words: ${result.totalWords}`,
+        `Unique words: ${result.uniqueWords}`,
+      ];
+      if (result.focusKeyword) {
+        lines.push(`Focus keyword: ${result.focusKeyword}`);
+        lines.push(`Focus matches: ${result.focusMatches}`);
+        lines.push(`Focus density: ${result.focusDensity.toFixed(2)}%`);
+      }
+      lines.push("", "Top terms:");
+      result.topTerms.forEach((term) => {
+        lines.push(`- ${term.word}: ${term.count} (${term.density.toFixed(2)}%)`);
+      });
+
+      setReport(lines.join("\n"));
+      setTopTerms(result.topTerms);
+      setError("");
+    } catch (densityError) {
+      setError(densityError instanceof Error ? densityError.message : "Unable to analyze keyword density.");
+      setReport("");
+      setTopTerms([]);
+    }
+  }
+
+  return (
+    <ToolShell title="Keyword Density Checker" description="Analyze term frequency in pasted content locally and review the top repeated words or a chosen focus keyword.">
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={secondaryButtonClass} onClick={loadExample}>Load example</button>
+      </div>
+      <Field label="Content">
+        <textarea className={textareaClass} value={content} onChange={(event) => setContent(event.target.value)} placeholder="Paste the content you want to analyze." />
+      </Field>
+      <Field label="Focus keyword or phrase" hint="Optional. Example: pdf watermark">
+        <input className={inputClass} value={focusKeyword} onChange={(event) => setFocusKeyword(event.target.value)} placeholder="Enter an optional keyword or phrase" />
+      </Field>
+      <Notice>Example use case: check how often a target phrase appears and review the most repeated terms in a draft page.</Notice>
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={buttonClass} onClick={handleAnalyze}>Analyze content</button>
+        {report ? <button type="button" className={secondaryButtonClass} onClick={() => copy("keyword density report", report)}>Copy report</button> : null}
+      </div>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!content.trim() ? (
+        <EmptyState title="No content analyzed yet" description="Paste some content or load the example to generate a quick keyword density report." />
+      ) : report ? (
+        <>
+          <OutputBlock title="Keyword density report" value={report} />
+          <div className="rounded-2xl bg-stone-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">Top terms</p>
+            <ul className="mt-3 space-y-2 text-sm text-slate-700">
+              {topTerms.map((term) => (
+                <li key={term.word}>{term.word}: {term.count} uses ({term.density.toFixed(2)}%)</li>
+              ))}
+            </ul>
+          </div>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function RobotsTxtGeneratorTool() {
+  const [userAgent, setUserAgent] = useState("*");
+  const [allow, setAllow] = useState("/");
+  const [disallow, setDisallow] = useState("/private/");
+  const [sitemapUrl, setSitemapUrl] = useState("https://example.com/sitemap.xml");
+  const [output, setOutput] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function loadExample() {
+    setUserAgent("*");
+    setAllow("/");
+    setDisallow("/admin/\n/tmp/");
+    setSitemapUrl("https://example.com/sitemap.xml");
+  }
+
+  function handleGenerate() {
+    setOutput(buildRobotsTxt({ userAgent, allow, disallow, sitemapUrl }));
+  }
+
+  return (
+    <ToolShell title="Robots.txt Generator" description="Generate a simple robots.txt file locally from common crawl rules, then copy the result into your site root.">
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={secondaryButtonClass} onClick={loadExample}>Load example</button>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="User-agent">
+          <input className={inputClass} value={userAgent} onChange={(event) => setUserAgent(event.target.value)} placeholder="*" />
+        </Field>
+        <Field label="Sitemap URL">
+          <input className={inputClass} value={sitemapUrl} onChange={(event) => setSitemapUrl(event.target.value)} placeholder="https://example.com/sitemap.xml" />
+        </Field>
+      </div>
+      <Field label="Allow rules" hint="One path per line">
+        <textarea className={textareaClass} value={allow} onChange={(event) => setAllow(event.target.value)} placeholder="/&#10;/blog/" />
+      </Field>
+      <Field label="Disallow rules" hint="One path per line">
+        <textarea className={textareaClass} value={disallow} onChange={(event) => setDisallow(event.target.value)} placeholder="/admin/&#10;/private/" />
+      </Field>
+      <Notice>Example use case: create a starter robots.txt that allows public pages, blocks private paths, and points crawlers to your sitemap.</Notice>
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={buttonClass} onClick={handleGenerate}>Generate robots.txt</button>
+        {output ? <button type="button" className={secondaryButtonClass} onClick={() => copy("robots.txt output", output)}>Copy output</button> : null}
+      </div>
+      {!output ? (
+        <EmptyState title="No robots.txt generated yet" description="Add your crawl rules or load the example to generate a copy-ready robots.txt file." />
+      ) : (
+        <>
+          <OutputBlock title="Generated robots.txt" value={output} />
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      )}
+    </ToolShell>
+  );
+}
+
+export function SitemapGeneratorTool() {
+  const [urls, setUrls] = useState("https://example.com/\nhttps://example.com/tools/pdf-watermark-tool");
+  const [changefreq, setChangefreq] = useState("weekly");
+  const [priority, setPriority] = useState("0.8");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    try {
+      setOutput(buildSitemapXml(urls.split("\n"), changefreq, priority));
+      setError("");
+    } catch (sitemapError) {
+      setError(sitemapError instanceof Error ? sitemapError.message : "Unable to generate that sitemap.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title="Sitemap Generator" description="Generate a simple XML sitemap from a list of absolute URLs and common sitemap options.">
+      <Field label="URLs" hint="Enter one absolute URL per line">
+        <textarea className={textareaClass} value={urls} onChange={(event) => setUrls(event.target.value)} placeholder="https://example.com/" />
+      </Field>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Change frequency">
+          <select className={inputClass} value={changefreq} onChange={(event) => setChangefreq(event.target.value)}>
+            <option value="always">always</option>
+            <option value="hourly">hourly</option>
+            <option value="daily">daily</option>
+            <option value="weekly">weekly</option>
+            <option value="monthly">monthly</option>
+            <option value="yearly">yearly</option>
+          </select>
+        </Field>
+        <Field label="Priority" hint="Use a value from 0.0 to 1.0">
+          <input className={inputClass} value={priority} onChange={(event) => setPriority(event.target.value)} placeholder="0.8" />
+        </Field>
+      </div>
+      <Notice>Example use case: create a starter XML sitemap for a small site or a batch of landing pages.</Notice>
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={buttonClass} onClick={handleGenerate}>Generate sitemap XML</button>
+        {output ? <button type="button" className={secondaryButtonClass} onClick={() => copy("sitemap XML", output)}>Copy output</button> : null}
+      </div>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!urls.trim() ? (
+        <EmptyState title="No sitemap generated yet" description="Add one or more absolute URLs to build a copy-ready XML sitemap." />
+      ) : output ? (
+        <>
+          <OutputBlock title="Generated sitemap XML" value={output} />
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function UrlSlugGeneratorTool() {
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function loadExample() {
+    setInput("Free PDF Watermark Tool for Small Business Documents");
+  }
+
+  function handleGenerate() {
+    setOutput(createSlug(input));
+  }
+
+  return (
+    <ToolShell title="URL Slug Generator" description="Generate readable URL slugs from titles, headings, and phrases with a clean SEO-focused workflow.">
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={secondaryButtonClass} onClick={loadExample}>Load example</button>
+      </div>
+      <Field label="Title or phrase">
+        <input className={inputClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="Enter a page title or phrase" />
+      </Field>
+      <Notice>Example use case: turn a blog title or landing-page heading into a lowercase, hyphenated URL segment.</Notice>
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={buttonClass} onClick={handleGenerate}>Generate slug</button>
+        {output ? <button type="button" className={secondaryButtonClass} onClick={() => copy("URL slug", output)}>Copy slug</button> : null}
+      </div>
+      {!input.trim() ? (
+        <EmptyState title="No slug generated yet" description="Enter a title or load the example to generate an SEO-friendly slug." />
+      ) : output ? (
+        <>
+          <OutputBlock title="Generated URL slug" value={output} multiline={false} />
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function OpenGraphGeneratorTool() {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [url, setUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [siteName, setSiteName] = useState("");
+  const [type, setType] = useState("website");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function loadExample() {
+    setTitle("PDF Watermark Tool | Toolbox Hub");
+    setDescription("Add text watermarks to PDF files online with a fast browser-side workflow.");
+    setUrl("https://example.com/tools/pdf-watermark-tool");
+    setImageUrl("https://example.com/og/pdf-watermark-tool.jpg");
+    setSiteName("Toolbox Hub");
+    setType("website");
+  }
+
+  function handleGenerate() {
+    if (!title.trim() || !description.trim()) {
+      setError("Enter a title and description before generating Open Graph tags.");
+      setOutput("");
+      return;
+    }
+
+    setOutput(buildOpenGraphTags({ title, description, url, imageUrl, siteName, type }));
+    setError("");
+  }
+
+  return (
+    <ToolShell title="Open Graph Generator" description="Generate Open Graph meta tags for richer social sharing previews and copy the final markup easily.">
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={secondaryButtonClass} onClick={loadExample}>Load example</button>
+      </div>
+      <Field label="Open Graph title">
+        <input className={inputClass} value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Enter the sharing title" />
+      </Field>
+      <Field label="Open Graph description">
+        <textarea className={textareaClass} value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Enter the sharing description" />
+      </Field>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Page URL">
+          <input className={inputClass} value={url} onChange={(event) => setUrl(event.target.value)} placeholder="https://example.com/page" />
+        </Field>
+        <Field label="Image URL">
+          <input className={inputClass} value={imageUrl} onChange={(event) => setImageUrl(event.target.value)} placeholder="https://example.com/image.jpg" />
+        </Field>
+        <Field label="Site name">
+          <input className={inputClass} value={siteName} onChange={(event) => setSiteName(event.target.value)} placeholder="Your site name" />
+        </Field>
+        <Field label="Open Graph type">
+          <select className={inputClass} value={type} onChange={(event) => setType(event.target.value)}>
+            <option value="website">website</option>
+            <option value="article">article</option>
+            <option value="product">product</option>
+          </select>
+        </Field>
+      </div>
+      <Notice>Example use case: generate `og:` tags for a blog post, landing page, tool page, or product page.</Notice>
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={buttonClass} onClick={handleGenerate}>Generate Open Graph tags</button>
+        {output ? <button type="button" className={secondaryButtonClass} onClick={() => copy("Open Graph tags", output)}>Copy output</button> : null}
+      </div>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!title.trim() && !description.trim() ? (
+        <EmptyState title="No Open Graph tags generated yet" description="Fill in the sharing fields or load the example to generate copy-ready Open Graph markup." />
+      ) : output ? (
+        <>
+          <OutputBlock title="Generated Open Graph tags" value={output} />
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function EmailValidatorTool() {
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleValidate() {
+    try {
+      const next = validateEmailFormat(input);
+      setResult([
+        `Status: ${next.valid ? "Valid format" : "Invalid format"}`,
+        `Normalized: ${next.normalized}`,
+        `Note: ${next.note}`,
+      ].join("\n"));
+      setError("");
+    } catch (validationError) {
+      setError(validationError instanceof Error ? validationError.message : "Unable to validate that email address.");
+      setResult("");
+    }
+  }
+
+  return (
+    <ToolShell title="Email Validator" description="Validate common email-address format rules locally in the browser without pretending to verify mailbox existence.">
+      <Field label="Email address">
+        <input className={inputClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="name@example.com" />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleValidate}>Validate email</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!result && !error ? (
+        <EmptyState title="No email checked yet" description="Enter an email address to run a local format validation and generate a copy-ready result." />
+      ) : result ? (
+        <>
+          <OutputBlock title="Validation result" value={result} />
+          <button type="button" className={buttonClass} onClick={() => copy("email validation result", result)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function PhoneNumberFormatterTool() {
+  const [input, setInput] = useState("");
+  const [style, setStyle] = useState<"us" | "international">("us");
+  const [result, setResult] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleFormat() {
+    try {
+      const next = formatPhoneNumberValue(input, style);
+      setResult([
+        `Formatted: ${next.formatted}`,
+        `Digits only: ${next.digits}`,
+        `Note: ${next.note}`,
+      ].join("\n"));
+      setError("");
+    } catch (formattingError) {
+      setError(formattingError instanceof Error ? formattingError.message : "Unable to format that phone number.");
+      setResult("");
+    }
+  }
+
+  return (
+    <ToolShell title="Phone Number Formatter" description="Clean up phone numbers locally and format them with a simple US or international output style.">
+      <Field label="Phone number">
+        <input className={inputClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="+1 (415) 555-0123" />
+      </Field>
+      <Field label="Formatting style">
+        <select className={inputClass} value={style} onChange={(event) => setStyle(event.target.value as "us" | "international")}>
+          <option value="us">US format</option>
+          <option value="international">International format</option>
+        </select>
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleFormat}>Format number</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!result && !error ? (
+        <EmptyState title="No formatted number yet" description="Enter a number and choose an output style to generate a cleaned phone-number format." />
+      ) : result ? (
+        <>
+          <OutputBlock title="Formatted phone number" value={result} />
+          <button type="button" className={buttonClass} onClick={() => copy("formatted phone number", result)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function UUIDValidatorTool() {
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleValidate() {
+    try {
+      const next = inspectUuid(input);
+      setResult([
+        `Status: ${next.valid ? "Valid UUID" : "Invalid UUID"}`,
+        `Normalized: ${next.normalized}`,
+        `Version: ${next.version}`,
+        `Variant: ${next.variant}`,
+      ].join("\n"));
+      setError("");
+    } catch (validationError) {
+      setError(validationError instanceof Error ? validationError.message : "Unable to validate that UUID.");
+      setResult("");
+    }
+  }
+
+  return (
+    <ToolShell title="UUID Validator" description="Validate common UUID formats locally and show the detected version when the pattern matches.">
+      <Field label="UUID value">
+        <input className={inputClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="123e4567-e89b-12d3-a456-426614174000" />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleValidate}>Validate UUID</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!result && !error ? (
+        <EmptyState title="No UUID checked yet" description="Paste a UUID string to validate its pattern and inspect the version information locally." />
+      ) : result ? (
+        <>
+          <OutputBlock title="UUID validation" value={result} />
+          <button type="button" className={buttonClass} onClick={() => copy("UUID validation result", result)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function RandomApiKeyGeneratorTool() {
+  const [prefix, setPrefix] = useState("sk_live");
+  const [length, setLength] = useState(32);
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    if (!Number.isFinite(length) || length < 16 || length > 96) {
+      setError("Choose a key length between 16 and 96 characters.");
+      setOutput("");
+      return;
+    }
+
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const body = getCryptoRandomString(length, alphabet);
+    setOutput(prefix.trim() ? `${prefix.trim()}_${body}` : body);
+    setError("");
+  }
+
+  return (
+    <ToolShell title="Random API Key Generator" description="Generate API-style random keys locally with browser cryptographic randomness and copy-ready output.">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Prefix">
+          <input className={inputClass} value={prefix} onChange={(event) => setPrefix(event.target.value)} placeholder="sk_live" />
+        </Field>
+        <Field label="Random body length">
+          <input className={inputClass} type="number" min="16" max="96" value={length} onChange={(event) => setLength(Number(event.target.value))} />
+        </Field>
+      </div>
+      <button type="button" className={buttonClass} onClick={handleGenerate}>Generate API key</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No API key generated yet" description="Choose an optional prefix and length, then generate a random key entirely in the browser." />
+      ) : output ? (
+        <>
+          <OutputBlock title="Generated API key" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("API key", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function SecureTokenGeneratorTool() {
+  const [format, setFormat] = useState<"hex" | "base64url">("base64url");
+  const [length, setLength] = useState(32);
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    if (!Number.isFinite(length) || length < 16 || length > 128) {
+      setError("Choose a token length between 16 and 128 characters.");
+      setOutput("");
+      return;
+    }
+
+    const alphabet =
+      format === "hex"
+        ? "abcdef0123456789"
+        : "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+
+    setOutput(getCryptoRandomString(length, alphabet));
+    setError("");
+  }
+
+  return (
+    <ToolShell title="Secure Token Generator" description="Generate secure random tokens locally in hex or URL-safe format using browser cryptographic randomness.">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Token format">
+          <select className={inputClass} value={format} onChange={(event) => setFormat(event.target.value as "hex" | "base64url")}>
+            <option value="base64url">Base64URL-safe</option>
+            <option value="hex">Hex</option>
+          </select>
+        </Field>
+        <Field label="Token length">
+          <input className={inputClass} type="number" min="16" max="128" value={length} onChange={(event) => setLength(Number(event.target.value))} />
+        </Field>
+      </div>
+      <button type="button" className={buttonClass} onClick={handleGenerate}>Generate token</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No token generated yet" description="Choose the token format and length, then generate a secure browser-side random token." />
+      ) : output ? (
+        <>
+          <OutputBlock title="Generated token" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("secure token", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function PasswordEntropyCalculatorTool() {
+  const [password, setPassword] = useState("");
+  const [result, setResult] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleCalculate() {
+    if (!password) {
+      setError("Enter a password before calculating entropy.");
+      setResult("");
+      return;
+    }
+
+    const entropy = calculatePasswordEntropy(password);
+    setResult([
+      `Estimated entropy: ${entropy.entropy.toFixed(2)} bits`,
+      `Strength: ${entropy.strength}`,
+      `Length: ${entropy.length} characters`,
+      `Estimated character pool: ${entropy.poolSize}`,
+      `Detected sets: ${entropy.characterSets.join(", ") || "none"}`,
+    ].join("\n"));
+    setError("");
+  }
+
+  return (
+    <ToolShell title="Password Entropy Calculator" description="Estimate password entropy locally from length and character variety to get a rough strength signal.">
+      <Field label="Password to analyze">
+        <input className={inputClass} type="text" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Enter a password sample" />
+      </Field>
+      <Notice>This is an estimate based on character variety and length. It does not account for password reuse or predictable patterns.</Notice>
+      <button type="button" className={buttonClass} onClick={handleCalculate}>Calculate entropy</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!result && !error ? (
+        <EmptyState title="No entropy report yet" description="Enter a password sample to estimate entropy and review a simple browser-side strength summary." />
+      ) : result ? (
+        <>
+          <OutputBlock title="Entropy report" value={result} />
+          <button type="button" className={buttonClass} onClick={() => copy("entropy report", result)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function HashIdentifierTool() {
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleIdentify() {
+    try {
+      const candidates = identifyHashCandidates(input);
+      setResult(
+        candidates.length
+          ? [
+              `Likely matches: ${candidates.join(", ")}`,
+              `Input length: ${input.trim().length}`,
+              "Note: pattern matching suggests possibilities only and cannot guarantee the exact hash type.",
+            ].join("\n")
+          : [
+              "No strong hash match detected from this pattern.",
+              `Input length: ${input.trim().length}`,
+              "Note: the value may be plain text, a custom token, or a digest format outside the bundled pattern list.",
+            ].join("\n"),
+      );
+      setError("");
+    } catch (identifyError) {
+      setError(identifyError instanceof Error ? identifyError.message : "Unable to identify that hash-like value.");
+      setResult("");
+    }
+  }
+
+  return (
+    <ToolShell title="Hash Identifier" description="Guess likely hash families locally from digest length and character patterns with an honest uncertainty note.">
+      <Field label="Hash-like value">
+        <textarea className={textareaClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="5d41402abc4b2a76b9719d911017c592" />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleIdentify}>Identify hash</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!result && !error ? (
+        <EmptyState title="No hash identified yet" description="Paste a digest or token to compare it against common hash-pattern signatures in the browser." />
+      ) : result ? (
+        <>
+          <OutputBlock title="Identification result" value={result} />
+          <button type="button" className={buttonClass} onClick={() => copy("hash identification result", result)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function SqlMinifierTool() {
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleMinify() {
+    try {
+      setOutput(minifySql(input));
+      setError("");
+    } catch (sqlError) {
+      setError(sqlError instanceof Error ? sqlError.message : "Unable to minify that SQL query.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title="SQL Minifier" description="Minify common SQL queries locally by stripping comments and collapsing whitespace into compact single-line output.">
+      <Field label="SQL query">
+        <textarea className={textareaClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder={"SELECT id, name\nFROM users\nWHERE active = 1\nORDER BY created_at DESC;"} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleMinify}>Minify SQL</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No minified SQL yet" description="Paste a query and run the minifier to get a compact SQL string you can copy." />
+      ) : output ? (
+        <>
+          <CodeOutputBlock title="Minified SQL" value={output} language="sql" />
+          <button type="button" className={buttonClass} onClick={() => copy("minified SQL", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+function SqlFormatterTool({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleFormat() {
+    try {
+      setOutput(beautifySql(input));
+      setError("");
+    } catch (sqlError) {
+      setError(sqlError instanceof Error ? sqlError.message : "Unable to format that SQL query.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title={title} description={description}>
+      <Field label="SQL query">
+        <textarea className={textareaClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder={"select id, name, email from users where status = 'active' and deleted_at is null order by created_at desc;"} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleFormat}>Format SQL</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No formatted SQL yet" description="Paste a query to generate a readable multi-line layout with lightweight syntax highlighting." />
+      ) : output ? (
+        <>
+          <CodeOutputBlock title="Formatted SQL" value={output} language="sql" />
+          <button type="button" className={buttonClass} onClick={() => copy("formatted SQL", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function SqlBeautifierTool() {
+  return (
+    <SqlFormatterTool
+      title="SQL Beautifier"
+      description="Beautify common SQL queries locally with readable line breaks and indentation for fast review and sharing."
+    />
+  );
+}
+
+export function SqlQueryFormatterTool() {
+  return (
+    <SqlFormatterTool
+      title="SQL Query Formatter"
+      description="Format SQL queries locally into a cleaner, easier-to-scan structure while keeping the workflow fully in the browser."
+    />
+  );
+}
+
+export function CronExpressionGeneratorTool() {
+  const [mode, setMode] = useState<"every-minute" | "hourly" | "daily" | "weekly" | "monthly">("daily");
+  const [minute, setMinute] = useState(0);
+  const [hour, setHour] = useState(9);
+  const [weekday, setWeekday] = useState(1);
+  const [dayOfMonth, setDayOfMonth] = useState(1);
+  const [interval, setInterval] = useState(5);
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    if (minute < 0 || minute > 59 || hour < 0 || hour > 23) {
+      setError("Minute must be 0-59 and hour must be 0-23.");
+      setOutput("");
+      return;
+    }
+
+    let expression: string;
+    let description: string;
+
+    if (mode === "every-minute") {
+      if (interval < 1 || interval > 59) {
+        setError("Minute interval must be between 1 and 59.");
+        setOutput("");
+        return;
+      }
+      expression = `*/${interval} * * * *`;
+      description = `Runs every ${interval} minute(s).`;
+    } else if (mode === "hourly") {
+      expression = `${minute} * * * *`;
+      description = `Runs at minute ${minute} of every hour.`;
+    } else if (mode === "daily") {
+      expression = `${minute} ${hour} * * *`;
+      description = `Runs every day at ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}.`;
+    } else if (mode === "weekly") {
+      expression = `${minute} ${hour} * * ${weekday}`;
+      description = `Runs weekly on weekday ${weekday} at ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}.`;
+    } else {
+      if (dayOfMonth < 1 || dayOfMonth > 31) {
+        setError("Day of month must be between 1 and 31.");
+        setOutput("");
+        return;
+      }
+      expression = `${minute} ${hour} ${dayOfMonth} * *`;
+      description = `Runs monthly on day ${dayOfMonth} at ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}.`;
+    }
+
+    setOutput(`${expression}\n\n${description}`);
+    setError("");
+  }
+
+  return (
+    <ToolShell title="Cron Expression Generator" description="Generate common 5-field cron expressions from a simpler schedule form and copy the final expression easily.">
+      <Field label="Schedule type">
+        <select className={inputClass} value={mode} onChange={(event) => setMode(event.target.value as typeof mode)}>
+          <option value="every-minute">Every N minutes</option>
+          <option value="hourly">Hourly</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </Field>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {mode === "every-minute" ? (
+          <Field label="Minute interval">
+            <input className={inputClass} type="number" min="1" max="59" value={interval} onChange={(event) => setInterval(Number(event.target.value))} />
+          </Field>
+        ) : null}
+        {mode !== "every-minute" ? (
+          <>
+            <Field label="Hour">
+              <input className={inputClass} type="number" min="0" max="23" value={hour} onChange={(event) => setHour(Number(event.target.value))} />
+            </Field>
+            <Field label="Minute">
+              <input className={inputClass} type="number" min="0" max="59" value={minute} onChange={(event) => setMinute(Number(event.target.value))} />
+            </Field>
+          </>
+        ) : null}
+        {mode === "weekly" ? (
+          <Field label="Weekday" hint="0 = Sunday, 6 = Saturday">
+            <input className={inputClass} type="number" min="0" max="6" value={weekday} onChange={(event) => setWeekday(Number(event.target.value))} />
+          </Field>
+        ) : null}
+        {mode === "monthly" ? (
+          <Field label="Day of month">
+            <input className={inputClass} type="number" min="1" max="31" value={dayOfMonth} onChange={(event) => setDayOfMonth(Number(event.target.value))} />
+          </Field>
+        ) : null}
+      </div>
+      <button type="button" className={buttonClass} onClick={handleGenerate}>Generate cron expression</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No cron expression yet" description="Choose a schedule pattern and generate a 5-field cron expression with a human-readable summary." />
+      ) : output ? (
+        <>
+          <CodeOutputBlock title="Cron expression" value={output} language="text" />
+          <button type="button" className={buttonClass} onClick={() => copy("cron expression", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function CronExpressionParserTool() {
+  const [input, setInput] = useState("");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleParse() {
+    try {
+      const parsed = parseCronExpression(input);
+      setOutput(`${parsed.expression}\n\n${parsed.description}\n\n${parsed.output}`);
+      setError("");
+    } catch (cronError) {
+      setError(cronError instanceof Error ? cronError.message : "Unable to parse that cron expression.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title="Cron Expression Parser" description="Parse a standard 5-field cron expression into a clearer human-readable summary directly in the browser.">
+      <Field label="Cron expression" hint="Use the format: minute hour day month weekday">
+        <input className={inputClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="*/15 9 * * 1,3,5" />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleParse}>Parse cron</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No cron schedule parsed yet" description="Enter a standard 5-field cron expression to see a lightweight field-by-field explanation." />
+      ) : output ? (
+        <>
+          <CodeOutputBlock title="Parsed cron schedule" value={output} language="text" />
+          <button type="button" className={buttonClass} onClick={() => copy("parsed cron schedule", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function JsonSchemaValidatorTool() {
+  const [dataInput, setDataInput] = useState('{"name":"Toolbox Hub","tools":50}');
+  const [schemaInput, setSchemaInput] = useState('{"type":"object","required":["name","tools"],"properties":{"name":{"type":"string","minLength":3},"tools":{"type":"number","minimum":1}}}');
+  const [report, setReport] = useState("");
+  const [formattedData, setFormattedData] = useState("");
+  const [formattedSchema, setFormattedSchema] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleValidate() {
+    try {
+      const data = JSON.parse(dataInput);
+      const schema = JSON.parse(schemaInput) as ReducedJsonSchema;
+      const errors = validateJsonAgainstSchema(data, schema);
+      setFormattedData(JSON.stringify(data, null, 2));
+      setFormattedSchema(JSON.stringify(schema, null, 2));
+      setReport(errors.length ? errors.join("\n") : "Validation passed. The JSON matches the supported schema rules.");
+      setError("");
+    } catch (validationError) {
+      setError(validationError instanceof Error ? validationError.message : "Unable to validate the JSON against that schema.");
+      setReport("");
+      setFormattedData("");
+      setFormattedSchema("");
+    }
+  }
+
+  return (
+    <ToolShell title="JSON Schema Validator" description="Validate JSON against a reduced-scope JSON Schema rule set locally, including types, required keys, enums, patterns, and common numeric or length checks.">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="JSON data">
+          <textarea className={textareaClass} value={dataInput} onChange={(event) => setDataInput(event.target.value)} />
+        </Field>
+        <Field label="JSON schema">
+          <textarea className={textareaClass} value={schemaInput} onChange={(event) => setSchemaInput(event.target.value)} />
+        </Field>
+      </div>
+      <Notice>Reduced-scope schema support includes `type`, `required`, `properties`, `items`, `enum`, `minLength`, `maxLength`, `minimum`, `maximum`, `pattern`, `minItems`, and `maxItems`.</Notice>
+      <button type="button" className={buttonClass} onClick={handleValidate}>Validate JSON</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!report && !error ? (
+        <EmptyState title="No validation report yet" description="Paste JSON plus a compatible schema to validate the structure locally in the browser." />
+      ) : report ? (
+        <>
+          <OutputBlock title="Validation report" value={report} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <CodeOutputBlock title="Formatted JSON data" value={formattedData} language="json" />
+            <CodeOutputBlock title="Formatted JSON schema" value={formattedSchema} language="json" />
+          </div>
+          <button type="button" className={buttonClass} onClick={() => copy("JSON schema validation report", report)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function JsonKeyExtractorTool() {
+  const [input, setInput] = useState('{"site":{"name":"Toolbox Hub","categories":["text","developer"]}}');
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleExtract() {
+    try {
+      const parsed = JSON.parse(input);
+      const paths = [...extractJsonPaths(parsed)].sort();
+      setOutput(paths.join("\n"));
+      setError("");
+    } catch (extractError) {
+      setError(extractError instanceof Error ? extractError.message : "Unable to extract keys from that JSON.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title="JSON Key Extractor" description="Extract JSON keys and deep paths locally so you can inspect nested payload structure without leaving the browser.">
+      <Field label="JSON input">
+        <textarea className={textareaClass} value={input} onChange={(event) => setInput(event.target.value)} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleExtract}>Extract keys</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No JSON paths extracted yet" description="Paste valid JSON and run the extractor to list root keys and nested paths." />
+      ) : output ? (
+        <>
+          <OutputBlock title="Extracted JSON paths" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("JSON paths", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function XmlToJsonConverterTool() {
+  const [input, setInput] = useState("<site><name>Toolbox Hub</name><tools>50</tools></site>");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleConvert() {
+    try {
+      const parser = new DOMParser();
+      const documentNode = parser.parseFromString(input, "application/xml");
+      const parserError = documentNode.querySelector("parsererror");
+      if (parserError || !documentNode.documentElement) {
+        throw new Error("Enter valid XML before converting it.");
+      }
+      const converted = {
+        [documentNode.documentElement.tagName]: xmlNodeToJson(documentNode.documentElement),
+      };
+      setOutput(JSON.stringify(converted, null, 2));
+      setError("");
+    } catch (convertError) {
+      setError(convertError instanceof Error ? convertError.message : "Unable to convert that XML into JSON.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title="XML to JSON Converter" description="Convert valid XML into a readable reduced-scope JSON structure locally in the browser with highlighted output.">
+      <Field label="XML input">
+        <textarea className={textareaClass} value={input} onChange={(event) => setInput(event.target.value)} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleConvert}>Convert XML to JSON</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No JSON output yet" description="Paste valid XML and convert it into a reduced-scope JSON structure you can inspect and copy." />
+      ) : output ? (
+        <>
+          <CodeOutputBlock title="JSON output" value={output} language="json" />
+          <button type="button" className={buttonClass} onClick={() => copy("JSON output", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function JsonToXmlConverterTool() {
+  const [input, setInput] = useState('{"site":{"name":"Toolbox Hub","tools":50}}');
+  const [rootName, setRootName] = useState("root");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleConvert() {
+    try {
+      const parsed = JSON.parse(input);
+      const xml = typeof parsed === "object" && parsed && !Array.isArray(parsed) && Object.keys(parsed).length === 1
+        ? Object.entries(parsed as Record<string, unknown>).map(([key, value]) => jsonValueToXml(value, key)).join("\n")
+        : jsonValueToXml(parsed, rootName.trim() || "root");
+      setOutput(formatXml(xml));
+      setError("");
+    } catch (convertError) {
+      setError(convertError instanceof Error ? convertError.message : "Unable to convert that JSON into XML.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title="JSON to XML Converter" description="Convert valid JSON into readable XML locally in the browser, with support for nested objects, arrays, and simple attributes via `@attributes`.">
+      <Field label="JSON input">
+        <textarea className={textareaClass} value={input} onChange={(event) => setInput(event.target.value)} />
+      </Field>
+      <Field label="Fallback root name" hint="Used when the JSON root is not a single named object.">
+        <input className={inputClass} value={rootName} onChange={(event) => setRootName(event.target.value)} placeholder="root" />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleConvert}>Convert JSON to XML</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No XML output yet" description="Paste valid JSON and convert it into readable XML with browser-side formatting." />
+      ) : output ? (
+        <>
+          <CodeOutputBlock title="XML output" value={output} language="xml" />
+          <button type="button" className={buttonClass} onClick={() => copy("XML output", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function CsvDiffCheckerTool() {
+  const [leftInput, setLeftInput] = useState("id,name,status\n1,Alpha,active\n2,Beta,inactive");
+  const [rightInput, setRightInput] = useState("id,name,status\n1,Alpha,active\n2,Beta,active\n3,Gamma,active");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleCompare() {
+    try {
+      const leftRows = parseCsv(leftInput);
+      const rightRows = parseCsv(rightInput);
+      const leftHeaders = Object.keys(leftRows[0] ?? {});
+      const rightHeaders = Object.keys(rightRows[0] ?? {});
+
+      if (leftHeaders.join("|") !== rightHeaders.join("|")) {
+        throw new Error("Both CSV inputs need the same header row for this diff checker.");
+      }
+
+      const maxRows = Math.max(leftRows.length, rightRows.length);
+      const diffs: string[] = [];
+
+      for (let index = 0; index < maxRows; index += 1) {
+        const leftRow = leftRows[index];
+        const rightRow = rightRows[index];
+
+        if (!leftRow) {
+          diffs.push(`Row ${index + 2}: added in right CSV -> ${JSON.stringify(rightRow)}`);
+          continue;
+        }
+        if (!rightRow) {
+          diffs.push(`Row ${index + 2}: removed from right CSV -> ${JSON.stringify(leftRow)}`);
+          continue;
+        }
+
+        for (const header of leftHeaders) {
+          if ((leftRow[header] ?? "") !== (rightRow[header] ?? "")) {
+            diffs.push(`Row ${index + 2}, column "${header}": "${leftRow[header] ?? ""}" -> "${rightRow[header] ?? ""}"`);
+          }
+        }
+      }
+
+      setOutput(diffs.length ? diffs.join("\n") : "No row or cell differences found.");
+      setError("");
+    } catch (diffError) {
+      setError(diffError instanceof Error ? diffError.message : "Unable to compare those CSV inputs.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title="CSV Diff Checker" description="Compare two CSV inputs locally by row number and shared headers, then review a clear cell-by-cell diff report.">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Left CSV">
+          <textarea className={textareaClass} value={leftInput} onChange={(event) => setLeftInput(event.target.value)} />
+        </Field>
+        <Field label="Right CSV">
+          <textarea className={textareaClass} value={rightInput} onChange={(event) => setRightInput(event.target.value)} />
+        </Field>
+      </div>
+      <button type="button" className={buttonClass} onClick={handleCompare}>Compare CSV</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No CSV diff yet" description="Paste two CSV inputs with matching headers to generate a row-by-row diff report in the browser." />
+      ) : output ? (
+        <>
+          <OutputBlock title="CSV diff report" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("CSV diff report", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function KeywordDifficultyCheckerPlaceholderTool() {
+  return (
+    <ToolShell title="Keyword Difficulty Checker" description="True keyword difficulty depends on live search and SERP data, so this page stays honest until a real data-backed implementation is added.">
+      <Notice>
+        Coming soon. Reliable keyword difficulty scoring usually needs external ranking data and should
+        not be guessed locally without the evidence behind it.
+      </Notice>
+      <EmptyState
+        title="No fake difficulty score"
+        description="A future version can add a real difficulty workflow when trustworthy live data is available. Until then, this page explains the limitation instead of inventing a misleading score."
+      />
+    </ToolShell>
+  );
+}
+
+export function KeywordSuggestionGeneratorTool() {
+  const [seed, setSeed] = useState("email marketing");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    try {
+      setOutput(buildKeywordSuggestions(seed).join("\n"));
+      setError("");
+    } catch (generationError) {
+      setError(generationError instanceof Error ? generationError.message : "Unable to generate keyword suggestions.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title="Keyword Suggestion Generator" description="Generate local keyword ideas from a seed phrase using reusable modifiers and question-style patterns without pretending to use live search data.">
+      <Field label="Seed keyword or phrase" hint="Example: email marketing">
+        <input className={inputClass} value={seed} onChange={(event) => setSeed(event.target.value)} placeholder="email marketing" />
+      </Field>
+      <Notice>Example ideas include modifiers like “tips,” “guide,” “online,” and question-style variations.</Notice>
+      <button type="button" className={buttonClass} onClick={handleGenerate}>Generate keyword ideas</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No keyword ideas yet" description="Enter a seed phrase and generate a local list of brainstorming suggestions you can refine later." />
+      ) : output ? (
+        <>
+          <OutputBlock title="Keyword suggestions" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("keyword suggestions", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function MetaTagAnalyzerTool() {
+  const [markup, setMarkup] = useState('<title>Email Marketing Guide | Toolbox Hub</title>\n<meta name="description" content="Learn practical email marketing tips with a browser-first workflow." />\n<meta name="robots" content="index,follow" />\n<link rel="canonical" href="https://example.com/email-marketing-guide" />');
+  const [report, setReport] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleAnalyze() {
+    try {
+      const result = analyzeMetaTags(markup);
+      setReport(
+        `${result.findings.join("\n")}\n\nSuggestions:\n${result.suggestions.length ? result.suggestions.map((item) => `- ${item}`).join("\n") : "- No major gaps detected in the basic tag set."}`,
+      );
+      setError("");
+    } catch (analysisError) {
+      setError(analysisError instanceof Error ? analysisError.message : "Unable to analyze those meta tags.");
+      setReport("");
+    }
+  }
+
+  return (
+    <ToolShell title="Meta Tag Analyzer" description="Review pasted head markup locally, detect common SEO tags, and highlight basic gaps like missing titles, descriptions, canonicals, or Open Graph tags.">
+      <Field label="Head markup or meta tags" hint="Paste a few tags or a full <head> snippet.">
+        <textarea className={textareaClass} value={markup} onChange={(event) => setMarkup(event.target.value)} />
+      </Field>
+      <Notice>Helpful example: title, description, robots, canonical, and Open Graph tags for a landing page or blog post.</Notice>
+      <button type="button" className={buttonClass} onClick={handleAnalyze}>Analyze meta tags</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!report && !error ? (
+        <EmptyState title="No analysis yet" description="Paste markup and run the analyzer to get a quick formatted SEO review." />
+      ) : report ? (
+        <>
+          <OutputBlock title="Meta tag analysis" value={report} />
+          <button type="button" className={buttonClass} onClick={() => copy("meta tag analysis", report)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function PageTitleGeneratorTool() {
+  const [keyword, setKeyword] = useState("email marketing");
+  const [brand, setBrand] = useState("Toolbox Hub");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    try {
+      setOutput(buildPageTitles(keyword, brand).join("\n"));
+      setError("");
+    } catch (generationError) {
+      setError(generationError instanceof Error ? generationError.message : "Unable to generate page titles.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title="Page Title Generator" description="Generate SEO-friendly page title ideas from a topic, keyword, and optional brand name using local templates instead of live data or AI.">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Primary keyword" hint="Example: email marketing">
+          <input className={inputClass} value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="email marketing" />
+        </Field>
+        <Field label="Brand name" hint="Optional brand suffix">
+          <input className={inputClass} value={brand} onChange={(event) => setBrand(event.target.value)} placeholder="Toolbox Hub" />
+        </Field>
+      </div>
+      <Notice>Helpful example: combine a core keyword with a brand suffix for title-tag brainstorming.</Notice>
+      <button type="button" className={buttonClass} onClick={handleGenerate}>Generate page titles</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No title ideas yet" description="Enter a keyword and optional brand name to generate formatted page-title ideas." />
+      ) : output ? (
+        <>
+          <OutputBlock title="Page title ideas" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("page title ideas", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function DescriptionGeneratorTool() {
+  const [keyword, setKeyword] = useState("email marketing");
+  const [audience, setAudience] = useState("small teams");
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    try {
+      setOutput(buildDescriptions(keyword, audience).join("\n\n"));
+      setError("");
+    } catch (generationError) {
+      setError(generationError instanceof Error ? generationError.message : "Unable to generate description ideas.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title="Description Generator" description="Generate meta-description style lines locally from a topic and optional audience cue using reusable drafting templates.">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Topic or keyword" hint="Example: email marketing">
+          <input className={inputClass} value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="email marketing" />
+        </Field>
+        <Field label="Audience or use case" hint="Optional angle like beginners or small teams">
+          <input className={inputClass} value={audience} onChange={(event) => setAudience(event.target.value)} placeholder="small teams" />
+        </Field>
+      </div>
+      <Notice>Helpful example: draft several description options, then refine one down to your preferred snippet length.</Notice>
+      <button type="button" className={buttonClass} onClick={handleGenerate}>Generate descriptions</button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!output && !error ? (
+        <EmptyState title="No description ideas yet" description="Enter a keyword and optional audience to generate formatted draft descriptions you can refine." />
+      ) : output ? (
+        <>
+          <OutputBlock title="Description ideas" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("description ideas", output)}>Copy output</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
   );
 }

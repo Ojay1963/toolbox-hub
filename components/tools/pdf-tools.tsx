@@ -10,6 +10,7 @@ import {
   OutputBlock,
   secondaryButtonClass,
   ToolShell,
+  useCopyToClipboard,
 } from "@/components/tools/common";
 
 type DownloadItem = {
@@ -101,6 +102,52 @@ async function pdfBytesToDownload(bytes: Uint8Array, name: string): Promise<Down
     name,
     url: URL.createObjectURL(new Blob([bytes.slice().buffer as ArrayBuffer], { type: "application/pdf" })),
   };
+}
+
+async function textToDownload(text: string, name: string): Promise<DownloadItem> {
+  return {
+    name,
+    url: URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" })),
+  };
+}
+
+function formatPdfPointsToInches(points: number) {
+  return (points / 72).toFixed(2);
+}
+
+function formatPdfPointsToMillimeters(points: number) {
+  return ((points / 72) * 25.4).toFixed(1);
+}
+
+function detectCommonPageSize(width: number, height: number) {
+  const normalized = [Math.min(width, height), Math.max(width, height)];
+  const candidates = [
+    { label: "A4", size: [595.28, 841.89] },
+    { label: "Letter", size: [612, 792] },
+    { label: "Legal", size: [612, 1008] },
+    { label: "Tabloid", size: [792, 1224] },
+    { label: "A3", size: [841.89, 1190.55] },
+  ];
+
+  const match = candidates.find(({ size }) =>
+    Math.abs(size[0] - normalized[0]) <= 8 && Math.abs(size[1] - normalized[1]) <= 8,
+  );
+
+  return match?.label ?? "Custom size";
+}
+
+type PdfOutlineNode = {
+  title?: string;
+  items?: PdfOutlineNode[];
+};
+
+function flattenOutline(items: PdfOutlineNode[], depth = 0): string[] {
+  return items.flatMap((item) => {
+    const prefix = `${"  ".repeat(depth)}- `;
+    const current = `${prefix}${item.title || "Untitled bookmark"}`;
+    const children = item.items?.length ? flattenOutline(item.items, depth + 1) : [];
+    return [current, ...children];
+  });
 }
 
 export function PdfMergeTool() {
@@ -559,6 +606,549 @@ export function ProtectPdfTool() {
         browser-only tool stack, so this page stays honest instead of pretending to encrypt files.
       </Notice>
       <EmptyState title="No fake PDF protection here" description="If a robust local encryption workflow becomes practical in this project, it can be added without changing the route or SEO structure." />
+    </ToolShell>
+  );
+}
+
+export function PdfWatermarkTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [watermark, setWatermark] = useState("CONFIDENTIAL");
+  const [opacity, setOpacity] = useState(0.25);
+  const [position, setPosition] = useState<"center" | "top-left" | "bottom-right">("center");
+  const [download, setDownload] = useState<DownloadItem | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => () => {
+    if (download) URL.revokeObjectURL(download.url);
+  }, [download]);
+
+  async function handleWatermark() {
+    if (!file || !watermark.trim()) {
+      setError("Upload a PDF and enter watermark text first.");
+      return;
+    }
+
+    try {
+      if (download) URL.revokeObjectURL(download.url);
+      const { PDFDocument, StandardFonts, rgb, degrees } = await getPdfLib();
+      const pdf = await PDFDocument.load(await file.arrayBuffer());
+      const font = await pdf.embedFont(StandardFonts.HelveticaBold);
+
+      pdf.getPages().forEach((page) => {
+        const { width, height } = page.getSize();
+        const fontSize = Math.max(24, Math.round(Math.min(width, height) / 12));
+        const textWidth = font.widthOfTextAtSize(watermark, fontSize);
+        const textHeight = fontSize;
+
+        const positions = {
+          center: { x: (width - textWidth) / 2, y: (height - textHeight) / 2, rotate: degrees(-35) },
+          "top-left": { x: 24, y: height - textHeight - 24, rotate: degrees(0) },
+          "bottom-right": { x: width - textWidth - 24, y: 24, rotate: degrees(0) },
+        };
+
+        const selected = positions[position];
+        page.drawText(watermark, {
+          x: selected.x,
+          y: selected.y,
+          size: fontSize,
+          font,
+          rotate: selected.rotate,
+          opacity,
+          color: rgb(0.4, 0.4, 0.4),
+        });
+      });
+
+      const bytes = await pdf.save({ useObjectStreams: true });
+      setDownload(await pdfBytesToDownload(bytes, `${file.name.replace(/\.pdf$/i, "")}-watermarked.pdf`));
+      setError("");
+    } catch {
+      setError("Unable to add a watermark to this PDF.");
+    }
+  }
+
+  return (
+    <ToolShell title="PDF Watermark Tool" description="Add a text watermark to each PDF page locally in the browser and download the updated file.">
+      <Field label="PDF file">
+        <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Field label="Watermark text">
+          <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={watermark} onChange={(event) => setWatermark(event.target.value)} />
+        </Field>
+        <Field label="Position">
+          <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={position} onChange={(event) => setPosition(event.target.value as "center" | "top-left" | "bottom-right")}>
+            <option value="center">Center diagonal</option>
+            <option value="top-left">Top left</option>
+            <option value="bottom-right">Bottom right</option>
+          </select>
+        </Field>
+        <Field label={`Opacity (${Math.round(opacity * 100)}%)`}>
+          <input className="w-full" type="range" min="0.1" max="0.8" step="0.05" value={opacity} onChange={(event) => setOpacity(Number(event.target.value))} />
+        </Field>
+      </div>
+      <button type="button" className={buttonClass} onClick={handleWatermark} disabled={!file}>
+        Add watermark
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? <EmptyState title="Upload a PDF to watermark it" description="Enter text, choose the watermark style, and export a new watermarked PDF locally." /> : download ? <DownloadList items={[download]} /> : null}
+    </ToolShell>
+  );
+}
+
+export function PdfMetadataEditorTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [title, setTitle] = useState("");
+  const [author, setAuthor] = useState("");
+  const [subject, setSubject] = useState("");
+  const [keywords, setKeywords] = useState("");
+  const [download, setDownload] = useState<DownloadItem | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => () => {
+    if (download) URL.revokeObjectURL(download.url);
+  }, [download]);
+
+  async function handleApply() {
+    if (!file) {
+      setError("Upload a PDF file first.");
+      return;
+    }
+
+    try {
+      if (download) URL.revokeObjectURL(download.url);
+      const { PDFDocument } = await getPdfLib();
+      const pdf = await PDFDocument.load(await file.arrayBuffer());
+      pdf.setTitle(title.trim());
+      pdf.setAuthor(author.trim());
+      pdf.setSubject(subject.trim());
+      pdf.setKeywords(keywords.split(",").map((item) => item.trim()).filter(Boolean));
+      const bytes = await pdf.save({ useObjectStreams: true });
+      setDownload(await pdfBytesToDownload(bytes, `${file.name.replace(/\.pdf$/i, "")}-metadata.pdf`));
+      setError("");
+    } catch {
+      setError("Unable to update metadata for this PDF.");
+    }
+  }
+
+  return (
+    <ToolShell title="PDF Metadata Editor" description="Edit common PDF metadata fields locally in the browser and download the updated file.">
+      <Field label="PDF file">
+        <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Title">
+          <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={title} onChange={(event) => setTitle(event.target.value)} />
+        </Field>
+        <Field label="Author">
+          <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={author} onChange={(event) => setAuthor(event.target.value)} />
+        </Field>
+        <Field label="Subject">
+          <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={subject} onChange={(event) => setSubject(event.target.value)} />
+        </Field>
+        <Field label="Keywords" hint="Separate multiple keywords with commas.">
+          <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={keywords} onChange={(event) => setKeywords(event.target.value)} />
+        </Field>
+      </div>
+      <button type="button" className={buttonClass} onClick={handleApply} disabled={!file}>
+        Update metadata
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? <EmptyState title="Upload a PDF to edit its metadata" description="Set title, author, subject, and keywords, then download the updated PDF." /> : download ? <DownloadList items={[download]} /> : null}
+    </ToolShell>
+  );
+}
+
+export function PdfUnlockTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [status, setStatus] = useState("");
+  const [download, setDownload] = useState<DownloadItem | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => () => {
+    if (download) URL.revokeObjectURL(download.url);
+  }, [download]);
+
+  async function handleInspect() {
+    if (!file) {
+      setError("Upload a PDF file first.");
+      return;
+    }
+
+    try {
+      const { PDFDocument } = await getPdfLib();
+      if (download) URL.revokeObjectURL(download.url);
+      const pdf = await PDFDocument.load(await file.arrayBuffer());
+      const bytes = await pdf.save({ useObjectStreams: true });
+      setDownload(await pdfBytesToDownload(bytes, `${file.name.replace(/\.pdf$/i, "")}-readable-copy.pdf`));
+      setStatus("This PDF opened successfully in the current browser-side workflow. You can download a clean local copy, but this tool does not remove real password protection.");
+      setError("");
+    } catch {
+      if (download) URL.revokeObjectURL(download.url);
+      setDownload(null);
+      setStatus("");
+      setError("This PDF appears to be protected or unreadable. With the current browser-friendly stack, the site can detect that state honestly but cannot safely remove real PDF password protection.");
+    }
+  }
+
+  return (
+    <ToolShell title="PDF Unlock Tool" description="Inspect whether a PDF opens in the current browser-side workflow and stay honest about real password-protection limits.">
+      <Notice>
+        Reduced scope only. This tool can detect whether a PDF opens in the current local stack, but it does not fake password removal for protected files.
+      </Notice>
+      <Field label="PDF file">
+        <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleInspect} disabled={!file}>
+        Inspect PDF access
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {status ? <Notice tone="success">{status}</Notice> : null}
+      {download ? <DownloadList items={[download]} /> : null}
+      {!file ? <EmptyState title="Upload a PDF to inspect it" description="The tool checks whether the file opens locally and reports that result honestly." /> : null}
+    </ToolShell>
+  );
+}
+
+export function PdfPageExtractorTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [pageInput, setPageInput] = useState("1");
+  const [download, setDownload] = useState<DownloadItem | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => () => {
+    if (download) URL.revokeObjectURL(download.url);
+  }, [download]);
+
+  async function handleExtract() {
+    if (!file) {
+      setError("Upload a PDF file first.");
+      return;
+    }
+
+    try {
+      if (download) URL.revokeObjectURL(download.url);
+      const { PDFDocument } = await getPdfLib();
+      const source = await PDFDocument.load(await file.arrayBuffer());
+      const selection = parsePageSelection(pageInput, source.getPageCount()).map((page) => page - 1);
+      if (!selection.length) {
+        setError("Enter at least one valid page number or range.");
+        return;
+      }
+
+      const output = await PDFDocument.create();
+      const copied = await output.copyPages(source, selection);
+      copied.forEach((page) => output.addPage(page));
+      const bytes = await output.save({ useObjectStreams: true });
+      setDownload(await pdfBytesToDownload(bytes, `${file.name.replace(/\.pdf$/i, "")}-extracted.pdf`));
+      setError("");
+    } catch {
+      setError("Unable to extract the selected pages from this PDF.");
+    }
+  }
+
+  return (
+    <ToolShell title="PDF Page Extractor" description="Extract selected pages from a PDF into one new local output file.">
+      <Field label="PDF file">
+        <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <Field label="Pages to extract" hint="Examples: 1,3,5-7">
+        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={pageInput} onChange={(event) => setPageInput(event.target.value)} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleExtract} disabled={!file}>
+        Extract pages
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? <EmptyState title="Upload a PDF to extract pages" description="Choose the pages you want to keep and download one new PDF containing only those pages." /> : download ? <DownloadList items={[download]} /> : null}
+    </ToolShell>
+  );
+}
+
+export function PdfPageReorderTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [pageOrder, setPageOrder] = useState("");
+  const [download, setDownload] = useState<DownloadItem | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => () => {
+    if (download) URL.revokeObjectURL(download.url);
+  }, [download]);
+
+  async function handleReorder() {
+    if (!file) {
+      setError("Upload a PDF file first.");
+      return;
+    }
+
+    try {
+      if (download) URL.revokeObjectURL(download.url);
+      const { PDFDocument } = await getPdfLib();
+      const source = await PDFDocument.load(await file.arrayBuffer());
+      const order = pageOrder.split(",").map((part) => Number(part.trim())).filter((value) => !Number.isNaN(value));
+      const uniqueOrder = [...new Set(order)];
+
+      if (uniqueOrder.length !== source.getPageCount() || uniqueOrder.some((page) => page < 1 || page > source.getPageCount())) {
+        setError(`Enter every page exactly once using comma-separated page numbers from 1 to ${source.getPageCount()}.`);
+        return;
+      }
+
+      const output = await PDFDocument.create();
+      const copied = await output.copyPages(source, uniqueOrder.map((page) => page - 1));
+      copied.forEach((page) => output.addPage(page));
+      const bytes = await output.save({ useObjectStreams: true });
+      setDownload(await pdfBytesToDownload(bytes, `${file.name.replace(/\.pdf$/i, "")}-reordered.pdf`));
+      setError("");
+    } catch {
+      setError("Unable to reorder pages for this PDF.");
+    }
+  }
+
+  return (
+    <ToolShell title="PDF Page Reorder Tool" description="Reorder PDF pages locally by entering the full page sequence you want in the output file.">
+      <Field label="PDF file">
+        <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <Field label="Page order" hint="Example for a 4-page file: 2,1,4,3">
+        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={pageOrder} onChange={(event) => setPageOrder(event.target.value)} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleReorder} disabled={!file}>
+        Reorder pages
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? <EmptyState title="Upload a PDF to reorder pages" description="Enter the complete page sequence you want in the exported file." /> : download ? <DownloadList items={[download]} /> : null}
+    </ToolShell>
+  );
+}
+
+export function PdfTextExtractorTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [output, setOutput] = useState("");
+  const [download, setDownload] = useState<DownloadItem | null>(null);
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  useEffect(() => () => {
+    if (download) URL.revokeObjectURL(download.url);
+  }, [download]);
+
+  async function handleExtract() {
+    if (!file) {
+      setError("Upload a PDF file first.");
+      return;
+    }
+
+    try {
+      if (download) URL.revokeObjectURL(download.url);
+      const pdfjsLib = await getPdfJs();
+      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+      const pageTexts: string[] = [];
+
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const textContent = await page.getTextContent();
+        const strings = textContent.items
+          .map((item) => ("str" in item ? item.str : ""))
+          .filter(Boolean);
+        pageTexts.push(strings.join(" "));
+      }
+
+      const text = pageTexts.join("\n\n");
+      setOutput(text);
+      setDownload(await textToDownload(text, `${file.name.replace(/\.pdf$/i, "")}-text.txt`));
+      setError("");
+    } catch {
+      setError("Unable to extract text from this PDF. This works best for PDFs that already contain selectable text.");
+      setOutput("");
+      setDownload(null);
+    }
+  }
+
+  return (
+    <ToolShell title="PDF Text Extractor" description="Extract selectable text from a PDF locally in the browser and copy or download the result.">
+      <Field label="PDF file">
+        <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleExtract} disabled={!file}>
+        Extract text
+      </button>
+      <Notice>This tool works best for PDFs that already contain selectable text. Scanned-image PDFs may return little or no text.</Notice>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? (
+        <EmptyState title="Upload a PDF to extract text" description="Extracted text stays local in the browser and can be copied or downloaded as a text file." />
+      ) : (
+        <>
+          {output ? <OutputBlock title="Extracted text" value={output} /> : null}
+          <div className="flex flex-wrap gap-3">
+            {output ? <button type="button" className={buttonClass} onClick={() => copy("extracted text", output)}>Copy text</button> : null}
+            {download ? <button type="button" className={secondaryButtonClass} onClick={() => downloadItem(download)}>Download text file</button> : null}
+          </div>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      )}
+    </ToolShell>
+  );
+}
+
+export function PdfOcrPlaceholderTool() {
+  return (
+    <ToolShell title="PDF OCR" description="OCR for scanned PDFs is intentionally not faked in this browser-first version of the site.">
+      <Notice>
+        Coming soon. Reliable OCR usually needs server-side processing or heavier model infrastructure,
+        so this page stays honest until a real implementation is ready.
+      </Notice>
+      <EmptyState
+        title="No fake OCR results"
+        description="A future version will add a real OCR workflow for scanned PDFs. Until then, this page only explains the current limitation rather than pretending to extract text."
+      />
+    </ToolShell>
+  );
+}
+
+export function PdfBookmarkExtractorTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  async function handleExtract() {
+    if (!file) {
+      setError("Upload a PDF file first.");
+      return;
+    }
+
+    try {
+      const pdfjsLib = await getPdfJs();
+      const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+      const outline = (await pdf.getOutline()) as PdfOutlineNode[] | null;
+      if (!outline?.length) {
+        setOutput("No bookmarks or outline entries were found in this PDF.");
+      } else {
+        setOutput(flattenOutline(outline).join("\n"));
+      }
+      setError("");
+    } catch {
+      setError("Unable to read bookmark data from this PDF.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title="PDF Bookmark Extractor" description="Read bookmark or outline entries from supported PDFs locally and review the document navigation structure.">
+      <Field label="PDF file">
+        <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleExtract} disabled={!file}>
+        Extract bookmarks
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? (
+        <EmptyState title="Upload a PDF to inspect bookmarks" description="This tool reads outline entries locally when the PDF includes bookmark data." />
+      ) : output ? (
+        <>
+          <OutputBlock title="Bookmark outline" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("bookmark outline", output)}>
+            Copy output
+          </button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function PdfPageSizeCheckerTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [output, setOutput] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  async function handleCheck() {
+    if (!file) {
+      setError("Upload a PDF file first.");
+      return;
+    }
+
+    try {
+      const { PDFDocument } = await getPdfLib();
+      const pdf = await PDFDocument.load(await file.arrayBuffer());
+      const lines = pdf.getPages().map((page, index) => {
+        const { width, height } = page.getSize();
+        return `Page ${index + 1}: ${width.toFixed(2)} x ${height.toFixed(2)} pt | ${formatPdfPointsToInches(width)} x ${formatPdfPointsToInches(height)} in | ${formatPdfPointsToMillimeters(width)} x ${formatPdfPointsToMillimeters(height)} mm | ${detectCommonPageSize(width, height)}`;
+      });
+      setOutput(lines.join("\n"));
+      setError("");
+    } catch {
+      setError("Unable to read page size details from this PDF.");
+      setOutput("");
+    }
+  }
+
+  return (
+    <ToolShell title="PDF Page Size Checker" description="Check each PDF page size locally and compare dimensions against common paper-size labels like A4 and Letter.">
+      <Field label="PDF file">
+        <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleCheck} disabled={!file}>
+        Check page sizes
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? (
+        <EmptyState title="Upload a PDF to inspect page sizes" description="The checker reads page dimensions locally and reports each page with point, inch, and millimeter values." />
+      ) : output ? (
+        <>
+          <OutputBlock title="Page size report" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("page size report", output)}>
+            Copy output
+          </button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function PdfPageCounterTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [summary, setSummary] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  async function handleCount() {
+    if (!file) {
+      setError("Upload a PDF file first.");
+      return;
+    }
+
+    try {
+      const { PDFDocument } = await getPdfLib();
+      const pdf = await PDFDocument.load(await file.arrayBuffer());
+      setSummary(`File: ${file.name}\nPages: ${pdf.getPageCount()}\nFile size: ${formatFileSize(file.size)}`);
+      setError("");
+    } catch {
+      setError("Unable to count pages in this PDF.");
+      setSummary("");
+    }
+  }
+
+  return (
+    <ToolShell title="PDF Page Counter" description="Count the total pages in an uploaded PDF locally before splitting, merging, or sharing the document.">
+      <Field label="PDF file">
+        <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleCount} disabled={!file}>
+        Count pages
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? (
+        <EmptyState title="Upload a PDF to count its pages" description="This lightweight browser-side utility reads the total page count and a few basic file details." />
+      ) : summary ? (
+        <>
+          <OutputBlock title="Page count summary" value={summary} />
+          <button type="button" className={buttonClass} onClick={() => copy("page count summary", summary)}>
+            Copy output
+          </button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
     </ToolShell>
   );
 }

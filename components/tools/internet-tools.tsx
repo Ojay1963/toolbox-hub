@@ -5,9 +5,11 @@ import {
   buttonClass,
   EmptyState,
   Field,
+  inputClass,
   Notice,
   OutputBlock,
   secondaryButtonClass,
+  textareaClass,
   ToolShell,
   useCopyToClipboard,
 } from "@/components/tools/common";
@@ -197,6 +199,23 @@ async function checkUrlRedirect(targetUrl: string): Promise<UrlCheckResult> {
   };
 }
 
+async function fetchWebpageSource(targetUrl: string) {
+  const response = await fetch(targetUrl, {
+    method: "GET",
+    mode: "cors",
+    cache: "no-store",
+    redirect: "follow",
+  });
+
+  return {
+    finalUrl: response.url,
+    status: response.status,
+    statusText: response.statusText,
+    contentType: response.headers.get("content-type") || "Unavailable",
+    source: await response.text(),
+  };
+}
+
 function parseUserAgent(userAgent: string): ParsedUserAgent {
   const value = userAgent.trim();
   if (!value) {
@@ -377,11 +396,18 @@ export function DnsLookupTool() {
   );
 }
 
-export function HttpStatusCodeCheckerTool() {
+function StatusCheckTool({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) {
   const [input, setInput] = useState("");
   const [result, setResult] = useState<UrlCheckResult | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
 
   async function handleCheck() {
     setLoading(true);
@@ -404,13 +430,13 @@ export function HttpStatusCodeCheckerTool() {
   }
 
   return (
-    <ToolShell title="HTTP Status Code Checker" description="Check a URL status from the browser when the target site allows it. This reduced-scope version does not fake results for blocked URLs.">
+    <ToolShell title={title} description={description}>
       <Notice>
         Reduced scope only. Browser-based checks work only for URLs that allow cross-origin requests.
         Many sites will block this, and blocked results are reported honestly instead of guessed.
       </Notice>
       <Field label="URL to check" hint="Enter a full URL or hostname. HTTPS is added automatically when missing.">
-        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={input} onChange={(event) => setInput(event.target.value)} placeholder="https://example.com" />
+        <input className={inputClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="https://example.com" />
       </Field>
       <button type="button" className={buttonClass} onClick={handleCheck} disabled={loading}>
         {loading ? "Checking status..." : "Check status"}
@@ -419,14 +445,57 @@ export function HttpStatusCodeCheckerTool() {
       {!input.trim() ? (
         <EmptyState title="Enter a URL to inspect it" description="The tool will attempt a real browser fetch and only show a status when the target allows that request." />
       ) : result ? (
-        <div className="grid gap-4 md:grid-cols-2">
-          <OutputBlock title="HTTP status" value={result.status ? `${result.status} ${result.statusText ?? ""}`.trim() : "Unavailable"} multiline={false} />
-          <OutputBlock title="Final URL" value={result.finalUrl || "Unavailable"} multiline={false} />
-          <OutputBlock title="Fetch type" value={result.type || "Unavailable"} multiline={false} />
-          <OutputBlock title="Redirected" value={result.redirected ? "Yes" : "No"} multiline={false} />
-        </div>
+        <>
+          <div className="grid gap-4 md:grid-cols-2">
+            <OutputBlock title="HTTP status" value={result.status ? `${result.status} ${result.statusText ?? ""}`.trim() : "Unavailable"} multiline={false} />
+            <OutputBlock title="Final URL" value={result.finalUrl || "Unavailable"} multiline={false} />
+            <OutputBlock title="Fetch type" value={result.type || "Unavailable"} multiline={false} />
+            <OutputBlock title="Redirected" value={result.redirected ? "Yes" : "No"} multiline={false} />
+          </div>
+          <button
+            type="button"
+            className={buttonClass}
+            onClick={() =>
+              copy(
+                "status result",
+                JSON.stringify(
+                  {
+                    status: result.status,
+                    statusText: result.statusText,
+                    finalUrl: result.finalUrl,
+                    type: result.type,
+                    redirected: result.redirected,
+                  },
+                  null,
+                  2,
+                ),
+              )
+            }
+          >
+            Copy result
+          </button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
       ) : null}
     </ToolShell>
+  );
+}
+
+export function HttpStatusCodeCheckerTool() {
+  return (
+    <StatusCheckTool
+      title="HTTP Status Code Checker"
+      description="Check a URL status from the browser when the target site allows it. This reduced-scope version does not fake results for blocked URLs."
+    />
+  );
+}
+
+export function UrlStatusCheckerTool() {
+  return (
+    <StatusCheckTool
+      title="URL Status Checker"
+      description="Check reachable URL response status from the browser with honest cross-origin and visibility limits."
+    />
   );
 }
 
@@ -481,6 +550,73 @@ export function UrlRedirectCheckerTool() {
           <OutputBlock title="Response URL" value={result.finalUrl || "Unavailable"} multiline={false} />
           <OutputBlock title="Location header" value={result.location || "Not exposed"} multiline={false} />
         </div>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function WebpageSourceViewerTool() {
+  const [input, setInput] = useState("");
+  const [source, setSource] = useState("");
+  const [meta, setMeta] = useState<{ finalUrl: string; status: string; contentType: string } | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
+
+  async function handleFetch() {
+    setLoading(true);
+    setError("");
+    setSource("");
+    setMeta(null);
+
+    try {
+      const targetUrl = normalizeTargetUrl(input);
+      const result = await fetchWebpageSource(targetUrl);
+      setSource(result.source);
+      setMeta({
+        finalUrl: result.finalUrl,
+        status: `${result.status} ${result.statusText}`.trim(),
+        contentType: result.contentType,
+      });
+    } catch (fetchError) {
+      setError(
+        fetchError instanceof Error
+          ? `${fetchError.message} Browsers can read remote page source only when the target allows CORS access.`
+          : "Unable to fetch source for that URL from the browser.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <ToolShell title="Webpage Source Viewer" description="Fetch visible webpage source from the browser when the remote site allows it. This reduced-scope version does not fake blocked results.">
+      <Notice>
+        Reduced scope only. This tool can read remote source only when the target allows browser access.
+        Many websites block this through CORS, and blocked requests are reported honestly.
+      </Notice>
+      <Field label="URL to fetch" hint="Enter a full URL or hostname. HTTPS is added automatically when missing.">
+        <input className={inputClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="https://example.com" />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleFetch} disabled={loading}>
+        {loading ? "Fetching source..." : "Fetch source"}
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!input.trim() ? (
+        <EmptyState title="Enter a URL to view its source" description="The tool will attempt a real browser fetch and only show source when the response is accessible to this page." />
+      ) : source && meta ? (
+        <>
+          <div className="grid gap-4 md:grid-cols-3">
+            <OutputBlock title="HTTP status" value={meta.status} multiline={false} />
+            <OutputBlock title="Final URL" value={meta.finalUrl} multiline={false} />
+            <OutputBlock title="Content type" value={meta.contentType} multiline={false} />
+          </div>
+          <Field label="Fetched source">
+            <textarea className={`${textareaClass} min-h-72 font-mono`} value={source} readOnly />
+          </Field>
+          <button type="button" className={buttonClass} onClick={() => copy("page source", source)}>Copy source</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
       ) : null}
     </ToolShell>
   );

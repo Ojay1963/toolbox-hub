@@ -12,6 +12,20 @@ import {
   useCopyToClipboard,
 } from "@/components/tools/common";
 
+const timezoneOptions = [
+  "UTC",
+  "Africa/Lagos",
+  "Europe/London",
+  "Europe/Berlin",
+  "America/New_York",
+  "America/Chicago",
+  "America/Los_Angeles",
+  "Asia/Dubai",
+  "Asia/Kolkata",
+  "Asia/Tokyo",
+  "Australia/Sydney",
+];
+
 const lengthUnits = {
   meter: 1,
   kilometer: 1000,
@@ -138,6 +152,63 @@ function unitLabel(value: string) {
   return value.replace(/-/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function formatDatePartsForTimeZone(date: Date, timeZone: string) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).formatToParts(date);
+
+  const getPart = (type: string) => parts.find((part) => part.type === type)?.value ?? "";
+  return {
+    year: getPart("year"),
+    month: getPart("month"),
+    day: getPart("day"),
+    hour: getPart("hour"),
+    minute: getPart("minute"),
+    second: getPart("second"),
+  };
+}
+
+function getTimezoneOffsetMinutes(date: Date, timeZone: string) {
+  const parts = formatDatePartsForTimeZone(date, timeZone);
+  const utcTimestamp = Date.UTC(
+    Number(parts.year),
+    Number(parts.month) - 1,
+    Number(parts.day),
+    Number(parts.hour),
+    Number(parts.minute),
+    Number(parts.second),
+  );
+
+  return (utcTimestamp - date.getTime()) / 60000;
+}
+
+function zonedDateTimeToUtc(dateTime: string, timeZone: string) {
+  const match = dateTime.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+  if (!match) {
+    throw new Error("Enter a valid date and time.");
+  }
+
+  const [year, month, day, hour, minute] = match.slice(1).map(Number);
+  const utcGuess = new Date(Date.UTC(year, month - 1, day, hour, minute));
+  const offsetMinutes = getTimezoneOffsetMinutes(utcGuess, timeZone);
+  return new Date(utcGuess.getTime() - offsetMinutes * 60000);
+}
+
+function formatDateTimeForZone(date: Date, timeZone: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    dateStyle: "full",
+    timeStyle: "long",
+  }).format(date);
+}
+
 function UnitConverter({
   title,
   description,
@@ -230,6 +301,114 @@ export function TemperatureConverterTool() {
 
 export function TimeConverterTool() {
   return <UnitConverter title="Time Converter" description="Convert time units such as seconds, minutes, hours, days, and weeks." units={timeUnits} />;
+}
+
+export function TimezoneConverterTool() {
+  const [dateTime, setDateTime] = useState("");
+  const [fromZone, setFromZone] = useState("UTC");
+  const [toZone, setToZone] = useState("Africa/Lagos");
+
+  const { output, error } = useMemo(() => {
+    if (!dateTime) {
+      return { output: "", error: "" };
+    }
+
+    try {
+      const utcDate = zonedDateTimeToUtc(dateTime, fromZone);
+      return {
+        output: `Source time: ${formatDateTimeForZone(utcDate, fromZone)}\nConverted time: ${formatDateTimeForZone(utcDate, toZone)}`,
+        error: "",
+      };
+    } catch (conversionError) {
+      return {
+        output: "",
+        error: conversionError instanceof Error ? conversionError.message : "Unable to convert that time.",
+      };
+    }
+  }, [dateTime, fromZone, toZone]);
+
+  return (
+    <ToolShell title="Timezone Converter" description="Convert a date and time from one timezone into another using browser-supported timezone data.">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Field label="Date and time">
+          <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="datetime-local" value={dateTime} onChange={(event) => setDateTime(event.target.value)} />
+        </Field>
+        <Field label="From timezone">
+          <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={fromZone} onChange={(event) => setFromZone(event.target.value)}>
+            {timezoneOptions.map((zone) => <option key={zone} value={zone}>{zone}</option>)}
+          </select>
+        </Field>
+        <Field label="To timezone">
+          <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={toZone} onChange={(event) => setToZone(event.target.value)}>
+            {timezoneOptions.map((zone) => <option key={zone} value={zone}>{zone}</option>)}
+          </select>
+        </Field>
+      </div>
+      {error ? <Notice tone="error">{error}</Notice> : output ? <OutputBlock title="Converted time" value={output} /> : <EmptyState title="Pick a date, time, and two timezones" description="The converter uses built-in browser timezone data and updates when all inputs are present." />}
+    </ToolShell>
+  );
+}
+
+export function UnixTimestampConverterTool() {
+  const [timestampInput, setTimestampInput] = useState("");
+  const [dateInput, setDateInput] = useState("");
+
+  const timestampResult = useMemo(() => {
+    const value = timestampInput.trim();
+    if (!value) {
+      return { output: "", error: "" };
+    }
+    if (!/^-?\d+$/.test(value)) {
+      return { output: "", error: "Enter a whole Unix timestamp in seconds or milliseconds." };
+    }
+
+    const numericValue = Number(value);
+    const milliseconds = value.length > 10 ? numericValue : numericValue * 1000;
+    const date = new Date(milliseconds);
+    if (Number.isNaN(date.getTime())) {
+      return { output: "", error: "That timestamp could not be converted into a valid date." };
+    }
+
+    return {
+      output: `${date.toUTCString()}\nLocal time: ${date.toLocaleString()}`,
+      error: "",
+    };
+  }, [timestampInput]);
+
+  const dateResult = useMemo(() => {
+    if (!dateInput) {
+      return { output: "", error: "" };
+    }
+
+    const date = new Date(dateInput);
+    if (Number.isNaN(date.getTime())) {
+      return { output: "", error: "Enter a valid date and time to convert." };
+    }
+
+    return {
+      output: `Unix seconds: ${Math.floor(date.getTime() / 1000)}\nUnix milliseconds: ${date.getTime()}`,
+      error: "",
+    };
+  }, [dateInput]);
+
+  return (
+    <ToolShell title="Unix Timestamp Converter" description="Convert Unix timestamps into readable dates and convert date/time values back into Unix time.">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="space-y-4">
+          <Field label="Unix timestamp" hint="10 digits are treated as seconds. Longer values are treated as milliseconds.">
+            <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" inputMode="numeric" value={timestampInput} onChange={(event) => setTimestampInput(event.target.value)} placeholder="1710758400" />
+          </Field>
+          {timestampResult.error ? <Notice tone="error">{timestampResult.error}</Notice> : timestampResult.output ? <OutputBlock title="Readable date output" value={timestampResult.output} /> : <EmptyState title="Enter a timestamp to decode it" description="Paste a Unix timestamp in seconds or milliseconds to see both UTC and local time." />}
+        </div>
+        <div className="space-y-4">
+          <Field label="Date and time">
+            <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="datetime-local" value={dateInput} onChange={(event) => setDateInput(event.target.value)} />
+          </Field>
+          {dateResult.error ? <Notice tone="error">{dateResult.error}</Notice> : dateResult.output ? <OutputBlock title="Unix timestamp output" value={dateResult.output} /> : <EmptyState title="Choose a date and time to encode it" description="Select a local date/time to get Unix seconds and Unix milliseconds." />}
+        </div>
+      </div>
+    </ToolShell>
+  );
 }
 
 export function CurrencyConverterTool() {

@@ -9,9 +9,13 @@ import type { ToolDefinition } from "@/lib/tools";
 export function ToolPage({
   tool,
   relatedTools,
+  categoryPopularTools,
+  categoryRecentTools,
 }: {
   tool: ToolDefinition;
   relatedTools: ToolDefinition[];
+  categoryPopularTools: ToolDefinition[];
+  categoryRecentTools: ToolDefinition[];
 }) {
   const categoryLabel = tool.category.replace(/-/g, " ");
 
@@ -104,6 +108,28 @@ export function ToolPage({
         <Section title="Related tools">
           <RelatedTools tools={relatedTools} />
         </Section>
+
+        <Section title={`More ${categoryLabel}`}>
+          <p>
+            If you want a nearby workflow in the same topic cluster, browse more tools from the{" "}
+            <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
+              {categoryLabel}
+            </Link>{" "}
+            category below.
+          </p>
+          <div className="grid gap-4 md:grid-cols-2">
+            {categoryPopularTools.slice(0, 4).map((item) => (
+              <Link
+                key={`category-popular-${item.slug}`}
+                href={`/tools/${item.slug}`}
+                className="rounded-2xl border border-[color:var(--border)] bg-stone-50 px-4 py-4 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
+              >
+                <span className="block font-semibold text-[color:var(--foreground)]">{item.name}</span>
+                <span className="mt-1 block leading-6">{item.shortDescription}</span>
+              </Link>
+            ))}
+          </div>
+        </Section>
       </div>
 
       <div className="space-y-6">
@@ -126,25 +152,66 @@ export function ToolPage({
         </section>
         <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
           <h2 className="text-lg font-bold tracking-tight">Internal links</h2>
-          <div className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
-            <Link href="/" className="block transition hover:text-[color:var(--primary)]">
-              Browse all tools
-            </Link>
-            <Link
-              href={`/category/${tool.category}`}
-              className="block transition hover:text-[color:var(--primary)]"
-            >
-              Explore more {categoryLabel}
-            </Link>
-            {relatedTools.map((item) => (
+          <div className="mt-4 space-y-5 text-sm text-[color:var(--muted)]">
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+                Main paths
+              </p>
+              <Link href="/" className="block transition hover:text-[color:var(--primary)]">
+                Browse all tools
+              </Link>
+              <Link href="/#search-tools" className="block transition hover:text-[color:var(--primary)]">
+                Search the full directory
+              </Link>
               <Link
-                key={item.slug}
-                href={`/tools/${item.slug}`}
+                href={`/category/${tool.category}`}
                 className="block transition hover:text-[color:var(--primary)]"
               >
-                {item.name}
+                Explore more {categoryLabel}
               </Link>
-            ))}
+            </div>
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+                Related tools
+              </p>
+              {relatedTools.map((item) => (
+                <Link
+                  key={item.slug}
+                  href={`/tools/${item.slug}`}
+                  className="block transition hover:text-[color:var(--primary)]"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+                Popular in {categoryLabel}
+              </p>
+              {categoryPopularTools.map((item) => (
+                <Link
+                  key={`popular-${item.slug}`}
+                  href={`/tools/${item.slug}`}
+                  className="block transition hover:text-[color:var(--primary)]"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+            <div className="space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+                New in {categoryLabel}
+              </p>
+              {categoryRecentTools.map((item) => (
+                <Link
+                  key={`recent-${item.slug}`}
+                  href={`/tools/${item.slug}`}
+                  className="block transition hover:text-[color:var(--primary)]"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
         <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">

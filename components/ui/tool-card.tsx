@@ -1,7 +1,29 @@
 import Link from "next/link";
 import type { ToolDefinition } from "@/lib/tools";
 
-export function ToolCard({ tool }: { tool: ToolDefinition }) {
+export function ToolCard({
+  tool,
+  compact = false,
+}: {
+  tool: ToolDefinition;
+  compact?: boolean;
+}) {
+  if (compact) {
+    return (
+      <Link
+        href={`/tools/${tool.slug}`}
+        className="group block rounded-2xl border border-[color:var(--border)] bg-stone-50 px-4 py-3 transition hover:border-[color:var(--primary)]"
+      >
+        <p className="text-sm font-semibold text-[color:var(--foreground)] transition group-hover:text-[color:var(--primary)]">
+          {tool.name}
+        </p>
+        <p className="mt-1 text-xs leading-6 text-[color:var(--muted)]">
+          {tool.shortDescription}
+        </p>
+      </Link>
+    );
+  }
+
   return (
     <Link
       href={`/tools/${tool.slug}`}

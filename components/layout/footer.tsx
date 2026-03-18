@@ -22,7 +22,7 @@ export function Footer() {
           <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--primary-dark)]">
             Categories
           </h3>
-          <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-[color:var(--muted)]">
+          <nav aria-label="Footer categories" className="mt-4 grid grid-cols-2 gap-3 text-sm text-[color:var(--muted)]">
             {categories.map((category) => (
               <Link
                 key={category.slug}
@@ -32,13 +32,13 @@ export function Footer() {
                 {category.name}
               </Link>
             ))}
-          </div>
+          </nav>
         </div>
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--primary-dark)]">
             Popular tools
           </h3>
-          <div className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
+          <nav aria-label="Footer popular tools" className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
             {quickLinks.map((tool) => (
               <Link
                 key={tool.slug}
@@ -48,7 +48,7 @@ export function Footer() {
                 {tool.name}
               </Link>
             ))}
-          </div>
+          </nav>
         </div>
       </div>
       <div className="border-t border-[color:var(--border)]/80">

@@ -1,8 +1,8 @@
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { FaqList } from "@/components/ui/faq-list";
 import { CategoryCard } from "@/components/ui/category-card";
-import { SearchBox } from "@/components/ui/search-box";
 import { ToolCard } from "@/components/ui/tool-card";
 import {
   buildBreadcrumbJsonLd,
@@ -10,26 +10,33 @@ import {
   buildFaqJsonLd,
   buildMetadata,
 } from "@/lib/seo";
-import { categories, getPopularTools, getRecentTools, getToolsByCategory, tools } from "@/lib/tools";
+import { categories, getPopularTools, getRecentTools, getToolsByCategory, getTrendingTools, tools } from "@/lib/tools";
+
+const SearchBox = dynamic(() => import("@/components/ui/search-box").then((module) => module.SearchBox));
 
 export const metadata = buildMetadata({
   title: "Free Online Tools for Images, PDFs, Text, Developers, and More",
   description:
-    "Use 100 free online tools for image editing, PDF tasks, text cleanup, generators, calculators, converters, and developer workflows.",
+    "Use more than 150 free online tools for image editing, PDF tasks, text cleanup, generators, calculators, converters, and developer workflows.",
   pathname: "/",
   keywords: ["free online tools", "browser tools", "seo-friendly tools"],
 });
 
 export default function HomePage() {
-  const featuredCategories = categories.slice(0, 6);
+  const totalTools = tools.length;
+  const featuredCategories = categories.map((category) => ({
+    category,
+    count: getToolsByCategory(category.slug).length,
+  }));
   const popularTools = getPopularTools(6);
   const latestTools = getRecentTools(6);
+  const trendingTools = getTrendingTools(6);
   const searchSuggestions = [...popularTools, ...latestTools].filter(
     (tool, index, collection) => collection.findIndex((candidate) => candidate.slug === tool.slug) === index,
   );
-  const discoveryCategories = categories.slice(0, 4).map((category) => ({
+  const discoveryCategories = categories.map((category) => ({
     category,
-    tools: getPopularTools(3, category.slug),
+    tools: getPopularTools(2, category.slug),
   }));
   const workingToolsCount = tools.filter((tool) => tool.implementationStatus === "working-local").length;
   const reducedScopeCount = tools.filter(
@@ -45,7 +52,7 @@ export default function HomePage() {
       answer: "Many tools are designed for local browser-side processing. Where a tool has limits, the page explains that clearly instead of pretending otherwise.",
     },
     {
-      question: "Are all 100 tools identical in scope?",
+      question: `Are all ${totalTools} tools identical in scope?`,
       answer: "No. Some are fully working locally, some are reduced-scope by design, and a small number stay honest as future-ready placeholders until a reliable implementation is practical.",
     },
   ];
@@ -93,11 +100,13 @@ export default function HomePage() {
             <div className="mt-6 max-w-3xl">
               <SearchBox
                 tools={tools}
-                title="Search 100 tools without digging through menus"
-                description="Search by tool name, keyword, category, or task. Popular tools and recent additions are suggested before you type so discovery stays quick."
-                maxResults={8}
+                title={`Search ${totalTools} tools without digging through menus`}
+                description="Search by tool name, keyword, category, or task. Popular tools and recent additions are suggested before you type, and category filters help narrow the list quickly."
+                maxResults={6}
                 suggestedTools={searchSuggestions}
                 sectionId="search-tools"
+                showCategoryFilter
+                showStatusFilter
               />
             </div>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -127,8 +136,8 @@ export default function HomePage() {
               <p className="mt-2 text-sm text-[color:var(--muted)]">fully working local tools</p>
             </div>
             <div className="rounded-3xl bg-white p-5">
-              <p className="text-3xl font-black">{categories.length}</p>
-              <p className="mt-2 text-sm text-[color:var(--muted)]">linked categories</p>
+              <p className="text-3xl font-black">{totalTools}</p>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">indexed tool pages</p>
             </div>
             <div className="rounded-3xl bg-white p-5">
               <p className="text-3xl font-black">{reducedScopeCount}</p>
@@ -140,6 +149,29 @@ export default function HomePage() {
               format="rectangle"
             />
           </div>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+          Trending tools
+        </p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="mt-2 text-3xl font-black tracking-tight">Fastest paths into the directory</h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
+              These tools balance popularity, freshness, and real implementation quality so new visitors
+              can start with a small confident set instead of facing the full directory at once.
+            </p>
+          </div>
+          <Link href="/#search-tools" className="text-sm font-semibold text-[color:var(--primary)]">
+            Search all tools
+          </Link>
+        </div>
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {trendingTools.map((tool) => (
+            <ToolCard key={tool.slug} tool={tool} />
+          ))}
         </div>
       </section>
 
@@ -156,11 +188,11 @@ export default function HomePage() {
           </Link>
         </div>
         <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {featuredCategories.map((category) => (
+          {featuredCategories.map(({ category, count }) => (
             <CategoryCard
               key={category.slug}
               category={category}
-              count={getToolsByCategory(category.slug).length}
+              count={count}
             />
           ))}
         </div>
@@ -172,8 +204,8 @@ export default function HomePage() {
         </p>
         <h2 className="mt-2 text-3xl font-black tracking-tight">Popular tools inside each section</h2>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
-          Instead of showing every tool at once, these short lists help people jump into the most
-          useful tools in each major category.
+          Instead of showing every tool at once, these short lists surface a couple of strong
+          entry points in each category so discovery stays focused.
         </p>
         <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {discoveryCategories.map(({ category, tools: categoryTools }) => (
@@ -195,7 +227,32 @@ export default function HomePage() {
                   </Link>
                 ))}
               </div>
+              <p className="mt-4 text-xs text-[color:var(--muted)]">
+                {getToolsByCategory(category.slug).length} tools in this category
+              </p>
             </section>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+          Browse by workflow
+        </p>
+        <h2 className="mt-2 text-3xl font-black tracking-tight">Choose a smaller path instead of the whole site</h2>
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
+          Category chips keep discovery lightweight. Open the section that matches your task first,
+          then use search or local filters inside that category.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          {featuredCategories.map(({ category, count }) => (
+            <Link
+              key={category.slug}
+              href={`/category/${category.slug}`}
+              className="rounded-full border border-[color:var(--border)] bg-white px-4 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+            >
+              {category.name} ({count})
+            </Link>
           ))}
         </div>
       </section>
@@ -229,14 +286,14 @@ export default function HomePage() {
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
             Latest tools
           </p>
-          <h2 className="mt-2 text-3xl font-black tracking-tight">Recently added to the registry</h2>
+          <h2 className="mt-2 text-3xl font-black tracking-tight">Recently added without the noise of a full dump</h2>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
             Recent additions help returning visitors spot new capabilities without scrolling through
             the full directory.
           </p>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
             {latestTools.map((tool) => (
-              <ToolCard key={tool.slug} tool={tool} />
+              <ToolCard key={tool.slug} tool={tool} compact />
             ))}
           </div>
         </div>
@@ -248,6 +305,10 @@ export default function HomePage() {
           />
           <div className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
             <h2 className="text-lg font-bold tracking-tight">Browse by intent</h2>
+            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+              If the homepage still feels broad, jump straight into one category and keep the next
+              search scoped there.
+            </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {categories.map((category) => (
                 <Link
