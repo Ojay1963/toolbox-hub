@@ -12,7 +12,7 @@ export function Header() {
             </div>
             <div>
               <p className="text-lg font-bold tracking-tight">Toolbox Hub</p>
-              <p className="text-sm text-[color:var(--muted)]">50 free browser-first tools</p>
+              <p className="text-sm text-[color:var(--muted)]">100 free browser-first tools</p>
             </div>
           </Link>
           <nav className="hidden flex-wrap items-center gap-4 text-sm text-[color:var(--muted)] lg:flex">
@@ -29,6 +29,30 @@ export function Header() {
               </Link>
             ))}
           </nav>
+        </div>
+        <div className="mt-4 lg:hidden">
+          <details className="rounded-2xl border border-[color:var(--border)] bg-white/80 p-4">
+            <summary className="cursor-pointer list-none text-sm font-semibold text-[color:var(--foreground)]">
+              Browse tools and categories
+            </summary>
+            <div className="mt-4 flex flex-wrap gap-2 text-sm text-[color:var(--muted)]">
+              <Link
+                href="/#search-tools"
+                className="rounded-full border border-[color:var(--border)] px-3 py-2 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
+              >
+                Search tools
+              </Link>
+              {categories.map((category) => (
+                <Link
+                  key={category.slug}
+                  href={`/category/${category.slug}`}
+                  className="rounded-full border border-[color:var(--border)] px-3 py-2 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
+                >
+                  {category.name}
+                </Link>
+              ))}
+            </div>
+          </details>
         </div>
       </div>
     </header>

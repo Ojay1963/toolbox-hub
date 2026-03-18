@@ -10,20 +10,27 @@ import {
   buildFaqJsonLd,
   buildMetadata,
 } from "@/lib/seo";
-import { categories, getToolsByCategory, tools } from "@/lib/tools";
+import { categories, getPopularTools, getRecentTools, getToolsByCategory, tools } from "@/lib/tools";
 
 export const metadata = buildMetadata({
   title: "Free Online Tools for Images, PDFs, Text, Developers, and More",
   description:
-    "Use 50 free online tools for image editing, PDF tasks, text cleanup, generators, calculators, converters, and developer workflows.",
+    "Use 100 free online tools for image editing, PDF tasks, text cleanup, generators, calculators, converters, and developer workflows.",
   pathname: "/",
   keywords: ["free online tools", "browser tools", "seo-friendly tools"],
 });
 
 export default function HomePage() {
-  const featuredCategories = categories.slice(0, 4);
-  const popularTools = tools.filter((tool) => tool.implementationStatus === "working-local").slice(0, 6);
-  const latestTools = [...tools].slice(-6).reverse();
+  const featuredCategories = categories.slice(0, 6);
+  const popularTools = getPopularTools(6);
+  const latestTools = getRecentTools(6);
+  const searchSuggestions = [...popularTools, ...latestTools].filter(
+    (tool, index, collection) => collection.findIndex((candidate) => candidate.slug === tool.slug) === index,
+  );
+  const discoveryCategories = categories.slice(0, 4).map((category) => ({
+    category,
+    tools: getPopularTools(3, category.slug),
+  }));
   const workingToolsCount = tools.filter((tool) => tool.implementationStatus === "working-local").length;
   const reducedScopeCount = tools.filter(
     (tool) => tool.implementationStatus === "reduced-scope-local",
@@ -38,7 +45,7 @@ export default function HomePage() {
       answer: "Many tools are designed for local browser-side processing. Where a tool has limits, the page explains that clearly instead of pretending otherwise.",
     },
     {
-      question: "Are all 50 tools identical in scope?",
+      question: "Are all 100 tools identical in scope?",
       answer: "No. Some are fully working locally, some are reduced-scope by design, and a small number stay honest as future-ready placeholders until a reliable implementation is practical.",
     },
   ];
@@ -84,7 +91,14 @@ export default function HomePage() {
               calculation tasks without a login or bloated interface.
             </p>
             <div className="mt-6 max-w-3xl">
-              <SearchBox tools={tools} />
+              <SearchBox
+                tools={tools}
+                title="Search 100 tools without digging through menus"
+                description="Search by tool name, keyword, category, or task. Popular tools and recent additions are suggested before you type so discovery stays quick."
+                maxResults={8}
+                suggestedTools={searchSuggestions}
+                sectionId="search-tools"
+              />
             </div>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -141,7 +155,7 @@ export default function HomePage() {
             Explore a category
           </Link>
         </div>
-        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {featuredCategories.map((category) => (
             <CategoryCard
               key={category.slug}
@@ -154,16 +168,34 @@ export default function HomePage() {
 
       <section className="mt-10">
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
-          All categories
+          Discovery paths
         </p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight">Browse the full tool directory</h2>
+        <h2 className="mt-2 text-3xl font-black tracking-tight">Popular tools inside each section</h2>
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
+          Instead of showing every tool at once, these short lists help people jump into the most
+          useful tools in each major category.
+        </p>
         <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {categories.map((category) => (
-            <CategoryCard
-              key={category.slug}
-              category={category}
-              count={getToolsByCategory(category.slug).length}
-            />
+          {discoveryCategories.map(({ category, tools: categoryTools }) => (
+            <section key={category.slug} className="rounded-3xl border border-[color:var(--border)] bg-white/88 p-5 shadow-sm">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-lg font-bold tracking-tight">{category.name}</h3>
+                <Link href={`/category/${category.slug}`} className="text-sm font-semibold text-[color:var(--primary)]">
+                  View all
+                </Link>
+              </div>
+              <div className="mt-4 space-y-3">
+                {categoryTools.map((tool) => (
+                  <Link
+                    key={tool.slug}
+                    href={`/tools/${tool.slug}`}
+                    className="block text-sm leading-6 text-[color:var(--muted)] transition hover:text-[color:var(--primary)]"
+                  >
+                    {tool.name}
+                  </Link>
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       </section>
@@ -173,6 +205,10 @@ export default function HomePage() {
           Popular tools
         </p>
         <h2 className="mt-2 text-3xl font-black tracking-tight">Popular starting points</h2>
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
+          These tools are weighted toward broad usefulness, strong local implementations, and clear
+          starting points for new visitors.
+        </p>
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {popularTools.map((tool) => (
             <ToolCard key={tool.slug} tool={tool} />
@@ -194,6 +230,10 @@ export default function HomePage() {
             Latest tools
           </p>
           <h2 className="mt-2 text-3xl font-black tracking-tight">Recently added to the registry</h2>
+          <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
+            Recent additions help returning visitors spot new capabilities without scrolling through
+            the full directory.
+          </p>
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {latestTools.map((tool) => (
               <ToolCard key={tool.slug} tool={tool} />

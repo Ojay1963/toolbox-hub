@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const siteMetadata = {
   name: "Toolbox Hub",
   description:
-    "A fast, SEO-friendly collection of 50 free online tools for images, PDFs, text, developers, generators, calculators, converters, and internet tasks.",
+    "A fast, SEO-friendly collection of 100 free online tools for images, PDFs, text, developers, generators, calculators, converters, and internet tasks.",
   siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "https://example.com").replace(/\/$/, ""),
 };
 

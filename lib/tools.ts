@@ -1,3 +1,5 @@
+import { extraToolDrafts } from "@/lib/tools-extra";
+
 export type ToolCategorySlug =
   | "image-tools"
   | "pdf-tools"
@@ -43,6 +45,8 @@ export type CategoryDefinition = {
   hero: string;
 };
 
+type ToolDraft = Omit<ToolDefinition, "relatedToolSlugs">;
+
 type ToolInput = Omit<ToolDefinition, "relatedToolSlugs" | "faq"> & {
   faq1: string;
   faq2: string;
@@ -61,7 +65,7 @@ export const categories: CategoryDefinition[] = [
   { slug: "internet-tools", name: "Internet Tools", title: "Free Online Internet Tools", description: "Inspect IP and DNS-related information with transparent scope boundaries for browser-only implementations.", hero: "This category is designed to surface internet utilities without pretending the browser can do more than it really can." },
 ];
 
-function makeTool(input: ToolInput): Omit<ToolDefinition, "relatedToolSlugs"> {
+function makeTool(input: ToolInput): ToolDraft {
   return {
     name: input.name,
     slug: input.slug,
@@ -81,7 +85,7 @@ function makeTool(input: ToolInput): Omit<ToolDefinition, "relatedToolSlugs"> {
   };
 }
 
-const toolDraftsPart1: Array<Omit<ToolDefinition, "relatedToolSlugs">> = [
+const toolDraftsPart1: ToolDraft[] = [
   makeTool({ name: "Image Compressor", slug: "image-compressor", category: "image-tools", shortDescription: "Reduce image file size with a browser-side compression workflow.", longDescription: "The Image Compressor page is structured for a local compression experience where users can upload an image, choose a quality target, preview the result, and download a smaller file. This tool is well suited to browser-side canvas-based processing and fits the current architecture cleanly.", keywords: ["image compressor", "compress image", "reduce image size"], howToUse: ["Upload an image file.", "Choose a target quality or compression level.", "Preview and download the compressed result."], implementationStatus: "planned-local", seoTitle: "Image Compressor Online", seoDescription: "Compress images online with a browser-first workflow designed for fast file-size reduction and simple downloads.", faq1: "Will this tool upload my image?", faqAnswer1: "The intended implementation is local browser-side processing so files do not need to leave the device.", faq2: "Can compressed images lose quality?", faqAnswer2: "Yes. Compression can reduce visual quality depending on the settings used." }),
   makeTool({ name: "Image Resizer", slug: "image-resizer", category: "image-tools", shortDescription: "Resize images by width and height with a simple local workflow.", longDescription: "The Image Resizer page supports a future browser-side tool that lets users change image dimensions, preserve aspect ratio, and export the result. It is a straightforward fit for the shared architecture and can plug into the registry without route changes.", keywords: ["image resizer", "resize image online", "change image size"], howToUse: ["Upload an image.", "Enter the new dimensions.", "Download the resized image."], implementationStatus: "planned-local", seoTitle: "Image Resizer Online", seoDescription: "Resize images online with a clean browser-first interface for changing width and height.", faq1: "Can I keep the aspect ratio?", faqAnswer1: "Yes. The intended local implementation should offer an aspect-ratio lock for cleaner resizing.", faq2: "Does resizing improve image quality?", faqAnswer2: "No. Resizing changes dimensions, but it does not recreate lost detail." }),
   makeTool({ name: "Crop Image", slug: "crop-image", category: "image-tools", shortDescription: "Crop an image to remove unwanted edges or focus on one area.", longDescription: "Crop Image is planned as a local image-editing utility that lets users define a crop box and export only the selected region. It works naturally with a browser canvas workflow and the site’s reusable tool template.", keywords: ["crop image", "image cropper", "trim image"], howToUse: ["Upload an image.", "Select or enter the crop area.", "Export the cropped image."], implementationStatus: "planned-local", seoTitle: "Crop Image Online", seoDescription: "Crop images online with a browser-based workflow for trimming photos and graphics.", faq1: "Will the original file be changed?", faqAnswer1: "No. The expected implementation creates a new cropped output file for download.", faq2: "Can cropping reduce file size?", faqAnswer2: "It often can, because the exported image contains fewer pixels than the original." }),
@@ -136,10 +140,33 @@ const toolDraftsPart2: Array<Omit<ToolDefinition, "relatedToolSlugs">> = [
   makeTool({ name: "DNS Lookup", slug: "dns-lookup", category: "internet-tools", shortDescription: "Honest placeholder for DNS lookup beyond the current browser-only scope.", longDescription: "DNS lookups generally require server-side infrastructure or a remote resolver service that is outside the current project scope. This page is intentionally marked coming soon rather than pretending that a browser-only site can perform authoritative DNS queries on its own.", keywords: ["dns lookup", "dns checker", "domain dns records"], howToUse: ["Open the page to review the current scope.", "Read why DNS lookup is not implemented in the browser-only architecture.", "Return later if server infrastructure is added."], implementationStatus: "coming-soon", seoTitle: "DNS Lookup Online", seoDescription: "DNS lookup page with an honest coming-soon note for functionality that needs server infrastructure.", statusNote: "Coming soon because real DNS lookup needs server-side infrastructure or external resolver access beyond the current scope.", faq1: "Why is DNS Lookup not implemented yet?", faqAnswer1: "Browser-only apps do not have the low-level network access needed for real DNS record queries.", faq2: "Could this be faked with sample data?", faqAnswer2: "No. The site avoids fake capability and misleading outputs." }),
 ];
 
-const toolDrafts = [...toolDraftsPart1, ...toolDraftsPart2];
+const toolDrafts = [...toolDraftsPart1, ...toolDraftsPart2, ...extraToolDrafts];
+const toolDraftOrder = new Map(toolDrafts.map((tool, index) => [tool.slug, index]));
+const popularToolPriority = new Map(
+  [
+    "word-counter",
+    "image-compressor",
+    "pdf-merge",
+    "json-formatter",
+    "password-generator",
+    "qr-code-generator",
+    "loan-calculator",
+    "currency-converter",
+    "image-format-converter",
+    "markdown-to-html-converter",
+    "discount-calculator",
+    "user-agent-parser",
+  ].map((slug, index) => [slug, index]),
+);
 
 const implementedToolSlugs = new Set([
   "image-compressor",
+  "image-format-converter",
+  "image-color-picker",
+  "blur-image-tool",
+  "image-brightness-adjuster",
+  "image-contrast-adjuster",
+  "image-grayscale-converter",
   "image-resizer",
   "crop-image",
   "jpg-to-png-converter",
@@ -159,50 +186,242 @@ const implementedToolSlugs = new Set([
   "case-converter",
   "remove-duplicate-lines",
   "text-sorter",
+  "text-reverser",
+  "text-to-slug-converter",
+  "text-line-counter",
+  "random-sentence-generator",
+  "lorem-ipsum-generator",
+  "text-replace-tool",
+  "text-duplicate-remover",
   "json-formatter",
+  "json-to-csv-converter",
+  "csv-to-json-converter",
   "base64-encoder",
   "base64-decoder",
   "css-minifier",
   "html-minifier",
+  "html-encoder",
+  "html-decoder",
+  "html-to-markdown-converter",
+  "markdown-to-html-converter",
   "url-encoder",
   "url-decoder",
+  "url-parser",
   "regex-tester",
+  "jwt-decoder",
+  "jwt-encoder",
+  "sha256-generator",
+  "md5-generator",
+  "hash-generator",
   "password-generator",
   "qr-code-generator",
   "uuid-generator",
   "random-name-generator",
   "random-number-generator",
+  "username-generator",
+  "nickname-generator",
+  "random-color-generator",
+  "random-password-phrase-generator",
+  "random-quote-generator",
   "age-calculator",
   "bmi-calculator",
   "loan-calculator",
   "percentage-calculator",
   "date-difference-calculator",
+  "discount-calculator",
+  "tip-calculator",
+  "profit-margin-calculator",
+  "vat-calculator",
+  "sales-tax-calculator",
+  "simple-interest-calculator",
+  "compound-interest-calculator",
   "length-converter",
   "weight-converter",
   "temperature-converter",
   "time-converter",
   "currency-converter",
+  "binary-to-decimal-converter",
+  "decimal-to-binary-converter",
+  "hex-to-rgb-converter",
+  "rgb-to-hex-converter",
+  "text-to-binary-converter",
+  "binary-to-text-converter",
   "ip-address-lookup",
+  "http-status-code-checker",
+  "url-redirect-checker",
+  "user-agent-parser",
+  "mime-type-lookup",
 ]);
 
 const implementationStatusOverrides = new Map<string, ImplementationStatus>([
   ["currency-converter", "reduced-scope-local"],
   ["ip-address-lookup", "reduced-scope-local"],
+  ["http-status-code-checker", "reduced-scope-local"],
+  ["url-redirect-checker", "reduced-scope-local"],
   ["pdf-compressor", "reduced-scope-local"],
   ["protect-pdf", "coming-soon"],
   ["pdf-to-word", "coming-soon"],
   ["word-to-pdf", "coming-soon"],
 ]);
 
+function getCategoryName(slug: ToolCategorySlug) {
+  return categories.find((category) => category.slug === slug)?.name ?? slug.replace(/-/g, " ");
+}
+
+function extractTopicTokens(tool: ToolDraft) {
+  return new Set(
+    [tool.name, ...tool.keywords]
+      .join(" ")
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, " ")
+      .split(/\s+/)
+      .filter((token) => token.length > 2 && !["tool", "tools", "online", "free", "converter", "calculator"].includes(token)),
+  );
+}
+
+function buildRelatedToolSlugs(tool: ToolDraft) {
+  const sourceTokens = extractTopicTokens(tool);
+
+  return toolDrafts
+    .filter((candidate) => candidate.category === tool.category && candidate.slug !== tool.slug)
+    .map((candidate) => {
+      const candidateTokens = extractTopicTokens(candidate);
+      const overlap = Array.from(sourceTokens).filter((token) => candidateTokens.has(token)).length;
+      return { candidate, overlap };
+    })
+    .sort((left, right) => {
+      const overlapDifference = right.overlap - left.overlap;
+      if (overlapDifference !== 0) {
+        return overlapDifference;
+      }
+      return getPopularityScore(right.candidate as ToolDefinition) - getPopularityScore(left.candidate as ToolDefinition);
+    })
+    .slice(0, 4)
+    .map(({ candidate }) => candidate.slug);
+}
+
+function enrichHowToUse(tool: ToolDraft, implementationStatus: ImplementationStatus) {
+  const steps = [...tool.howToUse];
+  const categoryName = getCategoryName(tool.category);
+
+  if (!steps.some((step) => /open|visit|go to/i.test(step))) {
+    steps.unshift(`Open the ${tool.name} page from the ${categoryName.toLowerCase()} section.`);
+  }
+
+  if (!steps.some((step) => /copy|download|save|review/i.test(step))) {
+    steps.push(
+      implementationStatus === "coming-soon"
+        ? "Review the current scope note and return when a reliable implementation is available."
+        : "Review the output, then copy, download, or continue to a related tool if needed.",
+    );
+  }
+
+  if (steps.length < 4) {
+    steps.push(
+      implementationStatus === "reduced-scope-local"
+        ? "Check the scope note so you know what the browser can and cannot do for this workflow."
+        : "Adjust the input values or settings until the output matches the result you need.",
+    );
+  }
+
+  return steps.slice(0, 5);
+}
+
+function enrichFaq(tool: ToolDraft, implementationStatus: ImplementationStatus) {
+  const faq = [...tool.faq];
+  const categoryName = getCategoryName(tool.category);
+
+  const extraFaq: FaqItem[] = [
+    {
+      question: `Can I use ${tool.name.toLowerCase()} on mobile?`,
+      answer: `${tool.name} is built to work on modern mobile and desktop browsers with the same route, content structure, and core workflow.`,
+    },
+    {
+      question: `Does ${tool.name.toLowerCase()} need an account or signup?`,
+      answer: `No. ${tool.name} follows the same no-auth approach as the rest of the ${categoryName.toLowerCase()} directory.`,
+    },
+    {
+      question: `Are there related tools if ${tool.name.toLowerCase()} is not the exact fit?`,
+      answer: `Yes. Each ${tool.name} page links to related tools and its parent category so you can move to a similar workflow quickly.`,
+    },
+  ];
+
+  if (implementationStatus === "reduced-scope-local") {
+    extraFaq.unshift({
+      question: `Why is ${tool.name.toLowerCase()} marked reduced scope?`,
+      answer: `This tool is intentionally honest about browser limitations and only exposes the parts of the workflow that can be delivered reliably without external infrastructure.`,
+    });
+  }
+
+  if (implementationStatus === "coming-soon") {
+    extraFaq.unshift({
+      question: `Why is ${tool.name.toLowerCase()} still coming soon?`,
+      answer: `The site avoids fake outputs, so this page stays transparent until a reliable implementation is practical within the current architecture.`,
+    });
+  }
+
+  for (const item of extraFaq) {
+    if (!faq.some((existing) => existing.question.toLowerCase() === item.question.toLowerCase())) {
+      faq.push(item);
+    }
+  }
+
+  return faq.slice(0, 4);
+}
+
+function enrichSeoTitle(tool: ToolDraft) {
+  const title = tool.seoTitle.trim();
+  if (title.length >= 45) {
+    return title;
+  }
+  return `${tool.name} Online Free | ${getCategoryName(tool.category)} | Toolbox Hub`;
+}
+
+function enrichSeoDescription(tool: ToolDraft, implementationStatus: ImplementationStatus) {
+  const base = tool.seoDescription.trim();
+  if (base.length >= 130) {
+    return base;
+  }
+
+  const scopeLine =
+    implementationStatus === "coming-soon"
+      ? " Honest scope notes included."
+      : implementationStatus === "reduced-scope-local"
+        ? " Includes clear reduced-scope notes."
+        : " Browser-first and easy to use.";
+
+  return `${tool.shortDescription} Use ${tool.name.toLowerCase()} online with how-to steps, FAQs, and related tools.${scopeLine}`;
+}
+
+function enrichLongDescription(tool: ToolDraft, implementationStatus: ImplementationStatus) {
+  const categoryName = getCategoryName(tool.category);
+  const scopeSentence =
+    implementationStatus === "coming-soon"
+      ? ` The page stays useful for SEO and navigation while clearly explaining why a reliable implementation is still pending.`
+      : implementationStatus === "reduced-scope-local"
+        ? ` The page also explains the current browser-only limits so visitors know exactly what results are realistic.`
+        : ` The page includes practical guidance, related tools, and internal links so visitors can complete nearby tasks without starting over.`;
+
+  if (tool.longDescription.length > 240) {
+    return `${tool.longDescription}${scopeSentence}`;
+  }
+
+  return `${tool.longDescription} ${tool.name} belongs to the ${categoryName.toLowerCase()} section, which helps users discover similar workflows, related conversions, and alternative tools from the same route structure.${scopeSentence}`;
+}
+
 export const tools: ToolDefinition[] = toolDrafts.map((tool) => ({
   ...tool,
   implementationStatus:
     implementationStatusOverrides.get(tool.slug) ??
     (implementedToolSlugs.has(tool.slug) ? "working-local" : tool.implementationStatus),
-  relatedToolSlugs: toolDrafts
-    .filter((candidate) => candidate.category === tool.category && candidate.slug !== tool.slug)
-    .slice(0, 3)
-    .map((candidate) => candidate.slug),
+})).map((tool) => ({
+  ...tool,
+  seoTitle: enrichSeoTitle(tool),
+  seoDescription: enrichSeoDescription(tool, tool.implementationStatus),
+  longDescription: enrichLongDescription(tool, tool.implementationStatus),
+  howToUse: enrichHowToUse(tool, tool.implementationStatus),
+  faq: enrichFaq(tool, tool.implementationStatus),
+  relatedToolSlugs: buildRelatedToolSlugs(tool),
 }));
 
 export function getCategory(slug: string) {
@@ -215,4 +434,41 @@ export function getTool(slug: string) {
 
 export function getToolsByCategory(category: ToolCategorySlug) {
   return tools.filter((tool) => tool.category === category);
+}
+
+function getPopularityScore(tool: ToolDefinition) {
+  let score = 0;
+
+  if (tool.implementationStatus === "working-local") score += 100;
+  if (tool.implementationStatus === "reduced-scope-local") score += 60;
+  if (tool.implementationStatus === "planned-local") score += 20;
+  if (tool.implementationStatus === "coming-soon") score += 5;
+
+  const priorityIndex = popularToolPriority.get(tool.slug);
+  if (priorityIndex !== undefined) {
+    score += 200 - priorityIndex * 10;
+  }
+
+  score += Math.max(0, 120 - (toolDraftOrder.get(tool.slug) ?? 999));
+  return score;
+}
+
+export function getPopularTools(limit = 8, category?: ToolCategorySlug) {
+  return tools
+    .filter((tool) => (category ? tool.category === category : true))
+    .sort((left, right) => {
+      const popularityDifference = getPopularityScore(right) - getPopularityScore(left);
+      if (popularityDifference !== 0) {
+        return popularityDifference;
+      }
+      return left.name.localeCompare(right.name);
+    })
+    .slice(0, limit);
+}
+
+export function getRecentTools(limit = 8, category?: ToolCategorySlug) {
+  return [...tools]
+    .filter((tool) => (category ? tool.category === category : true))
+    .sort((left, right) => (toolDraftOrder.get(right.slug) ?? 0) - (toolDraftOrder.get(left.slug) ?? 0))
+    .slice(0, limit);
 }

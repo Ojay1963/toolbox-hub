@@ -2,7 +2,6 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useMemo, useState } from "react";
-import QRCode from "qrcode";
 import {
   buttonClass,
   EmptyState,
@@ -16,6 +15,17 @@ import {
 
 const givenNames = ["Alex", "Jordan", "Taylor", "Morgan", "Avery", "Riley", "Cameron", "Jamie", "Logan", "Casey"];
 const familyNames = ["Parker", "Johnson", "Reed", "Mitchell", "Bennett", "Hayes", "Coleman", "Murphy", "Bailey", "Foster"];
+const usernameWords = ["pixel", "swift", "luna", "forge", "delta", "echo", "mint", "nova", "orbit", "atlas"];
+const nicknameWords = ["Ace", "Blaze", "Scout", "Nova", "Dash", "Skye", "Jinx", "Milo", "Rex", "Zee"];
+const quoteBank = [
+  "Consistency beats intensity when you are building something real.",
+  "Small tools can remove big friction.",
+  "Clarity is a feature, not an extra.",
+  "Reliable work compounds quietly over time.",
+  "Good systems make future work easier.",
+  "Simple can still be production-ready.",
+];
+const passphraseWords = ["river", "sunset", "maple", "signal", "harbor", "velvet", "ember", "forest", "copper", "cloud"];
 
 function buildDownloadLink(dataUrl: string, filename: string) {
   const anchor = document.createElement("a");
@@ -91,6 +101,7 @@ export function QrCodeGeneratorTool() {
     }
 
     try {
+      const { default: QRCode } = await import("qrcode");
       const url = await QRCode.toDataURL(value, {
         width: 320,
         margin: 2,
@@ -269,6 +280,154 @@ export function RandomNumberGeneratorTool() {
           </div>
         </>
       )}
+    </ToolShell>
+  );
+}
+
+export function UsernameGeneratorTool() {
+  const [count, setCount] = useState(6);
+  const [values, setValues] = useState<string[]>([]);
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    const total = Math.max(1, Math.min(20, count));
+    const next = Array.from({ length: total }, () => {
+      const word = usernameWords[getRandomInt(usernameWords.length)];
+      const suffix = String(getRandomInt(9000) + 1000);
+      return `${word}${suffix}`;
+    });
+    setValues(next);
+  }
+
+  const output = useMemo(() => values.join("\n"), [values]);
+
+  return (
+    <ToolShell title="Username Generator" description="Generate simple username ideas from bundled local patterns and random suffixes.">
+      <Field label="How many usernames?">
+        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="20" value={count} onChange={(event) => setCount(Number(event.target.value))} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleGenerate}>
+        Generate usernames
+      </button>
+      {!values.length ? <EmptyState title="No usernames generated yet" description="Generate handle ideas locally without relying on any live availability check." /> : <>
+        <OutputBlock title="Username ideas" value={output} />
+        <button type="button" className={buttonClass} onClick={() => copy("username ideas", output)}>Copy output</button>
+        {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+      </>}
+    </ToolShell>
+  );
+}
+
+export function NicknameGeneratorTool() {
+  const [count, setCount] = useState(6);
+  const [values, setValues] = useState<string[]>([]);
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    const total = Math.max(1, Math.min(20, count));
+    setValues(Array.from({ length: total }, () => nicknameWords[getRandomInt(nicknameWords.length)]));
+  }
+
+  const output = useMemo(() => values.join("\n"), [values]);
+
+  return (
+    <ToolShell title="Nickname Generator" description="Generate nickname ideas from a bundled local word list.">
+      <Field label="How many nicknames?">
+        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="20" value={count} onChange={(event) => setCount(Number(event.target.value))} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleGenerate}>
+        Generate nicknames
+      </button>
+      {!values.length ? <EmptyState title="No nicknames generated yet" description="Generate nickname ideas for profiles, placeholders, or fun naming prompts." /> : <>
+        <OutputBlock title="Nickname ideas" value={output} />
+        <button type="button" className={buttonClass} onClick={() => copy("nickname ideas", output)}>Copy output</button>
+        {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+      </>}
+    </ToolShell>
+  );
+}
+
+export function RandomColorGeneratorTool() {
+  const [values, setValues] = useState<string[]>([]);
+  const { copied, copy } = useCopyToClipboard();
+
+  function makeHex() {
+    return `#${Array.from({ length: 3 }, () => getRandomInt(256).toString(16).padStart(2, "0")).join("")}`;
+  }
+
+  function handleGenerate() {
+    setValues(Array.from({ length: 5 }, () => makeHex()));
+  }
+
+  const output = useMemo(() => values.join("\n"), [values]);
+
+  return (
+    <ToolShell title="Random Color Generator" description="Generate random HEX colors locally and copy the values you want to use.">
+      <button type="button" className={buttonClass} onClick={handleGenerate}>
+        Generate colors
+      </button>
+      {!values.length ? <EmptyState title="No colors generated yet" description="Generate a small palette of random colors with copy-ready HEX values." /> : <>
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
+          {values.map((value) => (
+            <div key={value} className="rounded-2xl border border-[color:var(--border)] bg-white p-3">
+              <div className="h-20 rounded-xl border border-[color:var(--border)]" style={{ backgroundColor: value }} />
+              <p className="mt-3 text-sm font-semibold">{value}</p>
+            </div>
+          ))}
+        </div>
+        <OutputBlock title="HEX values" value={output} />
+        <button type="button" className={buttonClass} onClick={() => copy("HEX values", output)}>Copy output</button>
+        {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+      </>}
+    </ToolShell>
+  );
+}
+
+export function RandomPasswordPhraseGeneratorTool() {
+  const [wordCount, setWordCount] = useState(4);
+  const [output, setOutput] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    const total = Math.max(3, Math.min(8, wordCount));
+    setOutput(Array.from({ length: total }, () => passphraseWords[getRandomInt(passphraseWords.length)]).join("-"));
+  }
+
+  return (
+    <ToolShell title="Random Password Phrase Generator" description="Generate simple passphrase-style passwords from bundled local words and browser randomness.">
+      <Field label="Words per passphrase">
+        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="3" max="8" value={wordCount} onChange={(event) => setWordCount(Number(event.target.value))} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleGenerate}>
+        Generate passphrase
+      </button>
+      {!output ? <EmptyState title="No passphrase generated yet" description="Generate a multi-word passphrase locally using browser-side randomness." /> : <>
+        <OutputBlock title="Generated passphrase" value={output} multiline={false} />
+        <button type="button" className={buttonClass} onClick={() => copy("passphrase", output)}>Copy output</button>
+        {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+      </>}
+    </ToolShell>
+  );
+}
+
+export function RandomQuoteGeneratorTool() {
+  const [quote, setQuote] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    setQuote(quoteBank[getRandomInt(quoteBank.length)]);
+  }
+
+  return (
+    <ToolShell title="Random Quote Generator" description="Generate quotes from a bundled local quote list with no external API dependency.">
+      <button type="button" className={buttonClass} onClick={handleGenerate}>
+        Generate quote
+      </button>
+      {!quote ? <EmptyState title="No quote generated yet" description="Generate a quote locally for inspiration, placeholders, or demos." /> : <>
+        <OutputBlock title="Generated quote" value={quote} />
+        <button type="button" className={buttonClass} onClick={() => copy("quote", quote)}>Copy output</button>
+        {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+      </>}
     </ToolShell>
   );
 }

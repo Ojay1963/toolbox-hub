@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { categories, tools } from "@/lib/tools";
+import { categories, getPopularTools } from "@/lib/tools";
 
 export function Footer() {
-  const quickLinks = tools.slice(0, 6);
+  const quickLinks = getPopularTools(6);
 
   return (
     <footer className="border-t border-[color:var(--border)] bg-white/70">

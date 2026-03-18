@@ -1,166 +1,131 @@
+import dynamic from "next/dynamic";
+import type { ComponentType } from "react";
 import type { ToolDefinition } from "@/lib/tools";
-import {
-  AgeCalculatorTool,
-  BmiCalculatorTool,
-  DateDifferenceCalculatorTool,
-  LoanCalculatorTool,
-  PercentageCalculatorTool,
-} from "@/components/tools/calculator-tools";
-import {
-  CurrencyConverterTool,
-  LengthConverterTool,
-  TemperatureConverterTool,
-  TimeConverterTool,
-  WeightConverterTool,
-} from "@/components/tools/converter-tools";
-import {
-  Base64DecoderTool,
-  Base64EncoderTool,
-  CssMinifierTool,
-  HtmlMinifierTool,
-  JsonFormatterTool,
-  RegexTesterTool,
-  UrlDecoderTool,
-  UrlEncoderTool,
-} from "@/components/tools/developer-tools";
-import {
-  BackgroundRemoverTool,
-  CropImageTool,
-  ImageCompressorTool,
-  ImageResizerTool,
-  ImageRotatorTool,
-  ImageToBase64ConverterTool,
-  ImageToWebpConverterTool,
-  ImageWatermarkTool,
-  JpgToPngConverterTool,
-  PngToJpgConverterTool,
-} from "@/components/tools/image-tools";
-import { DnsLookupTool, IpAddressLookupTool } from "@/components/tools/internet-tools";
-import {
-  JpgToPdfTool,
-  PdfCompressorTool,
-  PdfMergeTool,
-  PdfPageNumberAdderTool,
-  PdfPageRotatorTool,
-  PdfSplitTool,
-  PdfToJpgTool,
-  ProtectPdfTool,
-} from "@/components/tools/pdf-tools";
-import {
-  PasswordGeneratorTool,
-  QrCodeGeneratorTool,
-  RandomNameGeneratorTool,
-  RandomNumberGeneratorTool,
-  UuidGeneratorTool,
-} from "@/components/tools/generator-tools";
-import {
-  CaseConverterTool,
-  CharacterCounterTool,
-  RemoveDuplicateLinesTool,
-  TextSorterTool,
-  WordCounterTool,
-} from "@/components/tools/text-tools";
+
+function LoadingToolPanel() {
+  return (
+    <section className="rounded-3xl border border-[color:var(--border)] bg-white p-6 shadow-sm">
+      <div className="h-5 w-32 rounded-full bg-stone-100" />
+      <div className="mt-4 h-9 w-56 rounded-xl bg-stone-100" />
+      <div className="mt-4 space-y-3">
+        <div className="h-4 w-full rounded bg-stone-100" />
+        <div className="h-4 w-11/12 rounded bg-stone-100" />
+        <div className="h-4 w-3/4 rounded bg-stone-100" />
+      </div>
+    </section>
+  );
+}
+
+function buildDynamicTool(loader: () => Promise<ComponentType>) {
+  return dynamic(async () => ({ default: await loader() }), {
+    loading: () => <LoadingToolPanel />,
+  });
+}
+
+const toolComponentMap: Record<string, ComponentType> = {
+  "image-compressor": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.ImageCompressorTool)),
+  "image-format-converter": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.ImageFormatConverterTool)),
+  "image-color-picker": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.ImageColorPickerTool)),
+  "blur-image-tool": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.BlurImageTool)),
+  "image-brightness-adjuster": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.ImageBrightnessAdjusterTool)),
+  "image-contrast-adjuster": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.ImageContrastAdjusterTool)),
+  "image-grayscale-converter": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.ImageGrayscaleConverterTool)),
+  "image-resizer": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.ImageResizerTool)),
+  "crop-image": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.CropImageTool)),
+  "jpg-to-png-converter": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.JpgToPngConverterTool)),
+  "png-to-jpg-converter": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.PngToJpgConverterTool)),
+  "image-to-webp-converter": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.ImageToWebpConverterTool)),
+  "background-remover": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.BackgroundRemoverTool)),
+  "image-rotator": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.ImageRotatorTool)),
+  "image-watermark-tool": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.ImageWatermarkTool)),
+  "image-to-base64-converter": buildDynamicTool(() => import("@/components/tools/image-tools").then((m) => m.ImageToBase64ConverterTool)),
+  "pdf-merge": buildDynamicTool(() => import("@/components/tools/pdf-tools").then((m) => m.PdfMergeTool)),
+  "pdf-split": buildDynamicTool(() => import("@/components/tools/pdf-tools").then((m) => m.PdfSplitTool)),
+  "pdf-compressor": buildDynamicTool(() => import("@/components/tools/pdf-tools").then((m) => m.PdfCompressorTool)),
+  "pdf-to-jpg": buildDynamicTool(() => import("@/components/tools/pdf-tools").then((m) => m.PdfToJpgTool)),
+  "jpg-to-pdf": buildDynamicTool(() => import("@/components/tools/pdf-tools").then((m) => m.JpgToPdfTool)),
+  "pdf-page-rotator": buildDynamicTool(() => import("@/components/tools/pdf-tools").then((m) => m.PdfPageRotatorTool)),
+  "pdf-page-number-adder": buildDynamicTool(() => import("@/components/tools/pdf-tools").then((m) => m.PdfPageNumberAdderTool)),
+  "protect-pdf": buildDynamicTool(() => import("@/components/tools/pdf-tools").then((m) => m.ProtectPdfTool)),
+  "word-counter": buildDynamicTool(() => import("@/components/tools/text-tools").then((m) => m.WordCounterTool)),
+  "character-counter": buildDynamicTool(() => import("@/components/tools/text-tools").then((m) => m.CharacterCounterTool)),
+  "case-converter": buildDynamicTool(() => import("@/components/tools/text-tools").then((m) => m.CaseConverterTool)),
+  "remove-duplicate-lines": buildDynamicTool(() => import("@/components/tools/text-tools").then((m) => m.RemoveDuplicateLinesTool)),
+  "text-sorter": buildDynamicTool(() => import("@/components/tools/text-tools").then((m) => m.TextSorterTool)),
+  "text-reverser": buildDynamicTool(() => import("@/components/tools/text-tools").then((m) => m.TextReverserTool)),
+  "text-to-slug-converter": buildDynamicTool(() => import("@/components/tools/text-tools").then((m) => m.TextToSlugConverterTool)),
+  "text-line-counter": buildDynamicTool(() => import("@/components/tools/text-tools").then((m) => m.TextLineCounterTool)),
+  "random-sentence-generator": buildDynamicTool(() => import("@/components/tools/text-tools").then((m) => m.RandomSentenceGeneratorTool)),
+  "lorem-ipsum-generator": buildDynamicTool(() => import("@/components/tools/text-tools").then((m) => m.LoremIpsumGeneratorTool)),
+  "text-replace-tool": buildDynamicTool(() => import("@/components/tools/text-tools").then((m) => m.TextReplaceTool)),
+  "text-duplicate-remover": buildDynamicTool(() => import("@/components/tools/text-tools").then((m) => m.TextDuplicateRemoverTool)),
+  "json-formatter": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.JsonFormatterTool)),
+  "json-to-csv-converter": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.JsonToCsvConverterTool)),
+  "csv-to-json-converter": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.CsvToJsonConverterTool)),
+  "base64-encoder": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.Base64EncoderTool)),
+  "base64-decoder": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.Base64DecoderTool)),
+  "css-minifier": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.CssMinifierTool)),
+  "html-minifier": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.HtmlMinifierTool)),
+  "html-encoder": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.HtmlEncoderTool)),
+  "html-decoder": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.HtmlDecoderTool)),
+  "html-to-markdown-converter": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.HtmlToMarkdownConverterTool)),
+  "markdown-to-html-converter": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.MarkdownToHtmlConverterTool)),
+  "url-encoder": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.UrlEncoderTool)),
+  "url-decoder": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.UrlDecoderTool)),
+  "url-parser": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.UrlParserTool)),
+  "regex-tester": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.RegexTesterTool)),
+  "jwt-decoder": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.JwtDecoderTool)),
+  "jwt-encoder": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.JwtEncoderTool)),
+  "sha256-generator": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.Sha256GeneratorTool)),
+  "md5-generator": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.Md5GeneratorTool)),
+  "hash-generator": buildDynamicTool(() => import("@/components/tools/developer-tools").then((m) => m.HashGeneratorTool)),
+  "password-generator": buildDynamicTool(() => import("@/components/tools/generator-tools").then((m) => m.PasswordGeneratorTool)),
+  "qr-code-generator": buildDynamicTool(() => import("@/components/tools/generator-tools").then((m) => m.QrCodeGeneratorTool)),
+  "uuid-generator": buildDynamicTool(() => import("@/components/tools/generator-tools").then((m) => m.UuidGeneratorTool)),
+  "random-name-generator": buildDynamicTool(() => import("@/components/tools/generator-tools").then((m) => m.RandomNameGeneratorTool)),
+  "random-number-generator": buildDynamicTool(() => import("@/components/tools/generator-tools").then((m) => m.RandomNumberGeneratorTool)),
+  "username-generator": buildDynamicTool(() => import("@/components/tools/generator-tools").then((m) => m.UsernameGeneratorTool)),
+  "nickname-generator": buildDynamicTool(() => import("@/components/tools/generator-tools").then((m) => m.NicknameGeneratorTool)),
+  "random-color-generator": buildDynamicTool(() => import("@/components/tools/generator-tools").then((m) => m.RandomColorGeneratorTool)),
+  "random-password-phrase-generator": buildDynamicTool(() => import("@/components/tools/generator-tools").then((m) => m.RandomPasswordPhraseGeneratorTool)),
+  "random-quote-generator": buildDynamicTool(() => import("@/components/tools/generator-tools").then((m) => m.RandomQuoteGeneratorTool)),
+  "age-calculator": buildDynamicTool(() => import("@/components/tools/calculator-tools").then((m) => m.AgeCalculatorTool)),
+  "bmi-calculator": buildDynamicTool(() => import("@/components/tools/calculator-tools").then((m) => m.BmiCalculatorTool)),
+  "loan-calculator": buildDynamicTool(() => import("@/components/tools/calculator-tools").then((m) => m.LoanCalculatorTool)),
+  "percentage-calculator": buildDynamicTool(() => import("@/components/tools/calculator-tools").then((m) => m.PercentageCalculatorTool)),
+  "date-difference-calculator": buildDynamicTool(() => import("@/components/tools/calculator-tools").then((m) => m.DateDifferenceCalculatorTool)),
+  "discount-calculator": buildDynamicTool(() => import("@/components/tools/calculator-tools").then((m) => m.DiscountCalculatorTool)),
+  "tip-calculator": buildDynamicTool(() => import("@/components/tools/calculator-tools").then((m) => m.TipCalculatorTool)),
+  "profit-margin-calculator": buildDynamicTool(() => import("@/components/tools/calculator-tools").then((m) => m.ProfitMarginCalculatorTool)),
+  "vat-calculator": buildDynamicTool(() => import("@/components/tools/calculator-tools").then((m) => m.VatCalculatorTool)),
+  "sales-tax-calculator": buildDynamicTool(() => import("@/components/tools/calculator-tools").then((m) => m.SalesTaxCalculatorTool)),
+  "simple-interest-calculator": buildDynamicTool(() => import("@/components/tools/calculator-tools").then((m) => m.SimpleInterestCalculatorTool)),
+  "compound-interest-calculator": buildDynamicTool(() => import("@/components/tools/calculator-tools").then((m) => m.CompoundInterestCalculatorTool)),
+  "length-converter": buildDynamicTool(() => import("@/components/tools/converter-tools").then((m) => m.LengthConverterTool)),
+  "weight-converter": buildDynamicTool(() => import("@/components/tools/converter-tools").then((m) => m.WeightConverterTool)),
+  "temperature-converter": buildDynamicTool(() => import("@/components/tools/converter-tools").then((m) => m.TemperatureConverterTool)),
+  "time-converter": buildDynamicTool(() => import("@/components/tools/converter-tools").then((m) => m.TimeConverterTool)),
+  "currency-converter": buildDynamicTool(() => import("@/components/tools/converter-tools").then((m) => m.CurrencyConverterTool)),
+  "binary-to-decimal-converter": buildDynamicTool(() => import("@/components/tools/converter-tools").then((m) => m.BinaryToDecimalConverterTool)),
+  "decimal-to-binary-converter": buildDynamicTool(() => import("@/components/tools/converter-tools").then((m) => m.DecimalToBinaryConverterTool)),
+  "hex-to-rgb-converter": buildDynamicTool(() => import("@/components/tools/converter-tools").then((m) => m.HexToRgbConverterTool)),
+  "rgb-to-hex-converter": buildDynamicTool(() => import("@/components/tools/converter-tools").then((m) => m.RgbToHexConverterTool)),
+  "text-to-binary-converter": buildDynamicTool(() => import("@/components/tools/converter-tools").then((m) => m.TextToBinaryConverterTool)),
+  "binary-to-text-converter": buildDynamicTool(() => import("@/components/tools/converter-tools").then((m) => m.BinaryToTextConverterTool)),
+  "ip-address-lookup": buildDynamicTool(() => import("@/components/tools/internet-tools").then((m) => m.IpAddressLookupTool)),
+  "http-status-code-checker": buildDynamicTool(() => import("@/components/tools/internet-tools").then((m) => m.HttpStatusCodeCheckerTool)),
+  "url-redirect-checker": buildDynamicTool(() => import("@/components/tools/internet-tools").then((m) => m.UrlRedirectCheckerTool)),
+  "website-screenshot-tool": buildDynamicTool(() => import("@/components/tools/internet-tools").then((m) => m.WebsiteScreenshotTool)),
+  "user-agent-parser": buildDynamicTool(() => import("@/components/tools/internet-tools").then((m) => m.UserAgentParserTool)),
+  "dns-lookup": buildDynamicTool(() => import("@/components/tools/internet-tools").then((m) => m.DnsLookupTool)),
+  "mime-type-lookup": buildDynamicTool(() => import("@/components/tools/internet-tools").then((m) => m.MimeTypeLookupTool)),
+};
 
 export function ToolRenderer({ tool }: { tool: ToolDefinition }) {
-  switch (tool.slug) {
-    case "image-compressor":
-      return <ImageCompressorTool />;
-    case "image-resizer":
-      return <ImageResizerTool />;
-    case "crop-image":
-      return <CropImageTool />;
-    case "jpg-to-png-converter":
-      return <JpgToPngConverterTool />;
-    case "png-to-jpg-converter":
-      return <PngToJpgConverterTool />;
-    case "image-to-webp-converter":
-      return <ImageToWebpConverterTool />;
-    case "background-remover":
-      return <BackgroundRemoverTool />;
-    case "image-rotator":
-      return <ImageRotatorTool />;
-    case "image-watermark-tool":
-      return <ImageWatermarkTool />;
-    case "image-to-base64-converter":
-      return <ImageToBase64ConverterTool />;
-    case "pdf-merge":
-      return <PdfMergeTool />;
-    case "pdf-split":
-      return <PdfSplitTool />;
-    case "pdf-compressor":
-      return <PdfCompressorTool />;
-    case "pdf-to-jpg":
-      return <PdfToJpgTool />;
-    case "jpg-to-pdf":
-      return <JpgToPdfTool />;
-    case "pdf-page-rotator":
-      return <PdfPageRotatorTool />;
-    case "pdf-page-number-adder":
-      return <PdfPageNumberAdderTool />;
-    case "protect-pdf":
-      return <ProtectPdfTool />;
-    case "word-counter":
-      return <WordCounterTool />;
-    case "character-counter":
-      return <CharacterCounterTool />;
-    case "case-converter":
-      return <CaseConverterTool />;
-    case "remove-duplicate-lines":
-      return <RemoveDuplicateLinesTool />;
-    case "text-sorter":
-      return <TextSorterTool />;
-    case "json-formatter":
-      return <JsonFormatterTool />;
-    case "base64-encoder":
-      return <Base64EncoderTool />;
-    case "base64-decoder":
-      return <Base64DecoderTool />;
-    case "css-minifier":
-      return <CssMinifierTool />;
-    case "html-minifier":
-      return <HtmlMinifierTool />;
-    case "url-encoder":
-      return <UrlEncoderTool />;
-    case "url-decoder":
-      return <UrlDecoderTool />;
-    case "regex-tester":
-      return <RegexTesterTool />;
-    case "password-generator":
-      return <PasswordGeneratorTool />;
-    case "qr-code-generator":
-      return <QrCodeGeneratorTool />;
-    case "uuid-generator":
-      return <UuidGeneratorTool />;
-    case "random-name-generator":
-      return <RandomNameGeneratorTool />;
-    case "random-number-generator":
-      return <RandomNumberGeneratorTool />;
-    case "age-calculator":
-      return <AgeCalculatorTool />;
-    case "bmi-calculator":
-      return <BmiCalculatorTool />;
-    case "loan-calculator":
-      return <LoanCalculatorTool />;
-    case "percentage-calculator":
-      return <PercentageCalculatorTool />;
-    case "date-difference-calculator":
-      return <DateDifferenceCalculatorTool />;
-    case "length-converter":
-      return <LengthConverterTool />;
-    case "weight-converter":
-      return <WeightConverterTool />;
-    case "temperature-converter":
-      return <TemperatureConverterTool />;
-    case "time-converter":
-      return <TimeConverterTool />;
-    case "currency-converter":
-      return <CurrencyConverterTool />;
-    case "ip-address-lookup":
-      return <IpAddressLookupTool />;
-    case "dns-lookup":
-      return <DnsLookupTool />;
-    default:
-      break;
+  const ToolComponent = toolComponentMap[tool.slug];
+
+  if (ToolComponent) {
+    return <ToolComponent />;
   }
 
   return (

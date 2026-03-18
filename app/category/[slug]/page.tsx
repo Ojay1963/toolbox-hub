@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { FaqList } from "@/components/ui/faq-list";
+import { SearchBox } from "@/components/ui/search-box";
 import { ToolCard } from "@/components/ui/tool-card";
 import {
   buildBreadcrumbJsonLd,
@@ -10,7 +11,7 @@ import {
   buildFaqJsonLd,
   buildMetadata,
 } from "@/lib/seo";
-import { categories, getCategory, getToolsByCategory, tools } from "@/lib/tools";
+import { categories, getCategory, getPopularTools, getRecentTools, getToolsByCategory } from "@/lib/tools";
 
 export function generateStaticParams() {
   return categories.map((category) => ({ slug: category.slug }));
@@ -57,8 +58,10 @@ export default async function CategoryPage({
   const workingCount = categoryTools.filter(
     (tool) => tool.implementationStatus === "working-local",
   ).length;
+  const popularInCategory = getPopularTools(6, category.slug);
+  const recentInCategory = getRecentTools(4, category.slug);
   const relatedCategories = categories.filter((item) => item.slug !== category.slug).slice(0, 4);
-  const featuredLinks = categoryTools.slice(0, 4);
+  const featuredLinks = popularInCategory.slice(0, 4);
   const categoryFaq = [
     {
       question: `What kind of tools are in ${category.name}?`,
@@ -73,9 +76,7 @@ export default async function CategoryPage({
       answer: "Use the internal links to other categories and related tools throughout the site to move between similar tasks quickly.",
     },
   ];
-  const crossLinks = tools
-    .filter((tool) => tool.category !== category.slug)
-    .slice(0, 6);
+  const crossLinks = getPopularTools(6).filter((tool) => tool.category !== category.slug).slice(0, 6);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Home", pathname: "/" },
     { name: category.name, pathname: `/category/${category.slug}` },
@@ -143,6 +144,18 @@ export default async function CategoryPage({
         </div>
       </section>
 
+      <section className="mt-8">
+        <SearchBox
+          tools={categoryTools}
+          title={`Search inside ${category.name}`}
+          description={`Search only within ${category.name.toLowerCase()} so it is easier to find the right tool without leaving this section.`}
+          maxResults={6}
+          suggestedTools={[...popularInCategory, ...recentInCategory].filter(
+            (tool, index, collection) => collection.findIndex((candidate) => candidate.slug === tool.slug) === index,
+          )}
+        />
+      </section>
+
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <section>
           <div className="mb-5 flex items-end justify-between gap-4">
@@ -162,6 +175,16 @@ export default async function CategoryPage({
             {categoryTools.map((tool) => (
               <ToolCard key={tool.slug} tool={tool} />
             ))}
+          </div>
+          <div className="mt-8 rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-6 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+              Popular in this category
+            </p>
+            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {popularInCategory.map((tool) => (
+                <ToolCard key={`popular-${tool.slug}`} tool={tool} />
+              ))}
+            </div>
           </div>
         </section>
         <div className="space-y-6">
@@ -191,6 +214,20 @@ export default async function CategoryPage({
             <h2 className="text-lg font-bold tracking-tight">Internal links</h2>
             <div className="mt-4 space-y-3">
               {crossLinks.map((tool) => (
+                <Link
+                  key={tool.slug}
+                  href={`/tools/${tool.slug}`}
+                  className="block text-sm text-[color:var(--muted)] transition hover:text-[color:var(--primary)]"
+                >
+                  {tool.name}
+                </Link>
+              ))}
+            </div>
+          </section>
+          <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
+            <h2 className="text-lg font-bold tracking-tight">Recent additions</h2>
+            <div className="mt-4 space-y-3">
+              {recentInCategory.map((tool) => (
                 <Link
                   key={tool.slug}
                   href={`/tools/${tool.slug}`}

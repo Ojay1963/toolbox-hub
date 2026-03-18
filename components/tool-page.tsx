@@ -13,6 +13,8 @@ export function ToolPage({
   tool: ToolDefinition;
   relatedTools: ToolDefinition[];
 }) {
+  const categoryLabel = tool.category.replace(/-/g, " ");
+
   return (
     <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
       <div className="space-y-8">
@@ -29,7 +31,7 @@ export function ToolPage({
               href={`/category/${tool.category}`}
               className="transition hover:text-[color:var(--primary)]"
             >
-              {tool.category.replace(/-/g, " ")}
+              {categoryLabel}
             </Link>
             <span>/</span>
             <span className="text-[color:var(--foreground)]">{tool.name}</span>
@@ -56,10 +58,24 @@ export function ToolPage({
           <p>
             This page belongs to the{" "}
             <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
-              {tool.category.replace(/-/g, " ")}
+              {categoryLabel}
             </Link>{" "}
             category, so you can move to similar workflows if you need another option or a related task.
           </p>
+          {relatedTools.length ? (
+            <p>
+              Related options include{" "}
+              {relatedTools.map((item, index) => (
+                <span key={item.slug}>
+                  {index > 0 ? (index === relatedTools.length - 1 ? ", and " : ", ") : ""}
+                  <Link href={`/tools/${item.slug}`} className="font-semibold text-[color:var(--primary)]">
+                    {item.name}
+                  </Link>
+                </span>
+              ))}
+              , which can help if you need a nearby workflow instead of starting your search again.
+            </p>
+          ) : null}
         </Section>
 
         <Section title="How to use">
@@ -72,6 +88,13 @@ export function ToolPage({
               <li key={step}>{step}</li>
             ))}
           </ol>
+          <p>
+            If your task changes midway, you can also move to the{" "}
+            <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
+              {categoryLabel}
+            </Link>{" "}
+            category page or use the related tools below to stay in the same topic cluster.
+          </p>
         </Section>
 
         <Section title="FAQ">
@@ -111,7 +134,7 @@ export function ToolPage({
               href={`/category/${tool.category}`}
               className="block transition hover:text-[color:var(--primary)]"
             >
-              Explore more {tool.category.replace(/-/g, " ")}
+              Explore more {categoryLabel}
             </Link>
             {relatedTools.map((item) => (
               <Link

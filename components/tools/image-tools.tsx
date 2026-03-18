@@ -1,7 +1,8 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useState } from "react";
+import type { MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   buttonClass,
   EmptyState,
@@ -165,6 +166,40 @@ function useFilePreview(file: File | null) {
   }, [file]);
 
   return previewUrl;
+}
+
+function imageInputClass() {
+  return "w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]";
+}
+
+function getOutputExtension(type: string) {
+  if (type === "image/jpeg") return "jpg";
+  if (type === "image/png") return "png";
+  if (type === "image/webp") return "webp";
+  return "png";
+}
+
+async function applyCanvasFilterTool({
+  file,
+  outputType,
+  filter,
+  quality = 0.92,
+}: {
+  file: File;
+  outputType?: string;
+  filter: string;
+  quality?: number;
+}) {
+  return processImage({
+    file,
+    type: outputType ?? file.type ?? "image/png",
+    quality,
+    draw: (context, image) => {
+      context.filter = filter;
+      context.drawImage(image, 0, 0);
+      context.filter = "none";
+    },
+  });
 }
 
 export function ImageCompressorTool() {
@@ -749,5 +784,341 @@ export function BackgroundRemoverTool() {
       </Notice>
       <EmptyState title="No deceptive one-click removal here" description="When a genuinely useful browser-first version is practical, it can plug into this page without changing the route, content, or SEO structure." />
     </ToolShell>
+  );
+}
+
+export function ImageFormatConverterTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [outputType, setOutputType] = useState("image/png");
+  const [processed, setProcessed] = useState<ProcessedImage | null>(null);
+  const [error, setError] = useState("");
+  const previewUrl = useFilePreview(file);
+
+  useEffect(() => () => revokeUrl(processed?.url), [processed]);
+
+  const outputExtension = useMemo(() => getOutputExtension(outputType), [outputType]);
+
+  async function handleConvert() {
+    if (!file) {
+      setError("Upload a JPG, PNG, or WebP image first.");
+      return;
+    }
+
+    try {
+      revokeUrl(processed?.url);
+      const next = await processImage({
+        file,
+        type: outputType,
+        quality: outputType === "image/png" ? undefined : 0.92,
+        draw: (context, image) => {
+          if (outputType === "image/jpeg") {
+            context.fillStyle = "#ffffff";
+            context.fillRect(0, 0, image.width, image.height);
+          }
+          context.drawImage(image, 0, 0);
+        },
+      });
+      setProcessed(next);
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to convert this image.");
+    }
+  }
+
+  return (
+    <ToolShell title="Image Format Converter" description="Convert JPG, PNG, and WebP files between common browser-friendly formats using local canvas processing.">
+      <Field label="Supported file types" hint="JPG, PNG, WebP">
+        <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <Field label="Output format">
+        <select className={imageInputClass()} value={outputType} onChange={(event) => setOutputType(event.target.value)}>
+          <option value="image/png">PNG</option>
+          <option value="image/jpeg">JPG</option>
+          <option value="image/webp">WebP</option>
+        </select>
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleConvert} disabled={!file}>
+        Convert format
+      </button>
+      {outputType === "image/jpeg" ? <Notice>Transparent areas are flattened onto white when exporting as JPG.</Notice> : null}
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? (
+        <EmptyState title="Upload an image to convert" description="Choose a common image format, select the target format, and download the converted result." />
+      ) : (
+        <>
+          <ImageComparison originalUrl={previewUrl} processed={processed} />
+          <ImageDownloadPanel processed={processed} filename={`${file.name.replace(/\.[^.]+$/, "")}.${outputExtension}`} />
+        </>
+      )}
+    </ToolShell>
+  );
+}
+
+export function ImageColorPickerTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [error, setError] = useState("");
+  const [pickedHex, setPickedHex] = useState("");
+  const [pickedRgb, setPickedRgb] = useState("");
+  const [coordinates, setCoordinates] = useState("");
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const { copied, copy } = useCopyToClipboard();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!file) {
+      setPickedHex("");
+      setPickedRgb("");
+      setCoordinates("");
+      setError("");
+      return;
+    }
+
+    loadImage(file)
+      .then(({ image, url }) => {
+        if (cancelled) {
+          URL.revokeObjectURL(url);
+          return;
+        }
+        const canvas = canvasRef.current;
+        const context = canvas?.getContext("2d");
+        if (!canvas || !context) {
+          setError("Canvas is not available in this browser.");
+          URL.revokeObjectURL(url);
+          return;
+        }
+        canvas.width = image.width;
+        canvas.height = image.height;
+        context.clearRect(0, 0, image.width, image.height);
+        context.drawImage(image, 0, 0);
+        setError("");
+        URL.revokeObjectURL(url);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Unable to preview that image.");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [file]);
+
+  function handlePickColor(event: MouseEvent<HTMLCanvasElement>) {
+    const canvas = canvasRef.current;
+    const context = canvas?.getContext("2d");
+    if (!canvas || !context) {
+      setError("Canvas is not available in this browser.");
+      return;
+    }
+
+    const bounds = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / bounds.width;
+    const scaleY = canvas.height / bounds.height;
+    const x = Math.max(0, Math.min(canvas.width - 1, Math.floor((event.clientX - bounds.left) * scaleX)));
+    const y = Math.max(0, Math.min(canvas.height - 1, Math.floor((event.clientY - bounds.top) * scaleY)));
+    const [red, green, blue] = context.getImageData(x, y, 1, 1).data;
+    const hex = `#${[red, green, blue].map((value) => value.toString(16).padStart(2, "0").toUpperCase()).join("")}`;
+    setPickedHex(hex);
+    setPickedRgb(`rgb(${red}, ${green}, ${blue})`);
+    setCoordinates(`${x}, ${y}`);
+  }
+
+  return (
+    <ToolShell title="Image Color Picker" description="Pick HEX and RGB colors from uploaded JPG, PNG, or WebP images directly in the browser.">
+      <Field label="Supported file types" hint="JPG, PNG, WebP">
+        <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? (
+        <EmptyState title="Upload an image to sample colors" description="After the image loads, click anywhere on it to inspect that pixel's HEX and RGB values." />
+      ) : (
+        <>
+          <div className="rounded-2xl bg-stone-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">Click the image to pick a color</p>
+            <canvas
+              ref={canvasRef}
+              onClick={handlePickColor}
+              className="mt-3 max-h-[28rem] w-full cursor-crosshair rounded-2xl border border-[color:var(--border)] object-contain"
+              aria-label="Uploaded image canvas for color picking"
+            />
+          </div>
+          {pickedHex ? (
+            <>
+              <div className="rounded-2xl border border-[color:var(--border)] bg-stone-50 p-4">
+                <div className="h-16 rounded-xl border border-[color:var(--border)]" style={{ backgroundColor: pickedHex }} aria-hidden="true" />
+              </div>
+              <div className="grid gap-3 md:grid-cols-3">
+                <OutputBlock title="HEX value" value={pickedHex} multiline={false} />
+                <OutputBlock title="RGB value" value={pickedRgb} multiline={false} />
+                <OutputBlock title="Pixel coordinates" value={coordinates} multiline={false} />
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <button type="button" className={buttonClass} onClick={() => copy("HEX value", pickedHex)}>
+                  Copy HEX
+                </button>
+                <button type="button" className={secondaryButtonClass} onClick={() => copy("RGB value", pickedRgb)}>
+                  Copy RGB
+                </button>
+              </div>
+              {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+            </>
+          ) : (
+            <Notice>Click the preview to read a color value.</Notice>
+          )}
+        </>
+      )}
+    </ToolShell>
+  );
+}
+
+function FilterImageTool({
+  title,
+  description,
+  filterLabel,
+  min,
+  max,
+  step,
+  value,
+  onChange,
+  filter,
+  filenamePrefix,
+}: {
+  title: string;
+  description: string;
+  filterLabel: string;
+  min: number;
+  max: number;
+  step: number;
+  value: number;
+  onChange: (value: number) => void;
+  filter: (value: number) => string;
+  filenamePrefix: string;
+}) {
+  const [file, setFile] = useState<File | null>(null);
+  const [processed, setProcessed] = useState<ProcessedImage | null>(null);
+  const [error, setError] = useState("");
+  const previewUrl = useFilePreview(file);
+
+  useEffect(() => () => revokeUrl(processed?.url), [processed]);
+
+  async function handleApply() {
+    if (!file) {
+      setError("Upload a JPG, PNG, or WebP image first.");
+      return;
+    }
+
+    try {
+      revokeUrl(processed?.url);
+      const next = await applyCanvasFilterTool({
+        file,
+        filter: filter(value),
+        outputType: file.type || "image/png",
+      });
+      setProcessed(next);
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to process this image.");
+    }
+  }
+
+  return (
+    <ToolShell title={title} description={description}>
+      <Field label="Supported file types" hint="JPG, PNG, WebP">
+        <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <Field label={filterLabel}>
+        <input className="w-full" type="range" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleApply} disabled={!file}>
+        Apply effect
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? (
+        <EmptyState title="Upload an image to edit" description="Choose a supported image, adjust the setting, and export a processed copy locally." />
+      ) : (
+        <>
+          <ImageComparison originalUrl={previewUrl} processed={processed} />
+          <ImageDownloadPanel processed={processed} filename={`${filenamePrefix}-${file.name.replace(/\.[^.]+$/, "")}.${processed ? getOutputExtension(processed.blob.type) : getOutputExtension(file.type || "image/png")}`} />
+        </>
+      )}
+    </ToolShell>
+  );
+}
+
+export function BlurImageTool() {
+  const [blur, setBlur] = useState(4);
+
+  return (
+    <FilterImageTool
+      title="Blur Image Tool"
+      description="Apply a blur effect to JPG, PNG, or WebP images locally with canvas filtering."
+      filterLabel={`Blur radius (${blur}px)`}
+      min={0}
+      max={20}
+      step={1}
+      value={blur}
+      onChange={setBlur}
+      filter={(value) => `blur(${value}px)`}
+      filenamePrefix="blurred"
+    />
+  );
+}
+
+export function ImageBrightnessAdjusterTool() {
+  const [brightness, setBrightness] = useState(100);
+
+  return (
+    <FilterImageTool
+      title="Image Brightness Adjuster"
+      description="Adjust image brightness locally in the browser with a canvas-based export workflow."
+      filterLabel={`Brightness (${brightness}%)`}
+      min={20}
+      max={200}
+      step={1}
+      value={brightness}
+      onChange={setBrightness}
+      filter={(value) => `brightness(${value}%)`}
+      filenamePrefix="brightness-adjusted"
+    />
+  );
+}
+
+export function ImageContrastAdjusterTool() {
+  const [contrast, setContrast] = useState(100);
+
+  return (
+    <FilterImageTool
+      title="Image Contrast Adjuster"
+      description="Adjust image contrast locally with browser-side canvas processing and download-ready output."
+      filterLabel={`Contrast (${contrast}%)`}
+      min={20}
+      max={200}
+      step={1}
+      value={contrast}
+      onChange={setContrast}
+      filter={(value) => `contrast(${value}%)`}
+      filenamePrefix="contrast-adjusted"
+    />
+  );
+}
+
+export function ImageGrayscaleConverterTool() {
+  const [strength, setStrength] = useState(100);
+
+  return (
+    <FilterImageTool
+      title="Image Grayscale Converter"
+      description="Convert images to grayscale locally in the browser with canvas-based processing."
+      filterLabel={`Grayscale strength (${strength}%)`}
+      min={0}
+      max={100}
+      step={1}
+      value={strength}
+      onChange={setStrength}
+      filter={(value) => `grayscale(${value}%)`}
+      filenamePrefix="grayscale"
+    />
   );
 }

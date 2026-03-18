@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PDFDocument, StandardFonts, degrees, rgb } from "pdf-lib";
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 import {
   buttonClass,
   EmptyState,
@@ -14,15 +12,36 @@ import {
   ToolShell,
 } from "@/components/tools/common";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  "pdfjs-dist/legacy/build/pdf.worker.min.mjs",
-  import.meta.url,
-).toString();
-
 type DownloadItem = {
   name: string;
   url: string;
 };
+
+type PdfLibModule = typeof import("pdf-lib");
+type PdfJsModule = typeof import("pdfjs-dist/legacy/build/pdf.mjs");
+
+let pdfLibPromise: Promise<PdfLibModule> | null = null;
+let pdfJsPromise: Promise<PdfJsModule> | null = null;
+
+function getPdfLib() {
+  if (!pdfLibPromise) {
+    pdfLibPromise = import("pdf-lib");
+  }
+  return pdfLibPromise;
+}
+
+async function getPdfJs() {
+  if (!pdfJsPromise) {
+    pdfJsPromise = import("pdfjs-dist/legacy/build/pdf.mjs").then((module) => {
+      module.GlobalWorkerOptions.workerSrc = new URL(
+        "pdfjs-dist/legacy/build/pdf.worker.min.mjs",
+        import.meta.url,
+      ).toString();
+      return module;
+    });
+  }
+  return pdfJsPromise;
+}
 
 function revokeDownloads(items: DownloadItem[]) {
   items.forEach((item) => URL.revokeObjectURL(item.url));
@@ -100,6 +119,7 @@ export function PdfMergeTool() {
     }
     try {
       if (download) URL.revokeObjectURL(download.url);
+      const { PDFDocument } = await getPdfLib();
       const output = await PDFDocument.create();
       for (const file of files) {
         const source = await PDFDocument.load(await file.arrayBuffer());
@@ -152,6 +172,7 @@ export function PdfSplitTool() {
 
     try {
       revokeDownloads(downloads);
+      const { PDFDocument } = await getPdfLib();
       const source = await PDFDocument.load(await file.arrayBuffer());
       const nextDownloads: DownloadItem[] = [];
 
@@ -225,6 +246,7 @@ export function PdfCompressorTool() {
 
     try {
       if (download) URL.revokeObjectURL(download.url);
+      const { PDFDocument } = await getPdfLib();
       const source = await PDFDocument.load(await file.arrayBuffer());
       const output = await PDFDocument.create();
       const copiedPages = await output.copyPages(source, source.getPageIndices());
@@ -284,6 +306,7 @@ export function PdfToJpgTool() {
     try {
       revokeDownloads(downloads);
       const data = new Uint8Array(await file.arrayBuffer());
+      const pdfjsLib = await getPdfJs();
       const pdf = await pdfjsLib.getDocument({ data }).promise;
       const nextDownloads: DownloadItem[] = [];
 
@@ -350,6 +373,7 @@ export function JpgToPdfTool() {
 
     try {
       if (download) URL.revokeObjectURL(download.url);
+      const { PDFDocument } = await getPdfLib();
       const output = await PDFDocument.create();
       for (const file of files) {
         const bytes = new Uint8Array(await file.arrayBuffer());
@@ -410,6 +434,7 @@ export function PdfPageRotatorTool() {
 
     try {
       if (download) URL.revokeObjectURL(download.url);
+      const { PDFDocument, degrees } = await getPdfLib();
       const pdf = await PDFDocument.load(await file.arrayBuffer());
       const pagesToRotate = pageInput.trim()
         ? parsePageSelection(pageInput, pdf.getPageCount())
@@ -476,6 +501,7 @@ export function PdfPageNumberAdderTool() {
 
     try {
       if (download) URL.revokeObjectURL(download.url);
+      const { PDFDocument, StandardFonts, rgb } = await getPdfLib();
       const pdf = await PDFDocument.load(await file.arrayBuffer());
       const font = await pdf.embedFont(StandardFonts.Helvetica);
       pdf.getPages().forEach((page, index) => {
