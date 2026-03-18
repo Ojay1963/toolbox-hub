@@ -16,8 +16,13 @@ export function generateStaticParams() {
   return categories.map((category) => ({ slug: category.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const category = getCategory(params.slug);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const category = getCategory(slug);
   if (!category) {
     return {};
   }
@@ -37,8 +42,13 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   });
 }
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
-  const category = getCategory(params.slug);
+export default async function CategoryPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const category = getCategory(slug);
   if (!category) {
     notFound();
   }
