@@ -1,0 +1,25 @@
+import Link from "next/link";
+import type { ToolDefinition } from "@/lib/tools";
+
+export function ToolCard({ tool }: { tool: ToolDefinition }) {
+  return (
+    <Link
+      href={`/tools/${tool.slug}`}
+      className="group rounded-3xl border border-[color:var(--border)] bg-white/88 p-5 shadow-sm transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-full bg-[color:var(--soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+          {tool.category.replace(/-/g, " ")}
+        </span>
+        <span className="rounded-full border border-[color:var(--border)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
+          {tool.implementationStatus}
+        </span>
+      </div>
+      <h3 className="text-lg font-bold tracking-tight">{tool.name}</h3>
+      <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">{tool.shortDescription}</p>
+      <p className="mt-4 text-sm font-semibold text-[color:var(--primary)] transition group-hover:text-[color:var(--primary-dark)]">
+        Open tool
+      </p>
+    </Link>
+  );
+}

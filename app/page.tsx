@@ -1,0 +1,264 @@
+import Link from "next/link";
+import { AdPlaceholder } from "@/components/ui/ad-placeholder";
+import { FaqList } from "@/components/ui/faq-list";
+import { CategoryCard } from "@/components/ui/category-card";
+import { SearchBox } from "@/components/ui/search-box";
+import { ToolCard } from "@/components/ui/tool-card";
+import {
+  buildBreadcrumbJsonLd,
+  buildCollectionPageJsonLd,
+  buildFaqJsonLd,
+  buildMetadata,
+} from "@/lib/seo";
+import { categories, getToolsByCategory, tools } from "@/lib/tools";
+
+export const metadata = buildMetadata({
+  title: "Free Online Tools for Images, PDFs, Text, Developers, and More",
+  description:
+    "Use 50 free online tools for image editing, PDF tasks, text cleanup, generators, calculators, converters, and developer workflows.",
+  pathname: "/",
+  keywords: ["free online tools", "browser tools", "seo-friendly tools"],
+});
+
+export default function HomePage() {
+  const featuredCategories = categories.slice(0, 4);
+  const popularTools = tools.filter((tool) => tool.implementationStatus === "working-local").slice(0, 6);
+  const latestTools = [...tools].slice(-6).reverse();
+  const workingToolsCount = tools.filter((tool) => tool.implementationStatus === "working-local").length;
+  const reducedScopeCount = tools.filter(
+    (tool) => tool.implementationStatus === "reduced-scope-local",
+  ).length;
+  const homepageFaq = [
+    {
+      question: "Do these tools require an account?",
+      answer: "No. The site is intentionally built without auth so people can open a page and use a tool immediately.",
+    },
+    {
+      question: "Are files uploaded to a server?",
+      answer: "Many tools are designed for local browser-side processing. Where a tool has limits, the page explains that clearly instead of pretending otherwise.",
+    },
+    {
+      question: "Are all 50 tools identical in scope?",
+      answer: "No. Some are fully working locally, some are reduced-scope by design, and a small number stay honest as future-ready placeholders until a reliable implementation is practical.",
+    },
+  ];
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([{ name: "Home", pathname: "/" }]);
+  const homepageCollectionJsonLd = buildCollectionPageJsonLd({
+    name: "Free Online Tools Directory",
+    description:
+      "A browsable collection of free online tools for PDFs, images, text, developers, generators, calculators, converters, and internet tasks.",
+    pathname: "/",
+    items: popularTools.map((tool) => ({
+      name: tool.name,
+      pathname: `/tools/${tool.slug}`,
+    })),
+  });
+  const homepageFaqJsonLd = buildFaqJsonLd(homepageFaq);
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageCollectionJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqJsonLd) }}
+      />
+      <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10 lg:p-12">
+        <div className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr]">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[color:var(--primary-dark)]">
+              Free online tools
+            </p>
+            <h1 className="mt-4 max-w-4xl text-4xl font-black tracking-tight sm:text-6xl">
+              Free online tools for PDF, image, text, developer, and calculator tasks.
+            </h1>
+            <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
+              Toolbox Hub gives you a clean set of practical tools that work fast on desktop and
+              mobile. Use browser-first workflows for common file, text, coding, conversion, and
+              calculation tasks without a login or bloated interface.
+            </p>
+            <div className="mt-6 max-w-3xl">
+              <SearchBox tools={tools} />
+            </div>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/category/text-tools"
+                className="rounded-full bg-[color:var(--primary)] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[color:var(--primary-dark)]"
+              >
+                Start with text tools
+              </Link>
+              <Link
+                href="/category/pdf-tools"
+                className="rounded-full border border-[color:var(--border)] bg-white px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+              >
+                Explore PDF tools
+              </Link>
+              <Link
+                href="/category/converter-tools"
+                className="rounded-full border border-[color:var(--border)] bg-white px-5 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+              >
+                Browse converters
+              </Link>
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="rounded-3xl bg-[color:var(--soft)] p-5">
+              <p className="text-3xl font-black">{workingToolsCount}</p>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">fully working local tools</p>
+            </div>
+            <div className="rounded-3xl bg-white p-5">
+              <p className="text-3xl font-black">{categories.length}</p>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">linked categories</p>
+            </div>
+            <div className="rounded-3xl bg-white p-5">
+              <p className="text-3xl font-black">{reducedScopeCount}</p>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">honestly reduced-scope tools</p>
+            </div>
+            <AdPlaceholder
+              slot="homepage-hero-rail"
+              label="Hero sponsor slot"
+              format="rectangle"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+              Featured categories
+            </p>
+            <h2 className="mt-2 text-3xl font-black tracking-tight">Start from the right section</h2>
+          </div>
+          <Link href="/category/text-tools" className="text-sm font-semibold text-[color:var(--primary)]">
+            Explore a category
+          </Link>
+        </div>
+        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {featuredCategories.map((category) => (
+            <CategoryCard
+              key={category.slug}
+              category={category}
+              count={getToolsByCategory(category.slug).length}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+          All categories
+        </p>
+        <h2 className="mt-2 text-3xl font-black tracking-tight">Browse the full tool directory</h2>
+        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          {categories.map((category) => (
+            <CategoryCard
+              key={category.slug}
+              category={category}
+              count={getToolsByCategory(category.slug).length}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+          Popular tools
+        </p>
+        <h2 className="mt-2 text-3xl font-black tracking-tight">Popular starting points</h2>
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {popularTools.map((tool) => (
+            <ToolCard key={tool.slug} tool={tool} />
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <AdPlaceholder
+          slot="homepage-mid-banner"
+          label="Homepage banner slot"
+          format="leaderboard"
+        />
+      </section>
+
+      <section className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+            Latest tools
+          </p>
+          <h2 className="mt-2 text-3xl font-black tracking-tight">Recently added to the registry</h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {latestTools.map((tool) => (
+              <ToolCard key={tool.slug} tool={tool} />
+            ))}
+          </div>
+        </div>
+        <div className="space-y-6">
+          <AdPlaceholder
+            slot="homepage-sidebar-rail"
+            label="Homepage sidebar slot"
+            format="sidebar"
+          />
+          <div className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
+            <h2 className="text-lg font-bold tracking-tight">Browse by intent</h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <Link
+                  key={category.slug}
+                  href={`/category/${category.slug}`}
+                  className="rounded-full border border-[color:var(--border)] px-3 py-2 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
+                >
+                  {category.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-10 rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+          Why people use this site
+        </p>
+        <h2 className="mt-2 text-3xl font-black tracking-tight">Built for speed, clarity, and honest scope</h2>
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <div className="rounded-3xl bg-stone-50 p-5">
+            <h3 className="text-lg font-bold tracking-tight">Fast to open</h3>
+            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+              The site keeps pages lightweight and static where possible so people can get to the tool they need quickly.
+            </p>
+          </div>
+          <div className="rounded-3xl bg-stone-50 p-5">
+            <h3 className="text-lg font-bold tracking-tight">Clear about limitations</h3>
+            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+              Reduced-scope and future-ready tools are labeled clearly instead of pretending to offer live data or high-quality conversion they do not have.
+            </p>
+          </div>
+          <div className="rounded-3xl bg-stone-50 p-5">
+            <h3 className="text-lg font-bold tracking-tight">Easy to navigate</h3>
+            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+              Categories, related tools, search, and internal links make it easy to move from one task to the next without friction.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+          FAQ
+        </p>
+        <h2 className="mt-2 text-3xl font-black tracking-tight">Common questions</h2>
+        <div className="mt-6">
+          <FaqList items={homepageFaq} />
+        </div>
+      </section>
+    </div>
+  );
+}
