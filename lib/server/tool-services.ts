@@ -477,6 +477,17 @@ function splitParagraphs(text: string) {
     .filter(Boolean);
 }
 
+function normalizePdfText(text: string) {
+  return text
+    .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+    .replace(/[\u201C\u201D\u201E]/g, '"')
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/\u2026/g, "...")
+    .replace(/\u2022/g, "-")
+    .replace(/\u00A0/g, " ")
+    .replace(/[^\u0020-\u007E\n\r\t]/g, "");
+}
+
 function wrapText(font: Awaited<ReturnType<PDFDocument["embedFont"]>>, text: string, fontSize: number, maxWidth: number) {
   const words = text.split(/\s+/).filter(Boolean);
   const lines: string[] = [];
@@ -518,6 +529,10 @@ export async function convertWordToPdf(file: File) {
   if (!rawText) {
     throw new ToolServiceError("This Word document did not contain readable text for the current PDF export.");
   }
+  const safeText = normalizePdfText(rawText).trim();
+  if (!safeText) {
+    throw new ToolServiceError("This Word document contains text that could not be exported cleanly to PDF.");
+  }
 
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
@@ -537,7 +552,7 @@ export async function convertWordToPdf(file: File) {
     cursorY = pageSize.height - margin;
   };
 
-  const paragraphs = splitParagraphs(rawText);
+  const paragraphs = splitParagraphs(safeText);
   paragraphs.forEach((paragraph, index) => {
     const isHeading = paragraph.length < 90 && /^[A-Z0-9\s\-:]+$/.test(paragraph);
     const activeFont = isHeading ? titleFont : font;
@@ -562,7 +577,7 @@ export async function convertWordToPdf(file: File) {
   const bytes = await pdf.save({ useObjectStreams: true });
   return {
     bytes,
-    text: rawText,
+    text: safeText,
     name: `${file.name.replace(/\.docx$/i, "")}.pdf`,
   };
 }
