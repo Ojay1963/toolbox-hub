@@ -128,7 +128,12 @@ async function getPdfJs() {
   if (typeof globalThis.DOMMatrix === "undefined") {
     globalThis.DOMMatrix = SimpleDOMMatrix as unknown as typeof DOMMatrix;
   }
-  return import("pdfjs-dist/legacy/build/pdf.mjs");
+  const pdfJsModule = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  pdfJsModule.GlobalWorkerOptions.workerSrc = new URL(
+    "pdfjs-dist/legacy/build/pdf.worker.min.mjs",
+    import.meta.url,
+  ).toString();
+  return pdfJsModule;
 }
 
 export class ToolServiceError extends Error {
