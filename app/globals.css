@@ -44,6 +44,18 @@ textarea {
   font: inherit;
 }
 
+input[type="file"] {
+  cursor: pointer;
+}
+
+input[type="file"]::file-selector-button {
+  cursor: pointer;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+  cursor: pointer;
+}
+
 .prose-content h2,
 .prose-content h3 {
   font-weight: 700;

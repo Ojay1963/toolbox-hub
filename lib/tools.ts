@@ -273,6 +273,22 @@ const serviceBackedToolConfig = new Map<string, ServiceBackedToolConfig>([
         "Website screenshots are currently unavailable on this deployment. The route stays live for future activation, but it should not be indexed or featured until screenshot capture is enabled.",
     },
   ],
+  [
+    "website-speed-test",
+    {
+      requiredEnvVars: ["PAGESPEED_API_KEY"],
+      unavailableMessage:
+        "Website speed testing is currently unavailable on this deployment. The page stays live, but it should not be indexed or featured until PageSpeed access is enabled.",
+    },
+  ],
+  [
+    "mobile-friendly-checker",
+    {
+      requiredEnvVars: ["PAGESPEED_API_KEY"],
+      unavailableMessage:
+        "Mobile-friendly checking is currently unavailable on this deployment. The page stays live, but it should not be indexed or featured until PageSpeed access is enabled.",
+    },
+  ],
 ]);
 
 function resolveImplementationStatus(tool: ToolDraft): ImplementationStatus {

@@ -5,7 +5,6 @@ import { isIP } from "node:net";
 import mammoth from "mammoth";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
 
 type JsonRecord = Record<string, unknown>;
 type ApiSuccess<T> = { ok: true; data: T };
@@ -35,6 +34,10 @@ const blockedHostnameSuffixes = [".localhost", ".local", ".internal", ".home", "
 const MAX_PUBLIC_FILE_BYTES = 25 * 1024 * 1024;
 const DEFAULT_FETCH_TIMEOUT_MS = 12_000;
 const RATE_LIMIT_TIMEOUT_MS = 5_000;
+
+async function getPdfJs() {
+  return import("pdfjs-dist/legacy/build/pdf.mjs");
+}
 
 export class ToolServiceError extends Error {
   status: number;
@@ -471,6 +474,7 @@ export async function convertPdfToWord(file: File) {
     throw new ToolServiceError("Upload a PDF file to continue.");
   }
 
+  const pdfjsLib = await getPdfJs();
   const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
   const pageTexts: string[] = [];
 
@@ -576,14 +580,15 @@ export async function lookupDnsRecords(hostname: string) {
 
 export async function fetchPageSpeedReport(url: string) {
   const normalizedUrl = await normalizePublicHttpUrl(url);
-  const apiKey = process.env.PAGESPEED_API_KEY?.trim();
+  const apiKey = requireEnvVar(
+    "PAGESPEED_API_KEY",
+    "Website speed testing is not enabled on this deployment yet.",
+  );
   const query = new URLSearchParams();
   query.set("url", normalizedUrl.toString());
   query.set("strategy", "mobile");
   ["performance", "accessibility", "best-practices", "seo"].forEach((category) => query.append("category", category));
-  if (apiKey) {
-    query.set("key", apiKey);
-  }
+  query.set("key", apiKey);
 
   const response = await fetchWithTimeout(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?${query.toString()}`, {
     next: { revalidate: 1800 },
@@ -592,9 +597,7 @@ export async function fetchPageSpeedReport(url: string) {
 
   if (!response.ok) {
     throw new ToolServiceError(
-      apiKey
-        ? "The website speed service could not return a report for that URL right now."
-        : "The website speed service is temporarily unavailable. Add a PageSpeed API key or try again later.",
+      "The website speed service could not return a report for that URL right now.",
       { status: response.status === 429 ? 503 : 502, code: "UPSTREAM_UNAVAILABLE" },
     );
   }
