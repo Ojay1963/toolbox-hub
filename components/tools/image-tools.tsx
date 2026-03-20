@@ -2304,7 +2304,7 @@ export function ExifDataViewerTool() {
     try {
       const result = await readExifData(file);
       if (!result.supported) {
-        setOutput("This reduced-scope EXIF reader currently supports JPEG files best.");
+        setOutput("This EXIF reader works best with JPEG files.");
         setError("");
         return;
       }
@@ -2329,7 +2329,7 @@ export function ExifDataViewerTool() {
       </Field>
       <button type="button" className={buttonClass} onClick={handleRead} disabled={!file}>Read EXIF data</button>
       {error ? <Notice tone="error">{error}</Notice> : null}
-      {!file ? <EmptyState title="Upload an image to inspect EXIF data" description="Choose a JPG image to extract a reduced-scope set of common EXIF fields locally in the browser." /> : <>
+      {!file ? <EmptyState title="Upload an image to inspect EXIF data" description="Choose a JPG image to extract common EXIF details." /> : <>
         {previewUrl ? <div className="rounded-2xl bg-stone-50 p-4"><img src={previewUrl} alt="Uploaded image preview" className="max-h-80 w-full rounded-2xl object-contain" /></div> : null}
         {output ? <>
           <OutputBlock title="EXIF data" value={output} />
@@ -2504,7 +2504,7 @@ export function ImageNoiseReducerTool() {
   }
 
   return (
-    <ToolShell title="Image Noise Reducer" description="Apply a lightweight local smoothing pass to reduce visible image noise while staying honest about reduced-scope browser-side processing.">
+    <ToolShell title="Image Noise Reducer" description="Reduce visible image noise with a light smoothing pass.">
       <Field label="Supported file types" hint="JPG, PNG, WebP">
         <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>

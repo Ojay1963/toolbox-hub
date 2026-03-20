@@ -41,7 +41,7 @@ function slugify(value: string) {
 const sentenceBank = [
   "Small tools save surprising amounts of time during everyday work.",
   "A clean workflow usually beats a complicated one.",
-  "Browser-first utilities can be fast, simple, and practical.",
+  "Simple online tools can be fast, useful, and easy to trust.",
   "Good defaults make even small tools easier to trust.",
   "Clear output matters as much as correct output.",
   "Tiny improvements often create the biggest sense of momentum.",

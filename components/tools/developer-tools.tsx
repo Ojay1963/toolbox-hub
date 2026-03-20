@@ -149,7 +149,7 @@ function formatYaml(value: string) {
     }
 
     if (leadingSpaces > previousIndent + 2 && !trimmed.trimStart().startsWith("- ")) {
-      throw new Error(`Line ${index + 1} jumps indentation too far for this reduced-scope formatter.`);
+      throw new Error(`Line ${index + 1} jumps indentation too far for this formatter.`);
     }
 
     previousIndent = leadingSpaces;
@@ -782,12 +782,12 @@ const pageTitleTemplates = [
   "{keyword}: Simple Guide for Beginners",
   "Best {keyword} Tips for 2026",
   "{keyword} Checklist and Examples",
-  "Free {keyword} Tool | Fast Browser Workflow",
+  "Free {keyword} Tool | Fast Online Workflow",
 ];
 
 const descriptionTemplates = [
-  "Use {keyword} to simplify your workflow with a fast browser-based tool and clear copy-ready output.",
-  "Generate better {keyword} ideas locally with a practical browser-first workflow and easy next steps.",
+  "Use {keyword} to simplify your workflow with a fast online tool and clear copy-ready output.",
+  "Generate better {keyword} ideas with a practical workflow and easy next steps.",
   "Plan your {keyword} content faster with a lightweight local tool built for drafting and SEO brainstorming.",
   "Create a polished {keyword} draft with clear examples, structured output, and easy copy actions.",
 ];
@@ -1656,7 +1656,7 @@ function MinifierTool({
       <button type="button" className={buttonClass} onClick={handleMinify}>
         Minify code
       </button>
-      <Notice>Reduced-scope local minification only. This is useful for cleanup, but it is not a full production optimizer.</Notice>
+      <Notice>This tool is best for quick cleanup. Results may vary with more complex code.</Notice>
       {error ? <Notice tone="error">{error}</Notice> : null}
       {!input ? (
         <EmptyState title="Add code to minify" description="Paste CSS or HTML and the tool will remove comments and unnecessary spacing where appropriate." />
@@ -1677,7 +1677,7 @@ export function CssMinifierTool() {
   return (
     <MinifierTool
       title="CSS Minifier"
-      description="Shrink CSS by removing comments and extra whitespace with a lightweight browser-side cleanup flow."
+      description="Shrink CSS by removing comments and extra whitespace."
       minify={minifyCss}
       placeholder={"body {\n  color: red;\n}\n/* comment */"}
     />
@@ -1688,7 +1688,7 @@ export function HtmlMinifierTool() {
   return (
     <MinifierTool
       title="HTML Minifier"
-      description="Minify HTML markup locally with a lightweight cleanup pass and clear scope labeling."
+      description="Minify HTML markup with a quick cleanup pass."
       minify={minifyHtml}
       placeholder={"<div>\n  <span>Hello</span>\n</div>"}
     />
@@ -1895,7 +1895,7 @@ export function YamlFormatterTool() {
   return (
     <TransformTool
       title="YAML Formatter"
-      description="Format YAML locally with whitespace cleanup and reduced-scope indentation validation for common YAML structures."
+      description="Format YAML with whitespace cleanup and clear validation for common structures."
       inputLabel="YAML input"
       placeholder={`site:\n  name: Toolbox Hub\n  tools:\n    - formatter\n    - parser`}
       actionLabel="Format YAML"
@@ -3955,7 +3955,7 @@ export function JsonSchemaValidatorTool() {
   }
 
   return (
-    <ToolShell title="JSON Schema Validator" description="Validate JSON against a reduced-scope JSON Schema rule set locally, including types, required keys, enums, patterns, and common numeric or length checks.">
+    <ToolShell title="JSON Schema Validator" description="Validate JSON with support for common schema rules such as types, required keys, enums, patterns, and length checks.">
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="JSON data">
           <textarea className={textareaClass} value={dataInput} onChange={(event) => setDataInput(event.target.value)} />
@@ -3964,7 +3964,7 @@ export function JsonSchemaValidatorTool() {
           <textarea className={textareaClass} value={schemaInput} onChange={(event) => setSchemaInput(event.target.value)} />
         </Field>
       </div>
-      <Notice>Reduced-scope schema support includes `type`, `required`, `properties`, `items`, `enum`, `minLength`, `maxLength`, `minimum`, `maximum`, `pattern`, `minItems`, and `maxItems`.</Notice>
+      <Notice>Supported rules include `type`, `required`, `properties`, `items`, `enum`, `minLength`, `maxLength`, `minimum`, `maximum`, `pattern`, `minItems`, and `maxItems`.</Notice>
       <button type="button" className={buttonClass} onClick={handleValidate}>Validate JSON</button>
       {error ? <Notice tone="error">{error}</Notice> : null}
       {!report && !error ? (
@@ -4048,14 +4048,14 @@ export function XmlToJsonConverterTool() {
   }
 
   return (
-    <ToolShell title="XML to JSON Converter" description="Convert valid XML into a readable reduced-scope JSON structure locally in the browser with highlighted output.">
+    <ToolShell title="XML to JSON Converter" description="Convert valid XML into a readable JSON structure with highlighted output.">
       <Field label="XML input">
         <textarea className={textareaClass} value={input} onChange={(event) => setInput(event.target.value)} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleConvert}>Convert XML to JSON</button>
       {error ? <Notice tone="error">{error}</Notice> : null}
       {!output && !error ? (
-        <EmptyState title="No JSON output yet" description="Paste valid XML and convert it into a reduced-scope JSON structure you can inspect and copy." />
+        <EmptyState title="No JSON output yet" description="Paste valid XML and convert it into a JSON structure you can inspect and copy." />
       ) : output ? (
         <>
           <CodeOutputBlock title="JSON output" value={output} language="json" />
@@ -4187,14 +4187,13 @@ export function CsvDiffCheckerTool() {
 
 export function KeywordDifficultyCheckerPlaceholderTool() {
   return (
-    <ToolShell title="Keyword Difficulty Checker" description="True keyword difficulty depends on live search and SERP data, so this page stays honest until a real data-backed implementation is added.">
+    <ToolShell title="Keyword Difficulty Checker" description="Keyword difficulty works best with live search data, so this tool is not available yet.">
       <Notice>
-        Coming soon. Reliable keyword difficulty scoring usually needs external ranking data and should
-        not be guessed locally without the evidence behind it.
+        This tool is currently unavailable. Please check back later.
       </Notice>
       <EmptyState
-        title="No fake difficulty score"
-        description="A future version can add a real difficulty workflow when trustworthy live data is available. Until then, this page explains the limitation instead of inventing a misleading score."
+        title="Not available right now"
+        description="Reliable keyword difficulty scores need live search data. This page stays hidden until that experience is ready."
       />
     </ToolShell>
   );
@@ -4238,7 +4237,7 @@ export function KeywordSuggestionGeneratorTool() {
 }
 
 export function MetaTagAnalyzerTool() {
-  const [markup, setMarkup] = useState('<title>Email Marketing Guide | Toolbox Hub</title>\n<meta name="description" content="Learn practical email marketing tips with a browser-first workflow." />\n<meta name="robots" content="index,follow" />\n<link rel="canonical" href="https://example.com/email-marketing-guide" />');
+  const [markup, setMarkup] = useState('<title>Email Marketing Guide | Toolbox Hub</title>\n<meta name="description" content="Learn practical email marketing tips with clear examples and simple advice." />\n<meta name="robots" content="index,follow" />\n<link rel="canonical" href="https://example.com/email-marketing-guide" />');
   const [report, setReport] = useState("");
   const [error, setError] = useState("");
   const { copied, copy } = useCopyToClipboard();

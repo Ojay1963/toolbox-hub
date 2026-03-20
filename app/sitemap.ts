@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { blogArticles } from "@/lib/blog";
 import { siteMetadata } from "@/lib/seo";
 import {
   categories,
@@ -16,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const popularSlugs = new Set(getPopularTools(30).map((tool) => tool.slug));
   const recentSlugs = new Set(getRecentTools(50).map((tool) => tool.slug));
   const trendingSlugs = new Set(getTrendingTools(40).map((tool) => tool.slug));
-  const staticPages = ["/about", "/contact", "/privacy-policy", "/terms-of-use", "/disclaimer"];
+  const staticPages = ["/about", "/blog", "/contact", "/privacy-policy", "/terms-of-use", "/disclaimer"];
 
   return [
     {
@@ -36,6 +37,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "weekly" as const,
       priority: 0.88,
+    })),
+    ...blogArticles.map((article) => ({
+      url: `${siteMetadata.siteUrl}/blog/${article.slug}`,
+      lastModified,
+      changeFrequency: "monthly" as const,
+      priority: 0.74,
     })),
     ...tools
       .filter((tool) => shouldIncludeToolInSitemap(tool))

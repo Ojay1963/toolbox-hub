@@ -18,6 +18,7 @@ export function ToolPage({
   categoryRecentTools: ToolDefinition[];
 }) {
   const categoryLabel = tool.category.replace(/-/g, " ");
+  const primaryRelatedTools = relatedTools.slice(0, 3);
   return (
     <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
       <div className="space-y-8">
@@ -46,23 +47,37 @@ export function ToolPage({
           <p className="mt-4 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
             {tool.longDescription}
           </p>
+          {primaryRelatedTools.length ? (
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
+              Need a related workflow? Try{" "}
+              {primaryRelatedTools.map((item, index) => (
+                <span key={item.slug}>
+                  {index > 0 ? (index === primaryRelatedTools.length - 1 ? ", or " : ", ") : ""}
+                  <Link href={`/tools/${item.slug}`} className="font-semibold text-[color:var(--primary)]">
+                    {item.name}
+                  </Link>
+                </span>
+              ))}
+              .
+            </p>
+          ) : null}
           <div className="mt-8">
             <ToolRenderer tool={tool} />
           </div>
         </section>
 
-        <Section title="About this tool">
+        <Section title={`About ${tool.name}`}>
           <p>{tool.longDescription}</p>
           <p>
-            Browse more options in{" "}
+            You can also explore{" "}
             <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
               {categoryLabel}
             </Link>{" "}
-            if you want a similar tool.
+            for similar tools in the same category.
           </p>
           {relatedTools.length ? (
             <p>
-              Related options include{" "}
+              If you need a slightly different result, try{" "}
               {relatedTools.map((item, index) => (
                 <span key={item.slug}>
                   {index > 0 ? (index === relatedTools.length - 1 ? ", and " : ", ") : ""}
@@ -76,7 +91,7 @@ export function ToolPage({
           ) : null}
         </Section>
 
-        <Section title="How to use">
+        <Section title={`How to use ${tool.name.toLowerCase()}`}>
           <ol className="space-y-3 pl-5">
             {tool.howToUse.map((step) => (
               <li key={step}>{step}</li>
@@ -84,11 +99,36 @@ export function ToolPage({
           </ol>
         </Section>
 
-        <Section title="FAQ">
+        {tool.peopleAlsoSearchFor.length ? (
+          <Section title="People also search for">
+            <div className="flex flex-wrap gap-3">
+              {tool.peopleAlsoSearchFor.map((item) =>
+                item.href ? (
+                  <Link
+                    key={`${item.phrase}-${item.href}`}
+                    href={item.href}
+                    className="rounded-full border border-[color:var(--border)] bg-stone-50 px-4 py-2 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
+                  >
+                    {item.phrase}
+                  </Link>
+                ) : (
+                  <span
+                    key={item.phrase}
+                    className="rounded-full border border-[color:var(--border)] bg-stone-50 px-4 py-2 text-sm text-[color:var(--muted)]"
+                  >
+                    {item.phrase}
+                  </span>
+                ),
+              )}
+            </div>
+          </Section>
+        ) : null}
+
+        <Section title={`${tool.name} FAQs`}>
           <FaqList items={tool.faq} />
         </Section>
 
-        <Section title="Related tools">
+        <Section title={`Related ${categoryLabel}`}>
           <RelatedTools tools={relatedTools} />
         </Section>
 

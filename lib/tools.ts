@@ -22,6 +22,11 @@ export type FaqItem = {
   answer: string;
 };
 
+export type SearchPhraseItem = {
+  phrase: string;
+  href?: string;
+};
+
 export type ToolDefinition = {
   name: string;
   slug: string;
@@ -36,6 +41,7 @@ export type ToolDefinition = {
   seoTitle: string;
   seoDescription: string;
   statusNote?: string;
+  peopleAlsoSearchFor: SearchPhraseItem[];
 };
 
 type ImplementationStatusMeta = {
@@ -52,9 +58,9 @@ export type CategoryDefinition = {
   hero: string;
 };
 
-type ToolDraft = Omit<ToolDefinition, "relatedToolSlugs">;
+type ToolDraft = Omit<ToolDefinition, "relatedToolSlugs" | "peopleAlsoSearchFor">;
 
-type ToolInput = Omit<ToolDefinition, "relatedToolSlugs" | "faq"> & {
+type ToolInput = Omit<ToolDefinition, "relatedToolSlugs" | "faq" | "peopleAlsoSearchFor"> & {
   faq1: string;
   faq2: string;
   faqAnswer1: string;
@@ -93,41 +99,47 @@ function makeTool(input: ToolInput): ToolDraft {
     seoDescription: shouldNormalize ? normalizePublicCopy(input.seoDescription) : input.seoDescription,
     statusNote: shouldNormalize && input.statusNote ? normalizePublicCopy(input.statusNote) : input.statusNote,
     faq: [
-      { question: input.faq1, answer: shouldNormalize ? normalizePublicCopy(input.faqAnswer1) : input.faqAnswer1 },
-      { question: input.faq2, answer: shouldNormalize ? normalizePublicCopy(input.faqAnswer2) : input.faqAnswer2 },
+      {
+        question: shouldNormalize ? normalizePublicCopy(input.faq1) : input.faq1,
+        answer: shouldNormalize ? normalizePublicCopy(input.faqAnswer1) : input.faqAnswer1,
+      },
+      {
+        question: shouldNormalize ? normalizePublicCopy(input.faq2) : input.faq2,
+        answer: shouldNormalize ? normalizePublicCopy(input.faqAnswer2) : input.faqAnswer2,
+      },
     ],
   };
 }
 
 const toolDraftsPart1: ToolDraft[] = [
-  makeTool({ name: "Image Compressor", slug: "image-compressor", category: "image-tools", shortDescription: "Reduce image file size with a browser-side compression workflow.", longDescription: "The Image Compressor page is structured for a local compression experience where users can upload an image, choose a quality target, preview the result, and download a smaller file. This tool is well suited to browser-side canvas-based processing and fits the current architecture cleanly.", keywords: ["image compressor", "compress image", "reduce image size"], howToUse: ["Upload an image file.", "Choose a target quality or compression level.", "Preview and download the compressed result."], implementationStatus: "working-local", seoTitle: "Image Compressor Online", seoDescription: "Compress images online with a browser-first workflow designed for fast file-size reduction and simple downloads.", faq1: "Will this tool upload my image?", faqAnswer1: "The intended implementation is local browser-side processing so files do not need to leave the device.", faq2: "Can compressed images lose quality?", faqAnswer2: "Yes. Compression can reduce visual quality depending on the settings used." }),
-  makeTool({ name: "Image Resizer", slug: "image-resizer", category: "image-tools", shortDescription: "Resize images by width and height with a simple local workflow.", longDescription: "Image Resizer lets users change image dimensions, preserve aspect ratio, and export the result in a straightforward browser-side workflow. It is a clean fit for the shared architecture and keeps the experience fast and simple.", keywords: ["image resizer", "resize image online", "change image size"], howToUse: ["Upload an image.", "Enter the new dimensions.", "Download the resized image."], implementationStatus: "working-local", seoTitle: "Image Resizer Online", seoDescription: "Resize images online with a clean browser-first interface for changing width and height.", faq1: "Can I keep the aspect ratio?", faqAnswer1: "Yes. The tool offers an aspect-ratio lock for cleaner resizing.", faq2: "Does resizing improve image quality?", faqAnswer2: "No. Resizing changes dimensions, but it does not recreate lost detail." }),
+  makeTool({ name: "Image Compressor", slug: "image-compressor", category: "image-tools", shortDescription: "Compress images to reduce file size while keeping them ready to share, upload, or publish.", longDescription: "Image Compressor helps you shrink JPG, PNG, and WebP images so they load faster and take up less space. Upload a file, choose how much compression you want, preview the result, and download the smaller image.", keywords: ["image compressor", "compress image", "reduce image size", "image size reducer", "compress jpg", "compress png"], howToUse: ["Upload your image file.", "Choose the compression level or quality setting.", "Preview the result and download the smaller image."], implementationStatus: "working-local", seoTitle: "Image Compressor - Compress JPG, PNG, and WebP Online", seoDescription: "Compress JPG, PNG, and WebP images online to reduce file size without making downloads or sharing harder. Preview the result before you save it.", faq1: "How can I reduce image file size without losing too much quality?", faqAnswer1: "Start with light compression, preview the result, and increase it only if the image still looks good for your use case.", faq2: "Which image formats can I compress?", faqAnswer2: "This tool is best for common image formats such as JPG, PNG, and WebP." }),
+  makeTool({ name: "Image Resizer", slug: "image-resizer", category: "image-tools", shortDescription: "Resize images by pixel dimensions for websites, social posts, documents, and quick edits.", longDescription: "Image Resizer lets you change image width and height in just a few steps. It is useful for profile pictures, product photos, blog images, and any file that needs to fit a specific size before you download it.", keywords: ["image resizer", "resize image", "change image size", "resize photo online", "image size changer"], howToUse: ["Upload your image.", "Enter the new width and height or keep the aspect ratio locked.", "Download the resized image."], implementationStatus: "working-local", seoTitle: "Image Resizer - Resize Images Online by Width and Height", seoDescription: "Resize images online by changing width and height in pixels. Keep the aspect ratio if needed and download the resized image in seconds.", faq1: "Can I resize an image without stretching it?", faqAnswer1: "Yes. Keep the aspect ratio locked if you want the image to scale evenly.", faq2: "Will resizing improve image quality?", faqAnswer2: "No. Resizing changes dimensions, but it cannot recreate missing detail." }),
   makeTool({ name: "Crop Image", slug: "crop-image", category: "image-tools", shortDescription: "Crop an image to remove unwanted edges or focus on one area.", longDescription: "Crop Image is a local image-editing utility that lets users define a crop box and export only the selected region. It works naturally with a browser canvas workflow and the site’s reusable tool template.", keywords: ["crop image", "image cropper", "trim image"], howToUse: ["Upload an image.", "Select or enter the crop area.", "Export the cropped image."], implementationStatus: "working-local", seoTitle: "Crop Image Online", seoDescription: "Crop images online with a browser-based workflow for trimming photos and graphics.", faq1: "Will the original file be changed?", faqAnswer1: "No. The tool creates a new cropped output file for download.", faq2: "Can cropping reduce file size?", faqAnswer2: "It often can, because the exported image contains fewer pixels than the original." }),
   makeTool({ name: "JPG to PNG Converter", slug: "jpg-to-png-converter", category: "image-tools", shortDescription: "Convert JPG images into PNG format locally in the browser.", longDescription: "JPG to PNG Converter reads a JPG file, redraws it in the browser, and exports a PNG copy without server processing. It is a lightweight format-conversion workflow that fits the shared architecture well.", keywords: ["jpg to png", "jpeg to png", "image converter"], howToUse: ["Upload a JPG image.", "Convert the file in the browser.", "Download the PNG result."], implementationStatus: "working-local", seoTitle: "JPG to PNG Converter Online", seoDescription: "Convert JPG to PNG online with a browser-first workflow and no unnecessary server dependency.", faq1: "Does PNG always make files smaller?", faqAnswer1: "No. PNG may be larger than JPG depending on the image content.", faq2: "Will transparency be created automatically?", faqAnswer2: "No. Converting JPG to PNG changes the file format, but it does not reconstruct missing transparency." }),
   makeTool({ name: "PNG to JPG Converter", slug: "png-to-jpg-converter", category: "image-tools", shortDescription: "Convert PNG files into JPG format with local browser-side export.", longDescription: "The PNG to JPG Converter is a strong fit for local implementation because the browser can redraw uploaded images and export them as JPG. The registry and page template are ready for that client-side conversion component.", keywords: ["png to jpg", "png to jpeg", "convert png to jpg"], howToUse: ["Upload a PNG image.", "Set JPG export options if needed.", "Download the converted JPG file."], implementationStatus: "working-local", seoTitle: "PNG to JPG Converter Online", seoDescription: "Convert PNG to JPG online with a simple browser-side export workflow.", faq1: "What happens to transparent pixels?", faqAnswer1: "JPG does not support transparency, so transparent areas need to be flattened against a background color.", faq2: "Can JPG reduce file size?", faqAnswer2: "Often yes, especially for photographic images." }),
   makeTool({ name: "Image to WebP Converter", slug: "image-to-webp-converter", category: "image-tools", shortDescription: "Convert images to WebP for modern web-friendly compression.", longDescription: "This page is wired for a local image-to-WebP converter that would use browser-supported canvas export where available. It fits the registry model well and helps support web-optimization use cases without adding server infrastructure.", keywords: ["image to webp", "webp converter", "convert image to webp"], howToUse: ["Upload an image.", "Choose a WebP quality setting.", "Download the WebP file."], implementationStatus: "working-local", seoTitle: "Image to WebP Converter Online", seoDescription: "Convert images to WebP online with a browser-first workflow for modern web optimization.", faq1: "Why use WebP?", faqAnswer1: "WebP can provide smaller file sizes than older formats in many cases.", faq2: "Does browser support matter?", faqAnswer2: "Yes. The local implementation depends on browser support for WebP export." }),
-  makeTool({ name: "Background Remover", slug: "background-remover", category: "image-tools", shortDescription: "Remove image backgrounds through a server-assisted workflow when the deployment has background removal enabled.", longDescription: "Background Remover now supports a backend-assisted workflow for turning uploaded images into transparent PNGs. Because the actual cutout depends on a configured segmentation service, the page stays honest about deployment requirements and avoids pretending that lightweight browser-only processing can produce the same result.", keywords: ["background remover", "remove image background", "cut out subject"], howToUse: ["Upload an image file.", "Run background removal through the server route.", "Preview and download the transparent PNG result."], implementationStatus: "reduced-scope-local", seoTitle: "Background Remover Online", seoDescription: "Remove image backgrounds online with a server-assisted workflow that returns a transparent PNG and handles service availability clearly.", statusNote: "Server-assisted workflow. This tool works when a background-removal service is enabled for the current deployment.", faq1: "Does this run fully in the browser?", faqAnswer1: "No. The current implementation uses a backend route so the heavier background-removal step can be handled outside the browser.", faq2: "Will every image cut out perfectly?", faqAnswer2: "Not always. Final quality still depends on the configured removal service and the complexity of the source image." }),
+  makeTool({ name: "Background Remover", slug: "background-remover", category: "image-tools", shortDescription: "Remove the background from a photo or graphic and download a transparent PNG.", longDescription: "Background Remover helps you cut out a subject and remove the background from an image in a few clicks. It works best for product photos, portraits, and simple graphics where you want a transparent PNG to reuse elsewhere.", keywords: ["background remover", "remove background", "remove image background", "transparent png maker", "cut out image"], howToUse: ["Upload your image file.", "Run the background removal step.", "Preview the result and download the transparent PNG."], implementationStatus: "reduced-scope-local", seoTitle: "Background Remover - Remove Background from Images Online", seoDescription: "Remove the background from images online and download a transparent PNG. Great for product photos, portraits, and quick design edits.", statusNote: "Results can vary depending on the image.", faq1: "What kinds of images work best with a background remover?", faqAnswer1: "Clear subjects with simple backgrounds usually give the cleanest results.", faq2: "Will every edge look perfect?", faqAnswer2: "Not always. Hair, shadows, and busy backgrounds can need a little extra cleanup." }),
   makeTool({ name: "Image Rotator", slug: "image-rotator", category: "image-tools", shortDescription: "Rotate images by common angles in a local browser workflow.", longDescription: "Image Rotator is a browser-side utility for turning images by 90, 180, or 270 degrees and exporting the result. It fits neatly into the shared tool-page architecture and does not require external APIs.", keywords: ["image rotator", "rotate image", "turn photo"], howToUse: ["Upload an image.", "Choose a rotation angle.", "Download the rotated file."], implementationStatus: "working-local", seoTitle: "Image Rotator Online", seoDescription: "Rotate images online with a simple browser-first tool for quick angle adjustments.", faq1: "Can I rotate without uploading my image?", faqAnswer1: "Yes. The tool is designed for local browser processing.", faq2: "Will dimensions change after rotation?", faqAnswer2: "They may, depending on the angle and export format." }),
   makeTool({ name: "Image Watermark Tool", slug: "image-watermark-tool", category: "image-tools", shortDescription: "Add text or simple image watermarks before exporting a new copy.", longDescription: "Image Watermark Tool places text or logo overlays on uploaded images in a browser-first workflow. It keeps editing local while making it easy to position a watermark and export a fresh copy.", keywords: ["image watermark", "watermark tool", "add watermark to image"], howToUse: ["Upload an image.", "Add watermark text or a simple overlay.", "Position it and export the result."], implementationStatus: "working-local", seoTitle: "Image Watermark Tool Online", seoDescription: "Add text or logo-style watermarks to images online with a browser-first workflow.", faq1: "Will the original be overwritten?", faqAnswer1: "No. The tool generates a new downloadable image.", faq2: "Can I use a logo watermark?", faqAnswer2: "Yes. You can use simple logo-style overlays as part of the watermark workflow." }),
   makeTool({ name: "Image to Base64 Converter", slug: "image-to-base64-converter", category: "image-tools", shortDescription: "Convert an uploaded image file into a Base64 data string.", longDescription: "This tool page is designed for a local implementation that reads an uploaded image file and outputs a Base64 string or data URL. It is a clean browser-side use case and aligns well with the registry-driven architecture.", keywords: ["image to base64", "base64 image converter", "data url converter"], howToUse: ["Upload an image file.", "Generate the Base64 output.", "Copy the encoded string or data URL."], implementationStatus: "working-local", seoTitle: "Image to Base64 Converter Online", seoDescription: "Convert image files to Base64 online with a browser-side workflow and copy-ready output.", faq1: "Is Base64 smaller than the original file?", faqAnswer1: "No. Base64 usually increases size compared with the binary file.", faq2: "Why would I use this?", faqAnswer2: "It can be useful for embeds, quick testing, and inline data URLs." }),
-  makeTool({ name: "PDF Merge", slug: "pdf-merge", category: "pdf-tools", shortDescription: "Combine multiple PDFs into a single merged document.", longDescription: "PDF Merge combines multiple PDF files into a single browser-processed document while keeping metadata, FAQs, and related links consistent across the site. It is a practical local workflow for common merge tasks.", keywords: ["pdf merge", "merge pdf files", "combine pdf"], howToUse: ["Upload two or more PDF files.", "Arrange the order if needed.", "Merge and download the combined PDF."], implementationStatus: "working-local", seoTitle: "PDF Merge Online", seoDescription: "Merge PDF files online with a browser-first workflow and a clean production-ready page structure.", faq1: "Can this run without a server?", faqAnswer1: "Yes. A local browser-side merge is practical for many normal-sized PDF files.", faq2: "Do very large files have limits?", faqAnswer2: "Yes. Browser memory limits can affect larger PDF workflows." }),
+  makeTool({ name: "PDF Merge", slug: "pdf-merge", category: "pdf-tools", shortDescription: "Merge multiple PDF files into one document in the order you choose.", longDescription: "PDF Merge helps you combine two or more PDF files into a single document for sharing, printing, or archiving. Upload your files, arrange them in the right order, and download one merged PDF when you are done.", keywords: ["pdf merge", "merge pdf", "combine pdf files", "join pdf", "merge pdf files"], howToUse: ["Upload two or more PDF files.", "Arrange the files in the order you want.", "Merge them and download the combined PDF."], implementationStatus: "working-local", seoTitle: "PDF Merge - Combine PDF Files Online", seoDescription: "Merge PDF files online by combining multiple documents into one PDF. Reorder pages or files before you download the final merged document.", faq1: "How do I combine multiple PDF files into one?", faqAnswer1: "Upload the files, arrange them in the right order, and merge them into a single PDF.", faq2: "Can I change the file order before merging?", faqAnswer2: "Yes. Reordering the files before you merge helps you control the final document." }),
   makeTool({ name: "PDF Split", slug: "pdf-split", category: "pdf-tools", shortDescription: "Split one PDF into multiple files or separate pages.", longDescription: "PDF Split lets users break a PDF into single pages or selected page groups in a browser-first workflow. It fits well into the shared architecture while keeping the route structure, metadata, and related links stable.", keywords: ["pdf split", "split pdf pages", "separate pdf"], howToUse: ["Upload a PDF file.", "Choose the split method.", "Download the resulting PDF files."], implementationStatus: "working-local", seoTitle: "PDF Split Online", seoDescription: "Split PDF files online with a lightweight browser-first workflow.", faq1: "Can I split by page range?", faqAnswer1: "Yes. The tool supports splitting by selected pages or ranges.", faq2: "Does splitting require an account?", faqAnswer2: "No. The site is intentionally built without auth." }),
-  makeTool({ name: "PDF to Word", slug: "pdf-to-word", category: "pdf-tools", shortDescription: "Convert selectable PDF text into a real DOCX download through a server route.", longDescription: "PDF to Word now uses a server-side conversion workflow that extracts selectable text from uploaded PDFs and packages that content into a DOCX file for download. It is more capable than the old plain-text export, but it still stays honest about scanned PDFs and complex page layouts that need OCR or richer document reconstruction.", keywords: ["pdf to word", "extract pdf text", "pdf to docx"], howToUse: ["Upload a PDF with selectable text.", "Convert the file through the server route.", "Review the extracted text preview and download the DOCX file."], implementationStatus: "reduced-scope-local", seoTitle: "PDF to Word Online", seoDescription: "Convert selectable PDF text into a DOCX download online with a server-assisted workflow and honest layout limits.", statusNote: "Server-assisted conversion. This route creates a DOCX file from extracted PDF text, but scanned PDFs still need OCR and complex formatting may simplify.", faq1: "Does this create a real DOCX file now?", faqAnswer1: "Yes. The current server route generates a DOCX download from extracted PDF text.", faq2: "Will scanned PDFs work well?", faqAnswer2: "Not by themselves. Scanned or image-only PDFs still need OCR before usable Word content can be created." }),
-  makeTool({ name: "Word to PDF", slug: "word-to-pdf", category: "pdf-tools", shortDescription: "Convert DOCX files into readable PDF output through a server-assisted workflow.", longDescription: "Word to PDF now uses a server-side conversion route that extracts readable DOCX text and formats it into a clean PDF for download. The implementation is honest about complex layouts and advanced Word formatting, which may simplify during export, but it now produces a real PDF instead of a placeholder-only page.", keywords: ["word to pdf", "docx to pdf", "convert word to pdf"], howToUse: ["Upload a .docx file.", "Run the server-assisted conversion.", "Download the generated PDF file."], implementationStatus: "reduced-scope-local", seoTitle: "Word to PDF Converter Online", seoDescription: "Convert DOCX files to PDF online with a server-assisted workflow that produces a real PDF and explains formatting limits clearly.", statusNote: "Server-assisted conversion. The current workflow focuses on readable DOCX text and may simplify advanced layouts during PDF generation.", faq1: "Does this create a real PDF now?", faqAnswer1: "Yes. The current implementation generates a downloadable PDF on the server.", faq2: "Will every Word layout match perfectly?", faqAnswer2: "Not always. Advanced layouts, tables, and design-heavy documents may simplify in this first server-assisted version." }),
-  makeTool({ name: "PDF Compressor", slug: "pdf-compressor", category: "pdf-tools", shortDescription: "Reduce PDF size with a clearly scoped server-assisted optimization approach.", longDescription: "PDF Compressor now uses a backend route to rebuild uploaded PDFs into a cleaner optimized copy. It can reduce size for some files, but it stays honest about the fact that true compression quality still depends heavily on the source document structure.", keywords: ["pdf compressor", "compress pdf", "reduce pdf size"], howToUse: ["Upload a PDF file.", "Run the available optimization mode.", "Download the optimized result and compare file size."], implementationStatus: "reduced-scope-local", seoTitle: "PDF Compressor Online", seoDescription: "Compress PDF files online with a reduced-scope server-assisted workflow and honest size-reduction expectations.", statusNote: "Reduced-scope optimization. Results still depend heavily on the source PDF structure.", faq1: "Will every PDF compress well?", faqAnswer1: "No. Compression results vary a lot depending on how the original PDF was created.", faq2: "Why is this marked reduced-scope?", faqAnswer2: "Because the current workflow can help some files, but it cannot guarantee strong compression for all PDF types." }),
+  makeTool({ name: "PDF to Word", slug: "pdf-to-word", category: "pdf-tools", shortDescription: "Convert PDF text into an editable Word document you can download as DOCX.", longDescription: "PDF to Word helps you turn readable PDF text into a DOCX file you can open and edit in Word-compatible apps. It is most useful for text-based PDFs where you want to update wording, copy content, or reuse a document without starting over.", keywords: ["pdf to word", "pdf to docx", "convert pdf to word", "editable pdf to word", "pdf to word converter"], howToUse: ["Upload a PDF with readable text.", "Convert the file to Word format.", "Download the DOCX file and open it in your editor."], implementationStatus: "reduced-scope-local", seoTitle: "PDF to Word Converter - Convert PDF to DOCX Online", seoDescription: "Convert PDF text to Word online and download an editable DOCX file. Best for text-based PDFs that need quick editing or reuse.", statusNote: "Best for text-based PDFs.", faq1: "Can I convert a PDF to an editable Word document?", faqAnswer1: "Yes. This tool creates a DOCX file you can download and edit.", faq2: "Why does the layout sometimes change after conversion?", faqAnswer2: "Complex formatting, tables, and scanned pages may need extra cleanup after conversion." }),
+  makeTool({ name: "Word to PDF", slug: "word-to-pdf", category: "pdf-tools", shortDescription: "Convert a Word document to PDF for sharing, printing, or saving a final copy.", longDescription: "Word to PDF turns DOCX files into PDF documents you can download and share more easily. It is useful when you want a file that is easier to print, send, or keep as a final version.", keywords: ["word to pdf", "docx to pdf", "convert word to pdf", "word document to pdf", "word to pdf converter"], howToUse: ["Upload your .docx file.", "Convert the document to PDF.", "Download the finished PDF."], implementationStatus: "reduced-scope-local", seoTitle: "Word to PDF Converter - Convert DOCX to PDF Online", seoDescription: "Convert Word to PDF online and download a shareable PDF file. Great for DOCX documents you want to print, send, or save as a final copy.", statusNote: "Complex layouts can look different in the final PDF.", faq1: "How do I convert a Word document to PDF?", faqAnswer1: "Upload your DOCX file, convert it, and download the PDF when it is ready.", faq2: "Will the PDF look exactly like my Word file?", faqAnswer2: "Not always. Some fonts, tables, and layout details can look a little different after conversion." }),
+  makeTool({ name: "PDF Compressor", slug: "pdf-compressor", category: "pdf-tools", shortDescription: "Compress PDF files to reduce size and make them easier to upload, store, or share.", longDescription: "PDF Compressor helps you reduce PDF file size so documents are easier to email, upload, and save. Upload a PDF, run the compression step, and compare the result to see how much space you saved.", keywords: ["pdf compressor", "compress pdf", "reduce pdf size", "make pdf smaller", "pdf size reducer"], howToUse: ["Upload your PDF file.", "Compress the PDF.", "Download the smaller file and compare the size."], implementationStatus: "reduced-scope-local", seoTitle: "PDF Compressor - Reduce PDF File Size Online", seoDescription: "Compress PDF files online to reduce file size for email, uploads, and storage. Download the smaller PDF and compare the results.", statusNote: "Results can vary from file to file.", faq1: "How can I make a PDF file smaller?", faqAnswer1: "Upload the PDF, compress it, and download the smaller copy if the result works for your needs.", faq2: "Why does one PDF compress more than another?", faqAnswer2: "PDF size depends on images, fonts, and how the file was created, so results can vary." }),
   makeTool({ name: "PDF to JPG", slug: "pdf-to-jpg", category: "pdf-tools", shortDescription: "Convert PDF pages into JPG images with a local page-rendering workflow.", longDescription: "PDF to JPG converts PDF pages into image exports in a browser-first workflow when page rendering is available. It reuses the site's shared tool-page structure while keeping the process lightweight and easy to follow.", keywords: ["pdf to jpg", "convert pdf to image", "pdf to jpeg"], howToUse: ["Upload a PDF file.", "Choose which pages to export.", "Download one JPG per page or the selected pages."], implementationStatus: "working-local", seoTitle: "PDF to JPG Converter Online", seoDescription: "Convert PDF pages to JPG online with a browser-side page export workflow.", faq1: "Will each page become a separate image?", faqAnswer1: "Yes. Each selected page can be exported as a separate JPG image.", faq2: "Can image quality vary?", faqAnswer2: "Yes. Export settings and page complexity affect image output quality." }),
   makeTool({ name: "JPG to PDF", slug: "jpg-to-pdf", category: "pdf-tools", shortDescription: "Turn one or more JPG files into a PDF document.", longDescription: "JPG to PDF places uploaded images into PDF pages inside the browser and exports a downloadable document. It is a practical local workflow for combining images into a single PDF without extra server processing.", keywords: ["jpg to pdf", "image to pdf", "convert jpg to pdf"], howToUse: ["Upload one or more JPG files.", "Arrange page order if needed.", "Create and download the PDF."], implementationStatus: "working-local", seoTitle: "JPG to PDF Converter Online", seoDescription: "Convert JPG images to PDF online with a browser-first document builder workflow.", faq1: "Can I combine multiple images into one PDF?", faqAnswer1: "Yes. You can combine multiple images into a single PDF file.", faq2: "Will image dimensions affect page layout?", faqAnswer2: "Yes. The final PDF layout depends on image sizing and page-fit rules." }),
   makeTool({ name: "PDF Page Rotator", slug: "pdf-page-rotator", category: "pdf-tools", shortDescription: "Rotate selected PDF pages or the full document.", longDescription: "PDF Page Rotator rotates all pages or selected pages while keeping the route structure, metadata, and supporting content consistent across the site. It is a focused browser-first workflow for fixing page orientation.", keywords: ["pdf page rotator", "rotate pdf pages", "turn pdf pages"], howToUse: ["Upload a PDF.", "Select the pages and angle.", "Export the rotated PDF."], implementationStatus: "working-local", seoTitle: "PDF Page Rotator Online", seoDescription: "Rotate PDF pages online with a browser-first workflow for fixing page orientation.", faq1: "Can I rotate only one page?", faqAnswer1: "Yes. You can rotate only the pages you choose.", faq2: "Will text remain searchable?", faqAnswer2: "In a proper PDF-page rotation workflow, yes." }),
   makeTool({ name: "PDF Page Number Adder", slug: "pdf-page-number-adder", category: "pdf-tools", shortDescription: "Add page numbers to a PDF with a browser-side workflow.", longDescription: "PDF Page Number Adder lets users choose number placement and export an updated file in a local PDF page-numbering workflow. It keeps the experience straightforward while preserving related content and SEO coverage.", keywords: ["add page numbers to pdf", "pdf page number adder", "pdf numbering"], howToUse: ["Upload a PDF.", "Choose where the page numbers should appear.", "Apply and download the updated PDF."], implementationStatus: "working-local", seoTitle: "PDF Page Number Adder Online", seoDescription: "Add page numbers to PDF files online with a browser-side workflow.", faq1: "Can numbering start from a custom page?", faqAnswer1: "Yes. You can start numbering from a custom page when needed.", faq2: "Will the original file stay unchanged?", faqAnswer2: "Yes. The tool exports a new numbered copy." }),
-  makeTool({ name: "Protect PDF", slug: "protect-pdf", category: "pdf-tools", shortDescription: "Protect PDFs through a server-assisted encryption workflow when the deployment has PDF protection enabled.", longDescription: "Protect PDF is now wired to a backend route that can send the uploaded file and chosen password to a configured PDF protection service. The page remains transparent about deployment requirements, so it reports service availability clearly instead of pretending to encrypt files when no service is available.", keywords: ["protect pdf", "password protect pdf", "encrypt pdf"], howToUse: ["Upload a PDF file.", "Enter a password and run the server-assisted protection step.", "Download the protected PDF when the backend service is available."], implementationStatus: "reduced-scope-local", seoTitle: "Protect PDF Online", seoDescription: "Protect PDF files online with a server-assisted workflow that uses a configured backend encryption service and shows clear availability messages.", statusNote: "Server-assisted workflow. This tool works when a PDF protection service endpoint is enabled for the current deployment.", faq1: "Does this protect PDFs directly in the browser?", faqAnswer1: "No. The encryption step is handled through a backend route so the browser does not fake or weaken the protection flow.", faq2: "Will it work without server configuration?", faqAnswer2: "No. The page is wired for real protection, but it still needs a configured backend service before downloads are available." }),
+  makeTool({ name: "Protect PDF", slug: "protect-pdf", category: "pdf-tools", shortDescription: "Add a password to a PDF and download the protected file.", longDescription: "Protect PDF lets you add a password to a PDF for safer sharing and storage. If the tool is unavailable, the page will let you know clearly.", keywords: ["protect pdf", "password protect pdf", "encrypt pdf"], howToUse: ["Upload a PDF file.", "Enter a password.", "Download the protected PDF."], implementationStatus: "reduced-scope-local", seoTitle: "Protect PDF Online", seoDescription: "Protect PDF files online by adding a password and downloading the result.", statusNote: "This tool may not be available on every site setup.", faq1: "Does this add a real password to the PDF?", faqAnswer1: "Yes, when the tool is available it creates a password-protected PDF.", faq2: "What if the tool is unavailable?", faqAnswer2: "If protection is not available, the page will show a clear message instead of trying to process the file." }),
   makeTool({ name: "Word Counter", slug: "word-counter", category: "text-tools", shortDescription: "Count words in pasted or typed text.", longDescription: "Word Counter is a simple browser-side text utility that fits this project especially well. The page is ready for a local implementation that updates counts in real time as the user types or pastes text.", keywords: ["word counter", "count words online", "text word count"], howToUse: ["Paste or type text.", "Review the live word count.", "Adjust your content as needed."], implementationStatus: "working-local", seoTitle: "Word Counter Online", seoDescription: "Count words online with a simple browser-based text tool.", faq1: "Does the count update live?", faqAnswer1: "That is the intended local behavior for this tool.", faq2: "Can I use it for SEO writing?", faqAnswer2: "Yes. Word counting is useful for outlines, article drafts, and content reviews." }),
   makeTool({ name: "Character Counter", slug: "character-counter", category: "text-tools", shortDescription: "Count characters with and without spaces.", longDescription: "Character Counter is well suited to a lightweight local implementation. This page is structured for a future text area that calculates total characters, characters without spaces, and other simple metrics without external services.", keywords: ["character counter", "count characters", "letter counter"], howToUse: ["Enter or paste text.", "See the total character count.", "Use the result for writing or formatting limits."], implementationStatus: "working-local", seoTitle: "Character Counter Online", seoDescription: "Count characters online with a fast browser-first text utility.", faq1: "Can spaces be excluded?", faqAnswer1: "Yes. The intended implementation should show both totals.", faq2: "Is this helpful for social post limits?", faqAnswer2: "Yes. Character counts are often useful for captions and message limits." }),
   makeTool({ name: "Case Converter", slug: "case-converter", category: "text-tools", shortDescription: "Switch text between upper, lower, title, and sentence case.", longDescription: "Case Converter is a classic browser-side text tool and an easy fit for the site’s shared architecture. The page is ready for a local UI that transforms pasted text instantly and lets the user copy the result.", keywords: ["case converter", "uppercase lowercase", "title case converter"], howToUse: ["Paste your text.", "Choose a case style.", "Copy the converted output."], implementationStatus: "working-local", seoTitle: "Case Converter Online", seoDescription: "Convert text case online with a browser-based uppercase, lowercase, title case, and sentence case tool.", faq1: "Will this run locally?", faqAnswer1: "Yes. Case conversion is an ideal local text utility.", faq2: "Can title case be perfect for every language?", faqAnswer2: "No. Title-casing rules vary, so the implementation should keep expectations realistic." }),
   makeTool({ name: "Remove Duplicate Lines", slug: "remove-duplicate-lines", category: "text-tools", shortDescription: "Clean a text list by removing repeated lines.", longDescription: "This tool page is prepared for a future browser-side utility that removes duplicate lines from pasted text while preserving the first occurrence. It is a clean, practical fit for the registry-driven structure.", keywords: ["remove duplicate lines", "dedupe lines", "unique line tool"], howToUse: ["Paste text with one item per line.", "Run the duplicate-removal action.", "Copy the cleaned list."], implementationStatus: "working-local", seoTitle: "Remove Duplicate Lines Online", seoDescription: "Remove duplicate lines online with a lightweight browser-first text cleanup tool.", faq1: "Will line order be preserved?", faqAnswer1: "That is the expected behavior for the intended local implementation.", faq2: "Does this work for large lists?", faqAnswer2: "Yes, within normal browser memory limits." }),
   makeTool({ name: "Text Sorter", slug: "text-sorter", category: "text-tools", shortDescription: "Sort lines of text alphabetically in ascending or descending order.", longDescription: "Text Sorter is another strong browser-side fit. This page is ready for a local text utility that sorts line-based lists and supports simple ordering options without involving any backend.", keywords: ["text sorter", "sort text lines", "alphabetize text"], howToUse: ["Paste line-based text.", "Choose ascending or descending order.", "Copy the sorted output."], implementationStatus: "working-local", seoTitle: "Text Sorter Online", seoDescription: "Sort lines of text online with a browser-based alphabetical sorting tool.", faq1: "Is sorting case-sensitive?", faqAnswer1: "The intended local implementation can use a case-insensitive sort for more useful default behavior.", faq2: "Can I sort numeric values?", faqAnswer2: "Yes, though plain-text sorting and numeric sorting can behave differently." }),
 ];
-const toolDraftsPart2: Array<Omit<ToolDefinition, "relatedToolSlugs">> = [
-  makeTool({ name: "JSON Formatter", slug: "json-formatter", category: "developer-tools", shortDescription: "Format and validate JSON in the browser.", longDescription: "JSON Formatter is an excellent browser-side tool that can be added later with minimal complexity. The page is already wired for SEO and related-content structure, so only the UI logic needs to be plugged in next.", keywords: ["json formatter", "json validator", "pretty print json"], howToUse: ["Paste JSON into the editor.", "Format or validate it.", "Copy the cleaned output or fix any errors."], implementationStatus: "working-local", seoTitle: "JSON Formatter Online", seoDescription: "Format and validate JSON online with a clean browser-first developer tool.", faq1: "Can invalid JSON be corrected automatically?", faqAnswer1: "A formatter can validate input, but it should not pretend to guess broken syntax.", faq2: "Does this need a server?", faqAnswer2: "No. JSON formatting works well fully in the browser." }),
+const toolDraftsPart2: ToolDraft[] = [
+  makeTool({ name: "JSON Formatter", slug: "json-formatter", category: "developer-tools", shortDescription: "Format, validate, and pretty-print JSON so it is easier to read and fix.", longDescription: "JSON Formatter helps you clean up messy JSON, check for errors, and view structured data in a readable format. Paste your JSON, format it instantly, and copy the cleaned result for development, debugging, or documentation.", keywords: ["json formatter", "json validator", "pretty print json", "format json", "json beautifier", "json parser"], howToUse: ["Paste your JSON into the editor.", "Format or validate the content.", "Copy the cleaned JSON or fix any errors shown."], implementationStatus: "working-local", seoTitle: "JSON Formatter - Format and Validate JSON Online", seoDescription: "Format and validate JSON online with a clean editor that helps you pretty-print JSON, spot errors, and copy the fixed result quickly.", faq1: "How do I format JSON so it is easier to read?", faqAnswer1: "Paste your JSON into the tool and format it to add indentation and clearer structure.", faq2: "Can this tool find JSON errors?", faqAnswer2: "Yes. It can validate the input and show when the JSON needs to be fixed." }),
   makeTool({ name: "Base64 Encoder", slug: "base64-encoder", category: "developer-tools", shortDescription: "Encode plain text into Base64 format.", longDescription: "The Base64 Encoder page is set up for a lightweight local text utility that encodes plain text into Base64. It is a simple browser-native use case and fits the project well.", keywords: ["base64 encoder", "encode base64", "text to base64"], howToUse: ["Paste or type plain text.", "Run the encoding action.", "Copy the Base64 output."], implementationStatus: "working-local", seoTitle: "Base64 Encoder Online", seoDescription: "Encode text to Base64 online with a simple browser-based developer tool.", faq1: "Is Base64 encryption?", faqAnswer1: "No. Base64 is encoding, not encryption.", faq2: "Can encoded output be decoded later?", faqAnswer2: "Yes. Base64 is reversible when the input is valid." }),
   makeTool({ name: "Base64 Decoder", slug: "base64-decoder", category: "developer-tools", shortDescription: "Decode Base64 strings back into readable text.", longDescription: "This page is prepared for a browser-side Base64 Decoder that takes encoded input and outputs plain text. It keeps the scope focused and honest while remaining easy to implement later.", keywords: ["base64 decoder", "decode base64", "base64 to text"], howToUse: ["Paste a Base64 string.", "Run the decoding action.", "Review and copy the decoded text."], implementationStatus: "working-local", seoTitle: "Base64 Decoder Online", seoDescription: "Decode Base64 text online with a browser-first developer utility.", faq1: "What if the Base64 value is invalid?", faqAnswer1: "The tool should show an error rather than faking output.", faq2: "Can this decode binary files?", faqAnswer2: "The planned scope focuses on text-based decoding first." }),
   makeTool({ name: "CSS Minifier", slug: "css-minifier", category: "developer-tools", shortDescription: "Minify CSS by removing extra whitespace and comments.", longDescription: "CSS Minifier is a realistic browser-side tool as long as the implementation is clear about using a reduced-scope minification approach instead of pretending to be a full production bundler. The page is ready for that honest local version.", keywords: ["css minifier", "minify css", "compress css"], howToUse: ["Paste CSS code.", "Run the minify action.", "Copy the compact output."], implementationStatus: "working-local", seoTitle: "CSS Minifier Online", seoDescription: "Minify CSS online with a browser-side tool and clearly labeled lightweight scope.", statusNote: "Reduced-scope local version only; useful for cleanup, not a replacement for full build-pipeline optimization.", faq1: "Will this be as advanced as a build-tool minifier?", faqAnswer1: "No. A browser-side version can be useful, but it should be labeled as a lightweight minifier.", faq2: "Can comments be removed?", faqAnswer2: "Yes. That is a typical part of CSS minification." }),
@@ -136,7 +148,7 @@ const toolDraftsPart2: Array<Omit<ToolDefinition, "relatedToolSlugs">> = [
   makeTool({ name: "URL Decoder", slug: "url-decoder", category: "developer-tools", shortDescription: "Decode percent-encoded URL text into readable form.", longDescription: "This page is prepared for a future browser-side URL Decoder. It will fit neatly into the shared developer-tools architecture and help users inspect query parameters and encoded strings quickly.", keywords: ["url decoder", "decode url", "percent decode"], howToUse: ["Paste encoded text.", "Run the decode action.", "Review and copy the readable result."], implementationStatus: "working-local", seoTitle: "URL Decoder Online", seoDescription: "Decode URL-encoded text online with a browser-first developer utility.", faq1: "What if the input is malformed?", faqAnswer1: "The tool should show a clear error instead of pretending the data decoded correctly.", faq2: "Can this decode full URLs?", faqAnswer2: "Yes, as long as the encoded parts are valid." }),
   makeTool({ name: "Regex Tester", slug: "regex-tester", category: "developer-tools", shortDescription: "Test regular expressions against sample text.", longDescription: "Regex Tester is a strong fit for a browser-only implementation because JavaScript regular expressions can run directly in the page. The route and registry are ready for the future interactive UI component.", keywords: ["regex tester", "regular expression tester", "pattern matcher"], howToUse: ["Enter a regular expression.", "Add sample text.", "Review matches and errors."], implementationStatus: "working-local", seoTitle: "Regex Tester Online", seoDescription: "Test regular expressions online with a browser-based developer tool.", faq1: "Which regex engine would be used?", faqAnswer1: "A browser-side implementation would use the JavaScript regex engine.", faq2: "Can invalid patterns be handled?", faqAnswer2: "Yes. The tool should surface syntax errors clearly." }),
   makeTool({ name: "Password Generator", slug: "password-generator", category: "generator-tools", shortDescription: "Generate strong random passwords locally in the browser.", longDescription: "Password Generator is a natural browser-side tool. The future UI can use browser randomness, configurable length, and character sets while reusing the site’s existing page template and SEO setup.", keywords: ["password generator", "random password", "secure password"], howToUse: ["Choose password options.", "Generate a new password.", "Copy the result."], implementationStatus: "working-local", seoTitle: "Password Generator Online", seoDescription: "Generate secure passwords online with a browser-first random password tool.", faq1: "Should this use secure randomness?", faqAnswer1: "Yes. A proper implementation should use the browser’s secure random APIs.", faq2: "Can symbols be optional?", faqAnswer2: "Yes. That is a common generator setting." }),
-  makeTool({ name: "QR Code Generator", slug: "qr-code-generator", category: "generator-tools", shortDescription: "Generate QR codes from text or links.", longDescription: "The QR Code Generator page is structured for a future local implementation that creates QR codes directly in the browser and allows easy download. It fits the registry architecture without requiring a remote API.", keywords: ["qr code generator", "make qr code", "generate qr code"], howToUse: ["Enter text or a URL.", "Generate the QR code.", "Download or use the image."], implementationStatus: "working-local", seoTitle: "QR Code Generator Online", seoDescription: "Generate QR codes online with a browser-first tool for text and URL encoding.", faq1: "Can this work without an external API?", faqAnswer1: "Yes. QR generation is practical fully in the browser.", faq2: "What types of text can be encoded?", faqAnswer2: "URLs, plain text, and short structured data are common use cases." }),
+  makeTool({ name: "QR Code Generator", slug: "qr-code-generator", category: "generator-tools", shortDescription: "Create QR codes from links, text, contact details, and other short content.", longDescription: "QR Code Generator helps you make a QR code you can download and share in seconds. It is useful for website links, contact info, event details, product packaging, signs, menus, and quick mobile scanning.", keywords: ["qr code generator", "create qr code", "make qr code", "qr code maker", "url qr code generator"], howToUse: ["Enter a URL, text, or other short content.", "Generate the QR code.", "Download the QR code image or use it right away."], implementationStatus: "working-local", seoTitle: "QR Code Generator - Create QR Codes Online", seoDescription: "Create QR codes online for URLs, text, and contact details. Generate a QR code in seconds and download the image for print or sharing.", faq1: "What can I put in a QR code?", faqAnswer1: "Common options include website links, plain text, contact details, and short event or product information.", faq2: "Can I download the QR code after I create it?", faqAnswer2: "Yes. Generate the QR code and save the image for sharing or printing." }),
   makeTool({ name: "UUID Generator", slug: "uuid-generator", category: "generator-tools", shortDescription: "Generate one or more UUIDs for development and data tasks.", longDescription: "UUID Generator is simple, useful, and fully compatible with a browser-first approach. The page is already structured for a future tool that creates copy-ready UUID lists with minimal UI complexity.", keywords: ["uuid generator", "guid generator", "random uuid"], howToUse: ["Set how many UUIDs you want.", "Generate the values.", "Copy the results."], implementationStatus: "working-local", seoTitle: "UUID Generator Online", seoDescription: "Generate UUIDs online with a browser-based tool for development and testing workflows.", faq1: "Can this work fully locally?", faqAnswer1: "Yes. UUID generation is well suited to browser-side logic.", faq2: "Is this useful for testing?", faqAnswer2: "Yes. UUIDs are common in app development, fixtures, and examples." }),
   makeTool({ name: "Random Name Generator", slug: "random-name-generator", category: "generator-tools", shortDescription: "Generate random names from a local curated name list.", longDescription: "Random Name Generator is planned as a local tool that picks from a bundled list of names rather than pretending to use live data. That keeps the feature honest, fast, and aligned with the project’s no-database approach.", keywords: ["random name generator", "fake name generator", "name picker"], howToUse: ["Choose how many names you want.", "Generate a random list.", "Copy the names you need."], implementationStatus: "working-local", seoTitle: "Random Name Generator Online", seoDescription: "Generate random names online with a local bundled-list approach and no database requirement.", faq1: "Will names come from a live API?", faqAnswer1: "No. A good local implementation should use a bundled curated list.", faq2: "Are these real people?", faqAnswer2: "No. The intended use is sample names, placeholders, and idea generation." }),
   makeTool({ name: "Random Number Generator", slug: "random-number-generator", category: "generator-tools", shortDescription: "Generate random numbers within a selected range.", longDescription: "Random Number Generator is a straightforward local utility that fits the site cleanly. The page is ready for a future browser-side UI with range controls, quantity settings, and duplicate options.", keywords: ["random number generator", "number picker", "rng tool"], howToUse: ["Set the minimum and maximum values.", "Choose how many numbers to generate.", "Copy the result list."], implementationStatus: "working-local", seoTitle: "Random Number Generator Online", seoDescription: "Generate random numbers online with a browser-first range-based tool.", faq1: "Can duplicates be disabled?", faqAnswer1: "That is the intended option for the local implementation.", faq2: "Is this suitable for giveaways and draws?", faqAnswer2: "It can be useful for casual selection tasks, but high-stakes systems should use audited processes." }),
@@ -172,6 +184,29 @@ const popularToolPriority = new Map(
     "user-agent-parser",
   ].map((slug, index) => [slug, index]),
 );
+
+const ctrPrioritySlugs = new Set<string>([
+  "image-compressor",
+  "image-resizer",
+  "background-remover",
+  "pdf-merge",
+  "pdf-split",
+  "pdf-compressor",
+  "pdf-to-word",
+  "word-to-pdf",
+  "json-formatter",
+  "qr-code-generator",
+  "website-speed-test",
+  "password-generator",
+  "currency-converter",
+  "loan-calculator",
+  "image-format-converter",
+  "markdown-to-html-converter",
+  "discount-calculator",
+  "user-agent-parser",
+  "mobile-friendly-checker",
+  "dns-lookup",
+]);
 
 const implementationStatusMeta: Record<ImplementationStatus, ImplementationStatusMeta> = {
   "working-local": {
@@ -284,6 +319,93 @@ function getCategoryName(slug: ToolCategorySlug) {
   return categories.find((category) => category.slug === slug)?.name ?? slug.replace(/-/g, " ");
 }
 
+const relatedToolSlugOverrides = new Map<string, string[]>([
+  ["image-compressor", ["image-resizer", "image-to-webp-converter", "crop-image", "jpg-to-png-converter"]],
+  ["image-resizer", ["image-compressor", "crop-image", "image-rotator", "image-to-webp-converter"]],
+  ["background-remover", ["crop-image", "image-watermark-tool", "image-resizer", "jpg-to-png-converter"]],
+  ["pdf-merge", ["pdf-split", "pdf-compressor", "image-to-pdf-converter", "jpg-to-pdf", "pdf-page-rotator"]],
+  ["pdf-compressor", ["pdf-merge", "pdf-split", "protect-pdf", "pdf-to-jpg", "pdf-page-number-adder"]],
+  ["pdf-to-word", ["word-to-pdf", "pdf-compressor", "pdf-merge", "pdf-ocr-placeholder"]],
+  ["word-to-pdf", ["pdf-to-word", "pdf-compressor", "protect-pdf", "pdf-merge", "image-to-pdf-converter"]],
+  ["json-formatter", ["json-schema-validator", "json-to-csv-converter", "csv-to-json-converter", "xml-to-json-converter", "yaml-formatter"]],
+  ["qr-code-generator", ["qr-code-scanner", "barcode-scanner", "url-encoder", "image-to-base64-converter", "uuid-generator"]],
+  ["website-speed-test", ["mobile-friendly-checker", "website-screenshot-tool", "dns-lookup", "url-status-checker", "user-agent-parser"]],
+]);
+
+const peopleAlsoSearchForOverrides = new Map<string, SearchPhraseItem[]>([
+  ["image-compressor", [
+    { phrase: "compress image online" },
+    { phrase: "reduce image size" },
+    { phrase: "compress jpg online" },
+    { phrase: "compress png image" },
+    { phrase: "resize image", href: "/tools/image-resizer" },
+    { phrase: "convert image to webp", href: "/tools/image-to-webp-converter" },
+  ]],
+  ["image-resizer", [
+    { phrase: "resize image online" },
+    { phrase: "change image size" },
+    { phrase: "resize photo in pixels" },
+    { phrase: "compress image online", href: "/tools/image-compressor" },
+    { phrase: "crop image online", href: "/tools/crop-image" },
+  ]],
+  ["background-remover", [
+    { phrase: "remove background online" },
+    { phrase: "make transparent png" },
+    { phrase: "cut out image background" },
+    { phrase: "resize image", href: "/tools/image-resizer" },
+    { phrase: "crop image", href: "/tools/crop-image" },
+  ]],
+  ["pdf-merge", [
+    { phrase: "merge pdf files online" },
+    { phrase: "combine pdf files" },
+    { phrase: "join pdf pages" },
+    { phrase: "split pdf", href: "/tools/pdf-split" },
+    { phrase: "compress pdf", href: "/tools/pdf-compressor" },
+  ]],
+  ["pdf-compressor", [
+    { phrase: "compress pdf online" },
+    { phrase: "reduce pdf file size" },
+    { phrase: "make pdf smaller" },
+    { phrase: "merge pdf", href: "/tools/pdf-merge" },
+    { phrase: "pdf to word", href: "/tools/pdf-to-word" },
+  ]],
+  ["pdf-to-word", [
+    { phrase: "convert pdf to word" },
+    { phrase: "pdf to docx online" },
+    { phrase: "editable pdf to word" },
+    { phrase: "word to pdf", href: "/tools/word-to-pdf" },
+    { phrase: "pdf ocr", href: "/tools/pdf-ocr-placeholder" },
+  ]],
+  ["word-to-pdf", [
+    { phrase: "convert word to pdf" },
+    { phrase: "docx to pdf online" },
+    { phrase: "save word as pdf" },
+    { phrase: "pdf to word", href: "/tools/pdf-to-word" },
+    { phrase: "protect pdf", href: "/tools/protect-pdf" },
+  ]],
+  ["json-formatter", [
+    { phrase: "format json online" },
+    { phrase: "json validator" },
+    { phrase: "pretty print json" },
+    { phrase: "json schema validator", href: "/tools/json-schema-validator" },
+    { phrase: "json to csv", href: "/tools/json-to-csv-converter" },
+  ]],
+  ["qr-code-generator", [
+    { phrase: "create qr code online" },
+    { phrase: "make qr code from url" },
+    { phrase: "qr code generator free" },
+    { phrase: "qr code scanner", href: "/tools/qr-code-scanner" },
+    { phrase: "barcode scanner", href: "/tools/barcode-scanner" },
+  ]],
+  ["website-speed-test", [
+    { phrase: "website speed test online" },
+    { phrase: "page speed checker" },
+    { phrase: "test site performance" },
+    { phrase: "mobile friendly checker", href: "/tools/mobile-friendly-checker" },
+    { phrase: "website screenshot tool", href: "/tools/website-screenshot-tool" },
+  ]],
+]);
+
 function extractTopicTokens(tool: ToolDraft) {
   return new Set(
     [tool.name, ...tool.keywords]
@@ -296,6 +418,7 @@ function extractTopicTokens(tool: ToolDraft) {
 }
 
 function buildRelatedToolSlugs(tool: ToolDraft) {
+  const manualOverrides = relatedToolSlugOverrides.get(tool.slug) ?? [];
   const sourceTokens = extractTopicTokens(tool);
   const sameCategoryMatches = toolDrafts
     .filter((candidate) => candidate.category === tool.category && candidate.slug !== tool.slug)
@@ -330,7 +453,9 @@ function buildRelatedToolSlugs(tool: ToolDraft) {
     })
     .map(({ candidate }) => candidate.slug);
 
-  return [...new Set([...sameCategoryMatches, ...crossCategoryMatches])].slice(0, isExpandedSeoTool(tool.slug) ? 8 : 6);
+  return [...new Set([...manualOverrides, ...sameCategoryMatches, ...crossCategoryMatches])]
+    .filter((slug) => slug !== tool.slug)
+    .slice(0, isExpandedSeoTool(tool.slug) ? 8 : 6);
 }
 
 function enrichHowToUse(tool: ToolDraft, implementationStatus: ImplementationStatus) {
@@ -370,6 +495,10 @@ function enrichFaq(tool: ToolDraft, implementationStatus: ImplementationStatus) 
 
   const extraFaq: FaqItem[] = [
     {
+      question: `Is ${tool.name.toLowerCase()} free to use?`,
+      answer: `Yes. You can open ${tool.name.toLowerCase()} and use it without creating an account.`,
+    },
+    {
       question: `Can I use ${tool.name.toLowerCase()} on mobile?`,
       answer: `${tool.name} is designed to work on modern mobile and desktop browsers.`,
     },
@@ -386,6 +515,13 @@ function enrichFaq(tool: ToolDraft, implementationStatus: ImplementationStatus) 
       answer: `${tool.name} is best for quick ${getCategoryName(tool.category).toLowerCase()} tasks where you want a clear result and easy next steps.`,
     },
   ];
+
+  if (tool.category === "image-tools" || tool.category === "pdf-tools") {
+    extraFaq.splice(1, 0, {
+      question: `Is my file kept private when I use ${tool.name.toLowerCase()}?`,
+      answer: `Most workflows are designed for quick processing only. Review the result, download what you need, and avoid uploading sensitive files if you are unsure.`,
+    });
+  }
 
   if (isExpandedSeoTool(tool)) {
     extraFaq.unshift(
@@ -428,13 +564,22 @@ function enrichFaq(tool: ToolDraft, implementationStatus: ImplementationStatus) 
 
 function enrichSeoTitle(tool: ToolDraft) {
   const title = tool.seoTitle.trim();
+  const shouldAddFree = ctrPrioritySlugs.has(tool.slug) && !/^free\b/i.test(title);
+  const ctrTitle = shouldAddFree ? `Free ${title}` : title;
+
+  if (ctrTitle.length <= 60 && ctrPrioritySlugs.has(tool.slug)) {
+    return ctrTitle;
+  }
+
   if (isExpandedSeoTool(tool) && title.length < 55) {
     return `${tool.name} Online Free - ${getCategoryName(tool.category)} | Toolbox Hub`;
   }
   if (title.length >= 45) {
-    return title;
+    return ctrTitle;
   }
-  return `${tool.name} Online Free | ${getCategoryName(tool.category)} | Toolbox Hub`;
+  return shouldAddFree
+    ? `Free ${tool.name} Online | ${getCategoryName(tool.category)} | Toolbox Hub`
+    : `${tool.name} Online Free | ${getCategoryName(tool.category)} | Toolbox Hub`;
 }
 
 function enrichSeoDescription(tool: ToolDraft, implementationStatus: ImplementationStatus) {
@@ -451,7 +596,9 @@ function enrichSeoDescription(tool: ToolDraft, implementationStatus: Implementat
       ? " Check back soon for the full tool."
       : implementationStatus === "reduced-scope-local"
         ? " Clear, simple limits are explained."
-        : " Fast and easy to use.";
+        : ctrPrioritySlugs.has(tool.slug)
+          ? " Fast, simple, and easy to use."
+          : " Fast and easy to use.";
 
   return normalizePublicCopy(`${tool.shortDescription} Use ${tool.name.toLowerCase()} online with how-to steps, FAQs, related tools, and links to the ${getCategoryName(tool.category).toLowerCase()} directory.${scopeLine}`);
 }
@@ -463,7 +610,9 @@ function enrichLongDescription(tool: ToolDraft, implementationStatus: Implementa
       ? ` This page helps you find the tool and check back when it is ready.`
       : implementationStatus === "reduced-scope-local"
         ? ` Results can vary depending on the file, website, or input, and the page explains those limits clearly.`
-        : ` The page includes practical guidance, related tools, and helpful links so visitors can complete nearby tasks without starting over.`;
+        : ctrPrioritySlugs.has(tool.slug)
+          ? ` The page includes practical guidance, related tools, and helpful links so visitors can quickly move to the next step without starting over.`
+          : ` The page includes practical guidance, related tools, and helpful links so visitors can complete nearby tasks without starting over.`;
 
   if (tool.longDescription.length > 240) {
     return normalizePublicCopy(`${tool.longDescription}${scopeSentence}${isExpandedSeoTool(tool) ? ` The page also links to related ${categoryName.toLowerCase()} tasks.` : ""}`);
@@ -490,6 +639,90 @@ function enrichKeywords(tool: ToolDraft) {
   return [...new Set([...tool.keywords, ...extraKeywords])];
 }
 
+function toSearchPhrase(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[|/]/g, " ")
+    .replace(/[^a-z0-9\s&+-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isUsefulSearchPhrase(phrase: string, tool: ToolDraft) {
+  const normalized = toSearchPhrase(phrase);
+  if (!normalized || normalized.length < 8) {
+    return false;
+  }
+
+  const titlePhrase = toSearchPhrase(tool.seoTitle);
+  if (normalized === titlePhrase || normalized === toSearchPhrase(tool.name)) {
+    return false;
+  }
+
+  return true;
+}
+
+function buildPeopleAlsoSearchFor(tool: ToolDraft): SearchPhraseItem[] {
+  const manual = peopleAlsoSearchForOverrides.get(tool.slug);
+  if (manual) {
+    return manual.slice(0, 8);
+  }
+
+  const baseName = tool.name.toLowerCase();
+  const baseKeyword = tool.keywords[0]?.toLowerCase() ?? baseName;
+  const categoryQuery =
+    tool.category === "image-tools"
+      ? "edit image online"
+      : tool.category === "pdf-tools"
+        ? "pdf tools online"
+        : tool.category === "text-tools"
+          ? "text tools online"
+          : tool.category === "developer-tools"
+            ? "developer tools online"
+            : tool.category === "generator-tools"
+              ? "generator tools online"
+              : tool.category === "calculator-tools"
+                ? "calculator online"
+                : tool.category === "converter-tools"
+                  ? "convert online"
+                  : "website tools online";
+
+  const phraseCandidates = [
+    `${baseKeyword} online`,
+    `free ${baseKeyword}`,
+    `best ${baseKeyword}`,
+    tool.keywords[1] ? `${tool.keywords[1].toLowerCase()} online` : "",
+    tool.keywords[2] ? `${tool.keywords[2].toLowerCase()} tool` : "",
+    categoryQuery,
+  ]
+    .map((phrase) => toSearchPhrase(phrase))
+    .filter((phrase) => isUsefulSearchPhrase(phrase, tool));
+
+  const linkedRelated = (relatedToolSlugOverrides.get(tool.slug) ?? [])
+    .slice(0, 3)
+    .map((slug) => getTool(slug))
+    .filter((candidate): candidate is ToolDefinition => Boolean(candidate))
+    .map((candidate) => ({
+      phrase: toSearchPhrase(candidate.name),
+      href: `/tools/${candidate.slug}`,
+    }));
+
+  const phrases: SearchPhraseItem[] = [];
+  for (const phrase of phraseCandidates) {
+    if (!phrases.some((item) => item.phrase === phrase)) {
+      phrases.push({ phrase });
+    }
+  }
+
+  for (const item of linkedRelated) {
+    if (!phrases.some((phrase) => phrase.phrase === item.phrase)) {
+      phrases.push(item);
+    }
+  }
+
+  return phrases.slice(0, 6);
+}
+
 export const tools: ToolDefinition[] = toolDrafts.map((tool) => ({
   ...tool,
   implementationStatus: resolveImplementationStatus(tool),
@@ -510,6 +743,7 @@ export const tools: ToolDefinition[] = toolDrafts.map((tool) => ({
     keywords: enrichKeywords(tool),
     howToUse: enrichHowToUse(tool, tool.implementationStatus),
     faq: enrichFaq(tool, tool.implementationStatus),
+    peopleAlsoSearchFor: buildPeopleAlsoSearchFor(tool),
     relatedToolSlugs: buildRelatedToolSlugs(tool),
   };
 });
