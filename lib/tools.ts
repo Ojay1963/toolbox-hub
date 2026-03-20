@@ -344,7 +344,7 @@ function enrichHowToUse(tool: ToolDraft, implementationStatus: ImplementationSta
   if (!steps.some((step) => /copy|download|save|review/i.test(step))) {
     steps.push(
       implementationStatus === "coming-soon"
-        ? "Review the current scope note and return when a reliable implementation is available."
+        ? "Check back soon for the full tool."
         : "Review the output, then copy, download, or continue to a related tool if needed.",
     );
   }
@@ -352,7 +352,7 @@ function enrichHowToUse(tool: ToolDraft, implementationStatus: ImplementationSta
   if (steps.length < 4) {
     steps.push(
       implementationStatus === "reduced-scope-local"
-        ? "Check the scope note so you know what the browser can and cannot do for this workflow."
+        ? "Results can vary depending on the file, site, or input."
         : "Adjust the input values or settings until the output matches the result you need.",
     );
   }
@@ -361,7 +361,7 @@ function enrichHowToUse(tool: ToolDraft, implementationStatus: ImplementationSta
     steps.push(`Use the related tools area or the ${categoryName.toLowerCase()} page if you need a nearby workflow after this step.`);
   }
 
-  return steps.slice(0, isExpandedSeoTool(tool) ? 6 : 5);
+  return normalizePublicList(steps.slice(0, isExpandedSeoTool(tool) ? 6 : 5));
 }
 
 function enrichFaq(tool: ToolDraft, implementationStatus: ImplementationStatus) {
@@ -371,19 +371,19 @@ function enrichFaq(tool: ToolDraft, implementationStatus: ImplementationStatus) 
   const extraFaq: FaqItem[] = [
     {
       question: `Can I use ${tool.name.toLowerCase()} on mobile?`,
-      answer: `${tool.name} is built to work on modern mobile and desktop browsers with the same route, content structure, and core workflow.`,
+      answer: `${tool.name} is designed to work on modern mobile and desktop browsers.`,
     },
     {
       question: `Does ${tool.name.toLowerCase()} need an account or signup?`,
-      answer: `No. ${tool.name} follows the same no-auth approach as the rest of the ${categoryName.toLowerCase()} directory.`,
+      answer: `No. You can open the tool and use it without creating an account.`,
     },
     {
       question: `Are there related tools if ${tool.name.toLowerCase()} is not the exact fit?`,
-      answer: `Yes. Each ${tool.name} page links to related tools and its parent category so you can move to a similar workflow quickly.`,
+      answer: `Yes. Each tool page links to similar tools and its parent category.`,
     },
     {
       question: `What kind of task is ${tool.name.toLowerCase()} best for?`,
-      answer: `${tool.name} is best used for focused ${getCategoryName(tool.category).toLowerCase()} workflows where you want a quick browser-based result, a clear explanation of scope, and easy links to nearby tools.`,
+      answer: `${tool.name} is best for quick ${getCategoryName(tool.category).toLowerCase()} tasks where you want a clear result and easy next steps.`,
     },
   ];
 
@@ -391,26 +391,26 @@ function enrichFaq(tool: ToolDraft, implementationStatus: ImplementationStatus) 
     extraFaq.unshift(
       {
         question: `What output should I expect from ${tool.name.toLowerCase()}?`,
-        answer: `${tool.name} is designed to return a focused result for this workflow, plus internal links to nearby tools if you need a related next step.`,
+        answer: `${tool.name} gives you a focused result for this task, plus links to similar tools if you want to keep going.`,
       },
       {
         question: `Where can I find similar ${categoryName.toLowerCase()} after using ${tool.name.toLowerCase()}?`,
-        answer: `Use the related tools area, the category page, and the internal links block to continue into nearby ${categoryName.toLowerCase()} workflows without starting over.`,
+        answer: `Use the related tools section and the ${categoryName.toLowerCase()} page to find similar options.`,
       },
     );
   }
 
   if (implementationStatus === "reduced-scope-local") {
     extraFaq.unshift({
-      question: `Why is ${tool.name.toLowerCase()} marked reduced scope?`,
-      answer: `This tool is intentionally honest about browser limitations and only exposes the parts of the workflow that can be delivered reliably without external infrastructure.`,
+      question: `Are there any limits to ${tool.name.toLowerCase()}?`,
+      answer: `Yes. Some results may vary depending on the file, website, or input you use.`,
     });
   }
 
   if (implementationStatus === "coming-soon") {
     extraFaq.unshift({
       question: `Why is ${tool.name.toLowerCase()} still coming soon?`,
-      answer: `The site avoids fake outputs, so this page stays transparent until a reliable implementation is practical within the current architecture.`,
+      answer: `The tool is not ready yet, so the page stays simple until it is available.`,
     });
   }
 
@@ -420,7 +420,10 @@ function enrichFaq(tool: ToolDraft, implementationStatus: ImplementationStatus) 
     }
   }
 
-  return faq.slice(0, isExpandedSeoTool(tool) ? 6 : 5);
+  return faq.slice(0, isExpandedSeoTool(tool) ? 6 : 5).map((item) => ({
+    question: item.question,
+    answer: normalizePublicCopy(item.answer),
+  }));
 }
 
 function enrichSeoTitle(tool: ToolDraft) {
@@ -445,28 +448,28 @@ function enrichSeoDescription(tool: ToolDraft, implementationStatus: Implementat
 
   const scopeLine =
     implementationStatus === "coming-soon"
-      ? " Honest scope notes included."
+      ? " Check back soon for the full tool."
       : implementationStatus === "reduced-scope-local"
-        ? " Includes clear reduced-scope notes."
-        : " Browser-first and easy to use.";
+        ? " Clear, simple limits are explained."
+        : " Fast and easy to use.";
 
-  return `${tool.shortDescription} Use ${tool.name.toLowerCase()} online with how-to steps, FAQs, related tools, and links to the ${getCategoryName(tool.category).toLowerCase()} directory.${scopeLine}`;
+  return normalizePublicCopy(`${tool.shortDescription} Use ${tool.name.toLowerCase()} online with how-to steps, FAQs, related tools, and links to the ${getCategoryName(tool.category).toLowerCase()} directory.${scopeLine}`);
 }
 
 function enrichLongDescription(tool: ToolDraft, implementationStatus: ImplementationStatus) {
   const categoryName = getCategoryName(tool.category);
   const scopeSentence =
     implementationStatus === "coming-soon"
-      ? ` The page stays useful for SEO and navigation while clearly explaining why a reliable implementation is still pending.`
+      ? ` This page helps you find the tool and check back when it is ready.`
       : implementationStatus === "reduced-scope-local"
-        ? ` The page also explains the current browser-only limits so visitors know exactly what results are realistic.`
-        : ` The page includes practical guidance, related tools, and internal links so visitors can complete nearby tasks without starting over.`;
+        ? ` Results can vary depending on the file, website, or input, and the page explains those limits clearly.`
+        : ` The page includes practical guidance, related tools, and helpful links so visitors can complete nearby tasks without starting over.`;
 
   if (tool.longDescription.length > 240) {
-    return `${tool.longDescription}${scopeSentence}${isExpandedSeoTool(tool) ? ` The page also strengthens internal linking so visitors can keep exploring related ${categoryName.toLowerCase()} tasks.` : ""}`;
+    return normalizePublicCopy(`${tool.longDescription}${scopeSentence}${isExpandedSeoTool(tool) ? ` The page also links to related ${categoryName.toLowerCase()} tasks.` : ""}`);
   }
 
-  return `${tool.longDescription} ${tool.name} belongs to the ${categoryName.toLowerCase()} section, which helps users discover similar workflows, related conversions, and alternative tools from the same route structure.${scopeSentence}`;
+  return normalizePublicCopy(`${tool.longDescription} ${tool.name} belongs to the ${categoryName.toLowerCase()} section, which helps users discover similar workflows, related conversions, and alternative tools in the same area.${scopeSentence}`);
 }
 
 function enrichKeywords(tool: ToolDraft) {
@@ -490,17 +493,26 @@ function enrichKeywords(tool: ToolDraft) {
 export const tools: ToolDefinition[] = toolDrafts.map((tool) => ({
   ...tool,
   implementationStatus: resolveImplementationStatus(tool),
-})).map((tool) => ({
-  ...tool,
-  statusNote: resolveStatusNote(tool),
-  seoTitle: enrichSeoTitle(tool),
-  seoDescription: enrichSeoDescription(tool, tool.implementationStatus),
-  longDescription: enrichLongDescription(tool, tool.implementationStatus),
-  keywords: enrichKeywords(tool),
-  howToUse: enrichHowToUse(tool, tool.implementationStatus),
-  faq: enrichFaq(tool, tool.implementationStatus),
-  relatedToolSlugs: buildRelatedToolSlugs(tool),
-}));
+})).map((tool) => {
+  const resolvedStatusNote = resolveStatusNote(tool);
+
+  return {
+    ...tool,
+    statusNote:
+      tool.implementationStatus === "coming-soon"
+        ? resolvedStatusNote
+        : resolvedStatusNote
+          ? normalizePublicCopy(resolvedStatusNote)
+          : undefined,
+    seoTitle: enrichSeoTitle(tool),
+    seoDescription: enrichSeoDescription(tool, tool.implementationStatus),
+    longDescription: enrichLongDescription(tool, tool.implementationStatus),
+    keywords: enrichKeywords(tool),
+    howToUse: enrichHowToUse(tool, tool.implementationStatus),
+    faq: enrichFaq(tool, tool.implementationStatus),
+    relatedToolSlugs: buildRelatedToolSlugs(tool),
+  };
+});
 
 const toolBySlugMap = new Map(tools.map((tool) => [tool.slug, tool]));
 const toolsByCategoryMap = new Map<ToolCategorySlug, ToolDefinition[]>(

@@ -4,7 +4,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata = buildMetadata({
   title: "Privacy Policy",
   description:
-    "Read the privacy policy for Toolbox Hub, including how browser-side tools, uploaded files, analytics-free usage, and server-assisted routes are handled.",
+    "Read the privacy policy for Toolbox Hub, including how uploaded files, tool inputs, and third-party services may be handled.",
   pathname: "/privacy-policy",
   keywords: ["privacy policy", "toolbox hub privacy", "online tools privacy"],
 });
@@ -14,25 +14,25 @@ export default function PrivacyPolicyPage() {
     <StaticPage
       eyebrow="Legal"
       title="Privacy Policy"
-      intro="This Privacy Policy explains how Toolbox Hub handles information when you browse the site or use its tools. The site is designed to favor local browser-side processing whenever practical and to avoid collecting more data than is needed to operate the service."
+      intro="This Privacy Policy explains how Toolbox Hub handles information when you browse the site or use its tools. The site is designed to collect only the information needed to operate the service."
       sections={[
         {
           title: "Information We Process",
           paragraphs: [
-            "Most tools on the site run in the browser and do not require an account. When you use those tools, the content you enter or upload is processed locally on your device and is not intentionally stored by the site operator.",
-            "Some higher-value tools use server routes or third-party services to complete tasks such as document conversion, OCR, website analysis, or image processing. In those cases, the uploaded file or requested URL is processed only to complete the tool action you requested.",
+            "Most tools on the site do not require an account. When you use those tools, the content you enter or upload is used only to produce the result you requested.",
+            "Some tools may rely on online processing or third-party services for tasks such as document conversion, OCR, website analysis, or image editing. In those cases, the uploaded file or requested URL is used only to complete the action you requested.",
           ],
           bullets: [
             "We do not provide user accounts, public profiles, or persistent dashboards.",
             "We do not intentionally ask for sensitive personal information to use the core tool directory.",
-            "If a tool depends on a third-party service, the page should explain that scope honestly.",
+            "If a tool relies on a third-party service, the page should explain that clearly.",
           ],
         },
         {
           title: "Files, Text, and Tool Inputs",
           paragraphs: [
-            "Uploaded files, pasted text, URLs, and other inputs are used only to generate the output requested by the tool. Files may be transmitted to a server route or an external service only when that specific tool requires it.",
-            "Because the site includes utilities for PDFs, images, text, developer workflows, and internet checks, you should avoid uploading confidential, regulated, or highly sensitive material unless you fully understand the scope note shown on that tool page.",
+            "Uploaded files, pasted text, URLs, and other inputs are used only to generate the output requested by the tool. Some requests may be handled online or by a third-party service when needed to complete the tool action.",
+            "Because the site includes tools for PDFs, images, text, developer tasks, and website checks, you should avoid uploading confidential, regulated, or highly sensitive material unless you are comfortable with how that tool works.",
           ],
         },
         {
@@ -45,7 +45,7 @@ export default function PrivacyPolicyPage() {
         {
           title: "Third-Party Services",
           paragraphs: [
-            "Some tools may rely on external providers for capabilities that are not practical or reliable to perform entirely in the browser. Examples can include OCR, website performance analysis, background removal, screenshots, exchange rates, or document processing.",
+            "Some tools may rely on external providers for features such as OCR, website performance analysis, background removal, screenshots, exchange rates, or document processing.",
             "When a third-party provider is involved, the provider may process the request data needed to perform the task. Their own privacy and retention practices will apply in addition to this site policy.",
           ],
         },
@@ -59,7 +59,7 @@ export default function PrivacyPolicyPage() {
         {
           title: "Your Choices",
           paragraphs: [
-            "You can choose not to upload files or submit URLs to tools that rely on server-side processing. For browser-first tools, you can usually complete the workflow without sending your data away from the device.",
+            "You can choose not to upload files or submit URLs to tools that rely on online processing.",
             "If you need privacy-related contact or deletion information, use the public contact details listed on the contact page.",
           ],
         },

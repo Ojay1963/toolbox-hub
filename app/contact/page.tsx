@@ -12,7 +12,7 @@ export const metadata = buildMetadata({
 const contactTopics = [
   "Broken tool reports or output issues",
   "Accessibility concerns and usability feedback",
-  "Incorrect page copy, metadata, or scope notes",
+  "Incorrect page copy, metadata, or instructions",
   "Partnership, licensing, or business inquiries",
   "Abuse, security, or legal notices",
 ];
@@ -66,8 +66,7 @@ export default function ContactPage() {
               </p>
             ) : (
               <p>
-                Support, business, privacy, and legal requests are handled by email for the current
-                deployment.
+                Support, business, privacy, and legal requests are handled by email.
               </p>
             )}
             <p>

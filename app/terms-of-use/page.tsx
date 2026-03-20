@@ -14,7 +14,7 @@ export default function TermsOfUsePage() {
     <StaticPage
       eyebrow="Legal"
       title="Terms of Use"
-      intro="These Terms of Use govern access to and use of Toolbox Hub. By using the site, you agree to use it lawfully, respectfully, and within the technical and scope limits explained on each tool page."
+      intro="These Terms of Use govern access to and use of Toolbox Hub. By using the site, you agree to use it lawfully, respectfully, and within the limits explained on each tool page."
       sections={[
         {
           title: "Using the Site",
@@ -26,7 +26,7 @@ export default function TermsOfUsePage() {
         {
           title: "Tool Scope and Accuracy",
           paragraphs: [
-            "The site includes a mix of browser-first tools, reduced-scope workflows, and service-backed utilities. Some tools are precise calculators or formatters, while others depend on browser capabilities, third-party providers, or simplified conversion logic.",
+            "The site includes a mix of tools with different levels of complexity. Some tools provide straightforward calculations or formatting, while others may depend on device support, third-party services, or simplified processing.",
             "You are responsible for reviewing outputs before relying on them for legal, financial, medical, security, or compliance-sensitive decisions. The site aims to be honest about limitations and does not guarantee that every result is complete, current, or suitable for every use case.",
           ],
         },
@@ -47,8 +47,8 @@ export default function TermsOfUsePage() {
         {
           title: "Availability and Changes",
           paragraphs: [
-            "Because the site depends on browser features, hosting infrastructure, and some external services, any tool may change, be rate limited, become unavailable, or be removed without notice.",
-            "The operator may update tool behavior, page copy, route structure, technical limits, or these terms as the site evolves.",
+            "Because the site depends on software, hosting, and some external services, any tool may change, be rate limited, become unavailable, or be removed without notice.",
+            "The operator may update tool behavior, page copy, limits, or these terms as the site evolves.",
           ],
         },
         {

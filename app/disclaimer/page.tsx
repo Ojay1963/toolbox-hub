@@ -4,7 +4,7 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata = buildMetadata({
   title: "Disclaimer",
   description:
-    "Read the Toolbox Hub disclaimer about informational use, third-party service dependencies, tool limitations, and when results should be independently verified.",
+    "Read the Toolbox Hub disclaimer about informational use, tool limitations, third-party services, and when results should be independently verified.",
   pathname: "/disclaimer",
   keywords: ["disclaimer", "toolbox hub disclaimer", "online tools disclaimer"],
 });
@@ -26,8 +26,8 @@ export default function DisclaimerPage() {
         {
           title: "No Guarantee of Completeness",
           paragraphs: [
-            "Some tools depend on browser APIs, simplified local logic, or third-party services. That means results may vary by browser, device, file structure, service availability, or the quality of the input data.",
-            "Reduced-scope and service-backed tools are especially important to review carefully because they may intentionally simplify layout, formatting, metadata, or network visibility.",
+            "Some tools depend on device support, simplified processing, or third-party services. That means results may vary by browser, device, file structure, service availability, or the quality of the input data.",
+            "Some tools may simplify layout, formatting, metadata, or website checks, so you should review important outputs carefully.",
           ],
         },
         {
@@ -40,8 +40,8 @@ export default function DisclaimerPage() {
         {
           title: "Use at Your Own Risk",
           paragraphs: [
-            "You are responsible for deciding whether a tool is appropriate for your situation. That includes checking source material, confirming conversions, reviewing extracted text, testing generated files, and deciding whether a server-assisted workflow is acceptable for your data.",
-            "If you need guaranteed professional outputs, specialist review, or service-level commitments, a free browser-first tools website may not be sufficient on its own.",
+            "You are responsible for deciding whether a tool is appropriate for your situation. That includes checking source material, confirming conversions, reviewing extracted text, and testing generated files before relying on them.",
+            "If you need guaranteed professional outputs, specialist review, or service-level commitments, a free online tools website may not be sufficient on its own.",
           ],
         },
       ]}
