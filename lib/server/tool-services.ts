@@ -1,5 +1,6 @@
 import "server-only";
 
+import { Buffer } from "node:buffer";
 import { lookup, resolve4, resolve6, resolveCaa, resolveCname, resolveMx, resolveNs, resolveSoa, resolveSrv, resolveTxt } from "node:dns/promises";
 import { isIP } from "node:net";
 import mammoth from "mammoth";
@@ -512,7 +513,7 @@ export async function convertWordToPdf(file: File) {
     throw new ToolServiceError("Upload a DOCX Word document to continue.");
   }
 
-  const result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+  const result = await mammoth.extractRawText({ buffer: Buffer.from(await file.arrayBuffer()) });
   const rawText = result.value.trim();
   if (!rawText) {
     throw new ToolServiceError("This Word document did not contain readable text for the current PDF export.");
