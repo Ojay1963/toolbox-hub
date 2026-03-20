@@ -227,6 +227,41 @@ Set:
 NEXT_PUBLIC_SITE_URL=https://your-domain.com
 ```
 
+### Service-backed tool environment checks
+
+These tools should only be launched publicly when their backing service is configured:
+
+- `background-remover` and `remove-background-from-image`: `REMOVE_BG_API_KEY`
+- `pdf-ocr-placeholder`: `OCR_SPACE_API_KEY`
+- `protect-pdf`: `PDF_PROTECT_SERVICE_URL`
+- `website-screenshot-tool`: `SCREENSHOT_SERVICE_URL`
+
+Launch behavior is now deployment-aware:
+
+- if a required env var is missing, the tool page shows an explicit unavailable panel instead of an active but broken form
+- unavailable service-backed tools are not indexed
+- unavailable service-backed tools are not surfaced in featured discovery lists
+- alias routes remain non-indexed
+
+### Durable API rate limiting
+
+Expensive `app/api/tools/*` routes now use a durable Redis REST-backed fixed-window limiter that is suitable for Vercel or other serverless deployments.
+
+Supported environment variables:
+
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN`
+
+The limiter also accepts Vercel KV-style aliases if your deployment exposes them:
+
+- `KV_REST_API_URL`
+- `KV_REST_API_TOKEN`
+
+Protected routes include the highest-cost workflows such as OCR, background removal, screenshots, speed tests, mobile-friendly checks, PDF protection, and document conversion endpoints.
+
+In local development, rate limiting is allowed to bypass when the Redis REST env vars are not configured.
+In production, missing rate-limit env vars will make those API routes return a clear service-unavailable error instead of silently falling back to per-instance memory.
+
 ### Before going live
 
 - confirm the real domain is set in `NEXT_PUBLIC_SITE_URL`

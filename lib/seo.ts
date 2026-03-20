@@ -1,10 +1,54 @@
 import type { Metadata } from "next";
+import { getIndexableTools } from "@/lib/tools";
+
+function normalizeSiteUrl(value?: string) {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const withProtocol = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+
+  try {
+    return new URL(withProtocol).toString().replace(/\/$/, "");
+  } catch {
+    return undefined;
+  }
+}
+
+function normalizeEmail(value?: string) {
+  const trimmed = value?.trim().toLowerCase();
+  if (!trimmed || !trimmed.includes("@")) {
+    return undefined;
+  }
+
+  return trimmed;
+}
+
+function resolveSiteUrl() {
+  return (
+    normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL) ||
+    normalizeSiteUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL) ||
+    normalizeSiteUrl(process.env.VERCEL_URL) ||
+    "http://localhost:3000"
+  );
+}
+
+const resolvedSiteUrl = resolveSiteUrl();
+const siteUrlHostname = new URL(resolvedSiteUrl).hostname.toLowerCase();
+const isLocalSiteUrl = /^(localhost|127\.0\.0\.1)$/.test(siteUrlHostname);
+const isPreviewDeployment = process.env.VERCEL_ENV === "preview";
+const indexableToolCount = getIndexableTools().length;
 
 export const siteMetadata = {
   name: "Toolbox Hub",
   description:
-    "A fast, SEO-friendly collection of more than 150 free online tools for images, PDFs, text, developers, generators, calculators, converters, and internet tasks.",
-  siteUrl: (process.env.NEXT_PUBLIC_SITE_URL || "https://example.com").replace(/\/$/, ""),
+    `A fast, SEO-friendly collection of ${indexableToolCount} public tool pages for images, PDFs, text, developers, generators, calculators, converters, and internet tasks.`,
+  siteUrl: resolvedSiteUrl,
+  indexableToolCount,
+  contactEmail: normalizeEmail(process.env.NEXT_PUBLIC_CONTACT_EMAIL),
+  isLocalSiteUrl,
+  shouldAllowIndexing: !isLocalSiteUrl && !isPreviewDeployment,
 };
 
 export function absoluteUrl(pathname: string) {
@@ -16,11 +60,15 @@ export function buildMetadata({
   description,
   pathname,
   keywords,
+  index = true,
+  canonicalPathname,
 }: {
   title: string;
   description: string;
   pathname: string;
   keywords?: string[];
+  index?: boolean;
+  canonicalPathname?: string;
 }): Metadata {
   return {
     title: {
@@ -29,16 +77,16 @@ export function buildMetadata({
     description,
     keywords,
     robots: {
-      index: true,
+      index,
       follow: true,
     },
     alternates: {
-      canonical: absoluteUrl(pathname),
+      canonical: absoluteUrl(canonicalPathname ?? pathname),
     },
     openGraph: {
       title,
       description,
-      url: absoluteUrl(pathname),
+      url: absoluteUrl(canonicalPathname ?? pathname),
       siteName: siteMetadata.name,
       type: "website",
       locale: "en_US",

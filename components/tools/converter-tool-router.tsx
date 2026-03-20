@@ -5,6 +5,7 @@ import {
   BinaryToTextConverterTool,
   CurrencyConverterTool,
   DecimalToBinaryConverterTool,
+  FileSizeConverterTool,
   HexToRgbConverterTool,
   LengthConverterTool,
   RgbToHexConverterTool,
@@ -24,6 +25,7 @@ export function ConverterToolRouter({ tool }: { tool: ToolDefinition }) {
     case "weight-converter": return <WeightConverterTool />;
     case "temperature-converter": return <TemperatureConverterTool />;
     case "time-converter": return <TimeConverterTool />;
+    case "file-size-converter": return <FileSizeConverterTool />;
     case "currency-converter": return <CurrencyConverterTool />;
     case "timezone-converter": return <TimezoneConverterTool />;
     case "unix-timestamp-converter": return <UnixTimestampConverterTool />;

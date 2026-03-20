@@ -45,6 +45,15 @@ type BarcodeDetectorConstructor = new (options?: { formats?: string[] }) => Barc
 
 const supportedTypes = "image/jpeg,image/png,image/webp";
 
+async function getApiError(response: Response) {
+  try {
+    const data = (await response.json()) as { error?: string };
+    return data.error || "This service is temporarily unavailable. Please try again shortly.";
+  } catch {
+    return "This service is temporarily unavailable. Please try again shortly.";
+  }
+}
+
 function revokeUrl(url?: string) {
   if (url) URL.revokeObjectURL(url);
 }
@@ -1273,14 +1282,172 @@ export function ImageToBase64ConverterTool() {
 }
 
 export function BackgroundRemoverTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [processed, setProcessed] = useState<ProcessedImage | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const previewUrl = useFilePreview(file);
+
+  useEffect(() => () => revokeUrl(processed?.url), [processed]);
+
+  async function handleRemove() {
+    if (!file) {
+      setError("Upload an image file first.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+      revokeUrl(processed?.url);
+
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/tools/background-remover", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error(await getApiError(response));
+      }
+
+      const blob = await response.blob();
+      const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const url = URL.createObjectURL(blob);
+        const element = new Image();
+        element.onload = () => resolve(element);
+        element.onerror = () => {
+          URL.revokeObjectURL(url);
+          reject(new Error("The server returned an unreadable processed image."));
+        };
+        element.src = url;
+      });
+
+      const outputUrl = image.src;
+      setProcessed({
+        blob,
+        url: outputUrl,
+        width: image.naturalWidth || image.width,
+        height: image.naturalHeight || image.height,
+      });
+    } catch (removeError) {
+      setProcessed(null);
+      setError(removeError instanceof Error ? removeError.message : "Unable to remove the background from that image.");
+    } finally {
+      setLoading(false);
+    }
+  }
+  
   return (
-    <ToolShell title="Background Remover" description="This page is intentionally honest about current limits for browser-only background removal.">
+      <ToolShell title="Remove Background From Image" description="Upload an image, process it through the backend background-removal service, and preview or download the resulting transparent PNG.">
+        <Field label="Image file" hint="Upload JPG, PNG, or WebP to remove its background through the server route.">
+          <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+        </Field>
+        <button type="button" className={buttonClass} onClick={handleRemove} disabled={!file || loading}>
+          {loading ? "Removing background..." : "Remove background"}
+        </button>
+        <Notice>Server-assisted processing. If background removal is not enabled on this deployment, the page will show a clear unavailable message instead of faking a result.</Notice>
+        {error ? <Notice tone="error">{error}</Notice> : null}
+        {!file ? (
+          <EmptyState
+            title="Upload an image to remove its background"
+            description="The processed result will be returned as a transparent PNG when the backend service is available."
+          />
+        ) : (
+          <div className="grid gap-4 lg:grid-cols-2">
+            <div className="rounded-2xl bg-stone-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
+                Uploaded preview
+            </p>
+            {previewUrl ? <img src={previewUrl} alt="Uploaded image preview for background removal" className="mt-3 max-h-80 w-full rounded-2xl object-contain" /> : null}
+          </div>
+            <div className="rounded-2xl bg-stone-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
+                Processed result
+              </p>
+              {processed ? (
+                <div className="mt-3 space-y-4">
+                  <img src={processed.url} alt="Background-removed image preview" className="max-h-80 w-full rounded-2xl object-contain" />
+                  <button type="button" className={secondaryButtonClass} onClick={() => downloadProcessedImage(processed.url, `${file.name.replace(/\.[^.]+$/, "")}-no-background.png`)}>
+                    Download PNG
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-3 space-y-3 text-sm leading-7 text-[color:var(--muted)]">
+                  <p>File selected: <span className="font-medium text-[color:var(--foreground)]">{file.name}</span> ({formatFileSize(file.size)})</p>
+                  <p>Run the server-assisted background-removal step to generate a transparent PNG preview.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </ToolShell>
+  );
+}
+
+export function GifToMp4ConverterTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const previewUrl = useFilePreview(file);
+
+  return (
+    <ToolShell
+      title="GIF to MP4 Converter"
+      description="Preview an uploaded GIF and review the current limits of lightweight browser-side GIF-to-video conversion."
+    >
+      <Field
+        label="Animated GIF"
+        hint="Upload a GIF file to preview the kind of input this future conversion workflow will accept."
+      >
+        <input
+          type="file"
+          accept="image/gif"
+          onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+        />
+      </Field>
       <Notice>
-        Coming soon. A high-quality background remover usually needs heavier segmentation logic,
-        larger client downloads, or external services. This site avoids fake AI claims and does not
-        ship a poor-quality cutout workflow just to appear complete.
+        Coming soon. Reliable GIF-to-MP4 conversion in the browser can become heavy across devices and
+        codecs, so this page does not fake a video export with misleading output.
       </Notice>
-      <EmptyState title="No deceptive one-click removal here" description="When a genuinely useful browser-first version is practical, it can plug into this page without changing the route, content, or SEO structure." />
+      {!file ? (
+        <EmptyState
+          title="Upload a GIF to preview the future workflow"
+          description="You can inspect the selected input here today, but the route intentionally stops short of pretending it can deliver a robust MP4 conversion with the current lightweight stack."
+        />
+      ) : (
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-2xl bg-stone-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
+              Uploaded GIF preview
+            </p>
+            {previewUrl ? (
+              <img
+                src={previewUrl}
+                alt="Uploaded GIF preview for future GIF to MP4 conversion"
+                className="mt-3 max-h-80 w-full rounded-2xl object-contain"
+              />
+            ) : null}
+          </div>
+          <div className="rounded-2xl bg-stone-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
+              Current functionality
+            </p>
+            <div className="mt-3 space-y-3 text-sm leading-7 text-[color:var(--muted)]">
+              <p>
+                This page currently previews the uploaded GIF and explains why a dependable MP4 export
+                is not shipped yet.
+              </p>
+              <p>
+                A later version may add a real conversion workflow once codec support and performance
+                tradeoffs can be handled honestly across common browsers.
+              </p>
+              <p>
+                File selected: <span className="font-medium text-[color:var(--foreground)]">{file.name}</span>
+                {" "}({formatFileSize(file.size)})
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </ToolShell>
   );
 }

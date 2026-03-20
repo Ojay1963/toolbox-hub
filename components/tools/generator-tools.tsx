@@ -17,7 +17,60 @@ import {
 
 const givenNames = ["Alex", "Jordan", "Taylor", "Morgan", "Avery", "Riley", "Cameron", "Jamie", "Logan", "Casey"];
 const familyNames = ["Parker", "Johnson", "Reed", "Mitchell", "Bennett", "Hayes", "Coleman", "Murphy", "Bailey", "Foster"];
+const fakeAddressProfiles = [
+  {
+    country: "United States",
+    code: "US",
+    cities: ["Austin, TX", "Portland, OR", "Tampa, FL", "Denver, CO", "Raleigh, NC"],
+    streets: ["Maple", "Cedar", "Sunset", "Pine", "Lakeview", "Willow"],
+    streetSuffixes: ["St", "Ave", "Blvd", "Dr", "Ln"],
+    postalCode: () => String(getRandomInt(90000) + 10000),
+  },
+  {
+    country: "United Kingdom",
+    code: "UK",
+    cities: ["London", "Manchester", "Bristol", "Leeds", "Birmingham"],
+    streets: ["Baker", "Oak", "Queens", "Station", "Highfield", "King"],
+    streetSuffixes: ["Road", "Street", "Close", "Lane", "Way"],
+    postalCode: () => `${String.fromCharCode(65 + getRandomInt(26))}${String.fromCharCode(65 + getRandomInt(26))}${getRandomInt(9) + 1} ${getRandomInt(9)}${String.fromCharCode(65 + getRandomInt(26))}${String.fromCharCode(65 + getRandomInt(26))}`,
+  },
+  {
+    country: "Canada",
+    code: "CA",
+    cities: ["Toronto, ON", "Calgary, AB", "Ottawa, ON", "Halifax, NS", "Vancouver, BC"],
+    streets: ["Spruce", "Harbour", "Elm", "Victoria", "Northgate", "River"],
+    streetSuffixes: ["Street", "Avenue", "Drive", "Trail", "Court"],
+    postalCode: () => `${String.fromCharCode(65 + getRandomInt(26))}${getRandomInt(10)}${String.fromCharCode(65 + getRandomInt(26))} ${getRandomInt(10)}${String.fromCharCode(65 + getRandomInt(26))}${getRandomInt(10)}`,
+  },
+  {
+    country: "Nigeria",
+    code: "NG",
+    cities: ["Lagos", "Abuja", "Ibadan", "Port Harcourt", "Enugu"],
+    streets: ["Ademola", "Broad", "Unity", "Palm", "Freedom", "Chiefs"],
+    streetSuffixes: ["Road", "Close", "Street", "Way", "Crescent"],
+    postalCode: () => String(getRandomInt(900000) + 100000),
+  },
+  {
+    country: "India",
+    code: "IN",
+    cities: ["Mumbai", "Bengaluru", "Hyderabad", "Pune", "Jaipur"],
+    streets: ["MG", "Lake", "Temple", "Station", "Garden", "Nehru"],
+    streetSuffixes: ["Road", "Nagar", "Street", "Marg", "Layout"],
+    postalCode: () => String(getRandomInt(900000) + 100000),
+  },
+  {
+    country: "Australia",
+    code: "AU",
+    cities: ["Sydney NSW", "Melbourne VIC", "Brisbane QLD", "Perth WA", "Adelaide SA"],
+    streets: ["Jacaranda", "Harbour", "Coastal", "Kingfisher", "Banksia", "Wattle"],
+    streetSuffixes: ["Street", "Road", "Drive", "Place", "Terrace"],
+    postalCode: () => String(getRandomInt(9000) + 1000),
+  },
+] as const;
 const usernameWords = ["pixel", "swift", "luna", "forge", "delta", "echo", "mint", "nova", "orbit", "atlas"];
+const gamerStyleWords = ["shadow", "vortex", "blaze", "phantom", "glitch", "raven", "venom", "frost", "striker", "omega"];
+const professionalStyleWords = ["studio", "works", "group", "logic", "labs", "consult", "digital", "systems", "office", "craft"];
+const shortUsernameParts = ["ax", "zen", "flux", "nova", "byte", "arc", "lynx", "vibe", "echo", "zeno"];
 const nicknameWords = ["Ace", "Blaze", "Scout", "Nova", "Dash", "Skye", "Jinx", "Milo", "Rex", "Zee"];
 const quoteBank = [
   "Consistency beats intensity when you are building something real.",
@@ -92,7 +145,7 @@ function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
 }
 
-function pickRandom<T>(values: T[]) {
+function pickRandom<T>(values: readonly T[]) {
   return values[getRandomInt(values.length)];
 }
 
@@ -107,6 +160,96 @@ function toSlugParts(value: string) {
 
 function dedupePreserveOrder(values: string[]) {
   return Array.from(new Set(values));
+}
+
+type UsernameStyle = "gamer" | "professional" | "short";
+
+function titleCaseWord(value: string) {
+  return value ? value.charAt(0).toUpperCase() + value.slice(1) : value;
+}
+
+function capitalizeParts(parts: string[]) {
+  return parts.map((part) => titleCaseWord(part)).join("");
+}
+
+function normalizeKeyword(value: string) {
+  return toSlugParts(value).slice(0, 2);
+}
+
+function pickUsernameKeywordPart(keywordParts: string[]) {
+  if (!keywordParts.length) return "";
+  return pickRandom(keywordParts);
+}
+
+function buildGamerUsername(keywordParts: string[]) {
+  const base = pickUsernameKeywordPart(keywordParts) || pickRandom(usernameWords);
+  const accent = pickRandom(gamerStyleWords);
+  const suffix = String(getRandomInt(900) + 100);
+  return pickRandom([
+    `${base}${accent}${suffix}`,
+    `${accent}_${base}${suffix}`,
+    `${capitalizeParts([base, accent])}${suffix}`,
+    `x${capitalizeParts([base, accent])}`,
+  ]);
+}
+
+function buildProfessionalUsername(keywordParts: string[]) {
+  const lead = pickUsernameKeywordPart(keywordParts) || pickRandom(usernameWords);
+  const tail = pickRandom(professionalStyleWords);
+  const number = getRandomInt(90) + 10;
+  return pickRandom([
+    `${lead}.${tail}`,
+    `${lead}${tail}`,
+    `${lead}_${tail}${number}`,
+    `${capitalizeParts([lead, tail])}`,
+  ]);
+}
+
+function buildShortUsername(keywordParts: string[]) {
+  const lead = pickUsernameKeywordPart(keywordParts) || pickRandom(shortUsernameParts);
+  const tail = pickRandom(shortUsernameParts);
+  const suffix = getRandomInt(90) + 10;
+  return pickRandom([
+    `${lead}${tail}`,
+    `${lead}${suffix}`,
+    `${lead}${tail[0]}`,
+    `${tail}${lead[0]}${suffix}`,
+  ]);
+}
+
+function buildUsernameSuggestions(style: UsernameStyle, keyword: string, count: number) {
+  const keywordParts = normalizeKeyword(keyword);
+  const total = clamp(count, 10, 24);
+  const next: string[] = [];
+
+  while (next.length < total * 3 && next.length < 200) {
+    const candidate =
+      style === "gamer"
+        ? buildGamerUsername(keywordParts)
+        : style === "professional"
+          ? buildProfessionalUsername(keywordParts)
+          : buildShortUsername(keywordParts);
+    next.push(candidate.replace(/[^a-zA-Z0-9._-]/g, ""));
+  }
+
+  return dedupePreserveOrder(next).slice(0, total);
+}
+
+function buildFakeAddress(profile: (typeof fakeAddressProfiles)[number]) {
+  const first = pickRandom(givenNames);
+  const last = pickRandom(familyNames);
+  const streetNumber = getRandomInt(899) + 101;
+  const street = pickRandom(profile.streets);
+  const suffix = pickRandom(profile.streetSuffixes);
+  const city = pickRandom(profile.cities);
+
+  return [
+    `${first} ${last}`,
+    `${streetNumber} ${street} ${suffix}`,
+    city,
+    `${profile.postalCode()}`,
+    profile.country,
+  ].join("\n");
 }
 
 function buildDownloadLink(dataUrl: string, filename: string) {
@@ -438,6 +581,73 @@ export function RandomNameGeneratorTool() {
   );
 }
 
+export function FakeAddressGeneratorTool() {
+  const [countryCode, setCountryCode] = useState("US");
+  const [count, setCount] = useState(5);
+  const [values, setValues] = useState<string[]>([]);
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    const total = Math.max(1, Math.min(20, count));
+    const profile = fakeAddressProfiles.find((item) => item.code === countryCode);
+    if (!profile) {
+      setError("Choose a supported country or region first.");
+      setValues([]);
+      return;
+    }
+
+    setValues(Array.from({ length: total }, () => buildFakeAddress(profile)));
+    setError("");
+  }
+
+  const output = useMemo(
+    () => values.map((value, index) => `Address ${index + 1}\n${value}`).join("\n\n"),
+    [values],
+  );
+
+  return (
+    <ToolShell title="Fake Address Generator" description="Generate realistic sample names and mailing addresses locally for demos, testing, and placeholders without using any live data source.">
+      <div className="grid gap-4 md:grid-cols-2">
+        <Field label="Country or region">
+          <select className={inputClass} value={countryCode} onChange={(event) => setCountryCode(event.target.value)}>
+            {fakeAddressProfiles.map((profile) => (
+              <option key={profile.code} value={profile.code}>{profile.country}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="How many addresses?">
+          <input className={inputClass} type="number" min="1" max="20" value={count} onChange={(event) => setCount(Number(event.target.value))} />
+        </Field>
+      </div>
+      <Notice>These are fake sample addresses for UI testing and mock content only. They are not verified delivery addresses.</Notice>
+      <button type="button" className={buttonClass} onClick={handleGenerate}>
+        Generate addresses
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!values.length ? (
+        <EmptyState title="No fake addresses generated yet" description="Choose a country or region, set how many entries you need, and create a local sample address list." />
+      ) : (
+        <>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {values.map((value, index) => (
+              <div key={`${countryCode}-${index}-${value}`} className="rounded-2xl border border-[color:var(--border)] bg-white p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">Address {index + 1}</p>
+                <pre className="mt-3 whitespace-pre-wrap break-words text-sm text-slate-700">{value}</pre>
+              </div>
+            ))}
+          </div>
+          <OutputBlock title="Address list" value={output} />
+          <div className="flex flex-wrap gap-3">
+            <button type="button" className={buttonClass} onClick={() => copy("fake address list", output)}>Copy addresses</button>
+            {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+          </div>
+        </>
+      )}
+    </ToolShell>
+  );
+}
+
 export function RandomNumberGeneratorTool() {
   const [min, setMin] = useState(1);
   const [max, setMax] = useState(100);
@@ -538,6 +748,71 @@ export function UsernameGeneratorTool() {
         <button type="button" className={buttonClass} onClick={() => copy("username ideas", output)}>Copy output</button>
         {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
       </>}
+    </ToolShell>
+  );
+}
+
+export function RandomUsernameGeneratorTool() {
+  const [keyword, setKeyword] = useState("");
+  const [style, setStyle] = useState<UsernameStyle>("gamer");
+  const [count, setCount] = useState(10);
+  const [values, setValues] = useState<string[]>([]);
+  const { copied, copy } = useCopyToClipboard();
+
+  function handleGenerate() {
+    setValues(buildUsernameSuggestions(style, keyword, count));
+  }
+
+  const output = useMemo(() => values.join("\n"), [values]);
+
+  return (
+    <ToolShell title="Random Username Generator" description="Generate batches of username ideas locally with style-based patterns, optional keywords, and no external API calls.">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Field label="Username style">
+          <select className={inputClass} value={style} onChange={(event) => setStyle(event.target.value as UsernameStyle)}>
+            <option value="gamer">Gamer style</option>
+            <option value="professional">Professional style</option>
+            <option value="short">Short usernames</option>
+          </select>
+        </Field>
+        <Field label="Optional keyword" hint="Weave in a topic, nickname, brand, or favorite word.">
+          <input className={inputClass} value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="phoenix, design, atlas" maxLength={24} />
+        </Field>
+        <Field label="Suggestions to generate" hint="At least 10 suggestions are generated each time.">
+          <input className={inputClass} type="number" min="10" max="24" value={count} onChange={(event) => setCount(Number(event.target.value) || 10)} />
+        </Field>
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={buttonClass} onClick={handleGenerate}>
+          Generate usernames
+        </button>
+        <button type="button" className={secondaryButtonClass} onClick={handleGenerate} disabled={!values.length}>
+          Regenerate
+        </button>
+        <button type="button" className={secondaryButtonClass} onClick={() => copy("username suggestions", output)} disabled={!output}>
+          Copy suggestions
+        </button>
+      </div>
+
+      {!values.length ? (
+        <EmptyState title="No username suggestions yet" description="Pick a style, optionally add a keyword, and generate at least 10 local username ideas you can copy or refine." />
+      ) : (
+        <>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {values.map((value) => (
+              <div key={value} className="rounded-2xl border border-[color:var(--border)] bg-white p-4">
+                <p className="break-all text-base font-semibold text-[color:var(--foreground)]">{value}</p>
+                <button type="button" className="mt-3 text-sm font-medium text-[color:var(--primary)]" onClick={() => copy("username", value)}>
+                  Copy this username
+                </button>
+              </div>
+            ))}
+          </div>
+          <OutputBlock title="Username list" value={output} />
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      )}
     </ToolShell>
   );
 }

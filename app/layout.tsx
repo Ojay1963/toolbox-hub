@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AnalyticsHook } from "@/components/monitoring/analytics-hook";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { buildWebsiteJsonLd, siteMetadata } from "@/lib/seo";
@@ -48,6 +49,7 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
+        <AnalyticsHook />
         <div className="relative">
           <Header />
           <main id="main-content">{children}</main>

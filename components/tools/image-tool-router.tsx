@@ -8,6 +8,7 @@ import {
   ExifDataViewerTool,
   CropImageTool,
   GifMakerTool,
+  GifToMp4ConverterTool,
   ImageBorderGeneratorTool,
   ImageBrightnessAdjusterTool,
   ImageColorInverterTool,
@@ -63,6 +64,7 @@ export function ImageToolRouter({ tool }: { tool: ToolDefinition }) {
     case "image-format-converter": return <ImageFormatConverterTool />;
     case "image-cropper-pro": return <ImageCropperProTool />;
     case "gif-maker": return <GifMakerTool />;
+    case "gif-to-mp4-converter": return <GifToMp4ConverterTool />;
     case "video-to-gif-converter": return <VideoToGifConverterTool />;
     case "image-color-palette-generator": return <ImageColorPaletteGeneratorTool />;
     case "exif-data-viewer": return <ExifDataViewerTool />;
@@ -87,6 +89,7 @@ export function ImageToolRouter({ tool }: { tool: ToolDefinition }) {
     case "png-to-jpg-converter": return <PngToJpgConverterTool />;
     case "image-to-webp-converter": return <ImageToWebpConverterTool />;
     case "background-remover": return <BackgroundRemoverTool />;
+    case "remove-background-from-image": return <BackgroundRemoverTool />;
     case "image-rotator": return <ImageRotatorTool />;
     case "image-watermark-tool": return <ImageWatermarkTool />;
     case "image-to-base64-converter": return <ImageToBase64ConverterTool />;

@@ -31,6 +31,7 @@ import {
   JwtEncoderTool,
   KeywordDensityCheckerTool,
   MarkdownToHtmlConverterTool,
+  MarkdownEditorTool,
   Md5GeneratorTool,
   MetaTagGeneratorTool,
   OpenGraphGeneratorTool,
@@ -94,6 +95,7 @@ export function DeveloperToolRouter({ tool }: { tool: ToolDefinition }) {
     case "html-decoder": return <HtmlDecoderTool />;
     case "html-to-markdown-converter": return <HtmlToMarkdownConverterTool />;
     case "markdown-to-html-converter": return <MarkdownToHtmlConverterTool />;
+    case "markdown-editor": return <MarkdownEditorTool />;
     case "yaml-formatter": return <YamlFormatterTool />;
     case "xml-formatter": return <XmlFormatterTool />;
     case "json-diff-checker": return <JsonDiffCheckerTool />;

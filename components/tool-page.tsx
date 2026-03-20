@@ -4,7 +4,7 @@ import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { FaqList } from "@/components/ui/faq-list";
 import { RelatedTools } from "@/components/ui/related-tools";
 import { Section } from "@/components/ui/section";
-import type { ToolDefinition } from "@/lib/tools";
+import { getImplementationStatusMeta, type ToolDefinition } from "@/lib/tools";
 
 export function ToolPage({
   tool,
@@ -18,6 +18,7 @@ export function ToolPage({
   categoryRecentTools: ToolDefinition[];
 }) {
   const categoryLabel = tool.category.replace(/-/g, " ");
+  const statusMeta = getImplementationStatusMeta(tool);
 
   return (
     <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
@@ -46,7 +47,7 @@ export function ToolPage({
           <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">{tool.name}</h1>
           <div className="mt-4 flex flex-wrap gap-3">
             <span className="rounded-full bg-[color:var(--soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
-              {tool.implementationStatus}
+              {statusMeta.label}
             </span>
           </div>
           <p className="mt-4 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
@@ -145,8 +146,7 @@ export function ToolPage({
             <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">{tool.statusNote}</p>
           ) : (
             <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-              This tool is planned to fit the same fast, mobile-friendly, browser-first
-              architecture used across the site.
+              {statusMeta.summary}
             </p>
           )}
         </section>

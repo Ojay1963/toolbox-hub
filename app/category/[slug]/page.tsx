@@ -11,7 +11,15 @@ import {
   buildFaqJsonLd,
   buildMetadata,
 } from "@/lib/seo";
-import { categories, getCategory, getPopularTools, getRecentTools, getToolsByCategory, getTrendingTools } from "@/lib/tools";
+import {
+  categories,
+  getCategory,
+  getPopularTools,
+  getRecentTools,
+  getToolsByCategory,
+  getTrendingTools,
+  shouldIndexTool,
+} from "@/lib/tools";
 
 const SearchBox = dynamic(() => import("@/components/ui/search-box").then((module) => module.SearchBox));
 const CategoryDirectory = dynamic(() => import("@/components/ui/category-directory").then((module) => module.CategoryDirectory));
@@ -30,11 +38,11 @@ export async function generateMetadata({
   if (!category) {
     return {};
   }
-  const categoryTools = getToolsByCategory(category.slug);
+  const categoryTools = getToolsByCategory(category.slug).filter((tool) => shouldIndexTool(tool));
 
   return buildMetadata({
-    title: `${category.title} - ${categoryTools.length} Tools`,
-    description: `${category.description} Browse ${categoryTools.length} tools with internal links, how-to content, FAQs, and clear implementation scope notes.`,
+    title: `${category.title} - ${categoryTools.length} Public Tool Pages`,
+    description: `${category.description} Browse ${categoryTools.length} public tool pages with internal links, how-to content, FAQs, and clear implementation scope notes.`,
     pathname: `/category/${category.slug}`,
     keywords: [
       category.name,
@@ -57,10 +65,8 @@ export default async function CategoryPage({
     notFound();
   }
 
-  const categoryTools = getToolsByCategory(category.slug);
-  const workingCount = categoryTools.filter(
-    (tool) => tool.implementationStatus === "working-local",
-  ).length;
+  const categoryTools = getToolsByCategory(category.slug).filter((tool) => shouldIndexTool(tool));
+  const workingCount = categoryTools.filter((tool) => tool.implementationStatus === "working-local").length;
   const popularInCategory = getPopularTools(6, category.slug);
   const recentInCategory = getRecentTools(4, category.slug);
   const trendingInCategory = getTrendingTools(4, category.slug);
@@ -69,7 +75,7 @@ export default async function CategoryPage({
   const categoryFaq = [
     {
       question: `What kind of tools are in ${category.name}?`,
-      answer: `${category.name} includes focused utilities that fit the same mobile-friendly, SEO-aware site structure used across the rest of the directory.`,
+      answer: `${category.name} includes focused utilities that fit the same mobile-friendly, SEO-aware site structure used across the rest of the directory, with this page focused on the public tool pages that are indexable on the current deployment.`,
     },
     {
       question: `Are all ${category.name.toLowerCase()} fully local?`,
@@ -138,7 +144,7 @@ export default async function CategoryPage({
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-3xl bg-[color:var(--soft)] p-5">
               <p className="text-3xl font-black">{categoryTools.length}</p>
-              <p className="mt-2 text-sm text-[color:var(--muted)]">tools in this category</p>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">public tool pages in this category</p>
             </div>
             <div className="rounded-3xl bg-white p-5">
               <p className="text-3xl font-black">{workingCount}</p>
@@ -152,7 +158,7 @@ export default async function CategoryPage({
         <SearchBox
           tools={categoryTools}
           title={`Search inside ${category.name}`}
-          description={`Search only within ${category.name.toLowerCase()} so it is easier to find the right tool without leaving this section.`}
+          description={`Search only within ${category.name.toLowerCase()} public tool pages so it is easier to find the right launch-ready page without leaving this section.`}
           maxResults={6}
           compact
           showStatusFilter
@@ -185,8 +191,8 @@ export default async function CategoryPage({
           <div className="mt-8">
             <CategoryDirectory
               tools={categoryTools}
-              title={`${categoryTools.length} tools with lighter filtering`}
-              description="Search inside this category, filter by implementation status, and reveal more results only when you need them."
+              title={`${categoryTools.length} public tool pages with lighter filtering`}
+              description="Search inside this category, filter by implementation status, and reveal more public pages only when you need them."
             />
           </div>
         </section>

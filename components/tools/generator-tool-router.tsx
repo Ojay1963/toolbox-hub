@@ -7,6 +7,7 @@ import {
   CountdownTimerGeneratorTool,
   DiceRollerTool,
   DomainNameGeneratorTool,
+  FakeAddressGeneratorTool,
   InstagramHashtagGeneratorTool,
   NicknameGeneratorTool,
   PasswordGeneratorTool,
@@ -18,6 +19,7 @@ import {
   RandomNumberGeneratorTool,
   RandomPasswordPhraseGeneratorTool,
   RandomQuoteGeneratorTool,
+  RandomUsernameGeneratorTool,
   RandomTeamGeneratorTool,
   UuidGeneratorTool,
   UsernameGeneratorTool,
@@ -35,6 +37,7 @@ export function GeneratorToolRouter({ tool }: { tool: ToolDefinition }) {
     case "uuid-generator": return <UuidGeneratorTool />;
     case "random-name-generator": return <RandomNameGeneratorTool />;
     case "random-number-generator": return <RandomNumberGeneratorTool />;
+    case "random-username-generator": return <RandomUsernameGeneratorTool />;
     case "username-generator": return <UsernameGeneratorTool />;
     case "nickname-generator": return <NicknameGeneratorTool />;
     case "random-color-generator": return <RandomColorGeneratorTool />;
@@ -47,6 +50,7 @@ export function GeneratorToolRouter({ tool }: { tool: ToolDefinition }) {
     case "instagram-hashtag-generator": return <InstagramHashtagGeneratorTool />;
     case "product-name-generator": return <ProductNameGeneratorTool />;
     case "domain-name-generator": return <DomainNameGeneratorTool />;
+    case "fake-address-generator": return <FakeAddressGeneratorTool />;
     case "random-team-generator": return <RandomTeamGeneratorTool />;
     case "dice-roller": return <DiceRollerTool />;
     case "coin-flip-generator": return <CoinFlipGeneratorTool />;

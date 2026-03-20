@@ -12,6 +12,15 @@ import {
   useCopyToClipboard,
 } from "@/components/tools/common";
 
+async function getApiError(response: Response) {
+  try {
+    const data = (await response.json()) as { error?: string };
+    return data.error || "This service is temporarily unavailable. Please try again in a moment.";
+  } catch {
+    return "This service is temporarily unavailable. Please try again in a moment.";
+  }
+}
+
 const timezoneOptions = [
   "UTC",
   "Africa/Lagos",
@@ -53,18 +62,41 @@ const timeUnits = {
   week: 604800,
 };
 
-const currencyRatesDate = "2026-03-18";
-const currencyBase = "USD";
-const currencyRates: Record<string, number> = {
-  USD: 1,
-  EUR: 0.92,
-  GBP: 0.78,
-  NGN: 1585,
-  CAD: 1.36,
-  AUD: 1.52,
-  INR: 83.1,
-  JPY: 149.6,
-};
+const fileSizeSystems = {
+  decimal: {
+    base: 1000,
+    labels: ["Bytes", "KB", "MB", "GB", "TB"],
+  },
+  binary: {
+    base: 1024,
+    labels: ["Bytes", "KiB", "MiB", "GiB", "TiB"],
+  },
+} as const;
+
+const supportedCurrencyCodes = [
+  "AUD",
+  "BRL",
+  "CAD",
+  "CHF",
+  "CNY",
+  "EUR",
+  "GBP",
+  "GHS",
+  "HKD",
+  "INR",
+  "JPY",
+  "KES",
+  "MXN",
+  "NGN",
+  "NOK",
+  "NZD",
+  "SEK",
+  "SGD",
+  "USD",
+  "XAF",
+  "XOF",
+  "ZAR",
+];
 
 function normalizeHexColor(value: string) {
   const trimmed = value.trim().replace(/^#/, "");
@@ -303,6 +335,78 @@ export function TimeConverterTool() {
   return <UnitConverter title="Time Converter" description="Convert time units such as seconds, minutes, hours, days, and weeks." units={timeUnits} />;
 }
 
+export function FileSizeConverterTool() {
+  const [value, setValue] = useState("1024");
+  const [unitIndex, setUnitIndex] = useState(1);
+  const [system, setSystem] = useState<keyof typeof fileSizeSystems>("decimal");
+  const { copied, copy } = useCopyToClipboard();
+
+  const conversion = useMemo(() => {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return { error: "", output: "" };
+    }
+
+    const parsed = Number(trimmed);
+    if (!Number.isFinite(parsed) || parsed < 0) {
+      return {
+        error: "Enter a valid non-negative file size value.",
+        output: "",
+      };
+    }
+
+    const activeSystem = fileSizeSystems[system];
+    const normalizedIndex = Math.max(0, Math.min(unitIndex, activeSystem.labels.length - 1));
+    const bytes = parsed * activeSystem.base ** normalizedIndex;
+    const rows = activeSystem.labels.map((label, index) => {
+      const converted = bytes / activeSystem.base ** index;
+      const safeValue = converted >= 100 ? converted.toFixed(2) : converted.toFixed(4);
+      return `${label}: ${safeValue.replace(/\.?0+$/, "")}`;
+    });
+
+    return {
+      error: "",
+      output: rows.join("\n"),
+    };
+  }, [system, unitIndex, value]);
+
+  return (
+    <ToolShell title="File Size Converter" description="Convert between bytes, KB, MB, GB, and TB instantly with support for decimal and binary file-size units.">
+      <div className="grid gap-4 md:grid-cols-3">
+        <Field label="Value">
+          <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" inputMode="decimal" value={value} onChange={(event) => setValue(event.target.value)} placeholder="1024" />
+        </Field>
+        <Field label="Input unit">
+          <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={String(unitIndex)} onChange={(event) => setUnitIndex(Number(event.target.value))}>
+            {fileSizeSystems[system].labels.map((label, index) => (
+              <option key={label} value={index}>{label}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Unit system">
+          <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={system} onChange={(event) => setSystem(event.target.value as keyof typeof fileSizeSystems)}>
+            <option value="decimal">Decimal (KB = 1000 bytes)</option>
+            <option value="binary">Binary (KiB = 1024 bytes)</option>
+          </select>
+        </Field>
+      </div>
+      <Notice>Storage vendors often use decimal units, while many operating systems display binary units such as KiB and MiB.</Notice>
+      {conversion.error ? <Notice tone="error">{conversion.error}</Notice> : null}
+      {!value.trim() ? (
+        <EmptyState title="Enter a file size to convert it" description="The converter updates instantly and shows all related units in the selected measurement system." />
+      ) : conversion.output ? (
+        <>
+          <OutputBlock title="Converted values" value={conversion.output} />
+          <button type="button" className={buttonClass} onClick={() => copy("file size conversions", conversion.output)}>
+            Copy output
+          </button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
 export function TimezoneConverterTool() {
   const [dateTime, setDateTime] = useState("");
   const [fromZone, setFromZone] = useState("UTC");
@@ -412,98 +516,280 @@ export function UnixTimestampConverterTool() {
 }
 
 export function CurrencyConverterTool() {
-  const currencyCodes = Object.keys(currencyRates);
-  const [amount, setAmount] = useState(100);
+  const [quote, setQuote] = useState<{
+    provider: string;
+    base: string;
+    target: string;
+    amount: number;
+    convertedAmount: number;
+    rate: number;
+    effectiveDate: string;
+    isLive: boolean;
+    sourceNote: string;
+    requestedDate?: string;
+    rateStatus: "live" | "daily-updated" | "historical";
+  } | null>(null);
+  const [amountInput, setAmountInput] = useState("100");
   const [from, setFrom] = useState("USD");
-  const [to, setTo] = useState("EUR");
+  const [to, setTo] = useState("NGN");
+  const [historicalDate, setHistoricalDate] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { copied, copy } = useCopyToClipboard();
 
-  const result = useMemo(() => {
-    if (!Number.isFinite(amount)) {
+  const amount = useMemo(() => Number(amountInput), [amountInput]);
+  const hasAmountInput = amountInput.trim().length > 0;
+  const hasInvalidAmount = hasAmountInput && (!Number.isFinite(amount) || amount < 0);
+  const canSubmit = !loading && !hasInvalidAmount && Boolean(from) && Boolean(to);
+  const conciseProviderNote = useMemo(() => {
+    if (!quote) {
       return "";
     }
 
-    const inBaseCurrency = amount / currencyRates[from];
-    const convertedAmount = inBaseCurrency * currencyRates[to];
-    return convertedAmount.toFixed(4).replace(/\.?0+$/, "");
-  }, [amount, from, to]);
+    if (quote.rateStatus === "historical" && quote.requestedDate) {
+      return `Historical provider rate for ${quote.requestedDate}.`;
+    }
 
-  const rateLabel = useMemo(() => {
-    const rate = currencyRates[to] / currencyRates[from];
-    return `1 ${from} = ${rate.toFixed(4).replace(/\.?0+$/, "")} ${to}`;
-  }, [from, to]);
+    if (quote.provider === "Frankfurter") {
+      return "Daily-updated reference rate from the latest working day.";
+    }
+
+    return quote.isLive ? "Latest provider rate from the backend provider." : "Latest provider-supported reference rate.";
+  }, [quote]);
+  const dateLabel = useMemo(() => {
+    if (!quote) return "";
+    if (quote.rateStatus === "historical" && quote.requestedDate) {
+      return `Historical rate for ${quote.requestedDate}`;
+    }
+    return `Rate as of ${quote.effectiveDate}`;
+  }, [quote]);
+
+  async function handleConvert() {
+    if (!Number.isFinite(amount) || amount < 0) {
+      setQuote(null);
+      setError("Enter an amount greater than or equal to 0.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+      setQuote(null);
+      const searchParams = new URLSearchParams({
+        base: from,
+        target: to,
+        amount: String(amount),
+      });
+      if (historicalDate) {
+        searchParams.set("date", historicalDate);
+      }
+
+      const response = await fetch(`/api/tools/currency-converter?${searchParams.toString()}`);
+      if (!response.ok) {
+        throw new Error(await getApiError(response));
+      }
+
+      const payload = (await response.json()) as {
+        ok: true;
+        data: {
+          provider: string;
+          base: string;
+          target: string;
+          amount: number;
+          convertedAmount: number;
+          rate: number;
+          effectiveDate: string;
+          isLive: boolean;
+          sourceNote: string;
+          requestedDate?: string;
+          rateStatus: "live" | "daily-updated" | "historical";
+        };
+      };
+
+      setQuote(payload.data);
+    } catch (loadError) {
+      setQuote(null);
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "Currency conversion is temporarily unavailable.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const resultSummary = quote
+    ? [
+        `Provider: ${quote.provider}`,
+        `${dateLabel}`,
+        `1 ${quote.base} = ${quote.rate} ${quote.target}`,
+        `${quote.amount} ${quote.base} = ${quote.convertedAmount} ${quote.target}`,
+      ].join("\n")
+    : "";
 
   return (
     <ToolShell
       title="Currency Converter"
-      description="Convert currencies using manually defined reference rates bundled with the site. These rates are static, clearly labeled, and not live market data."
+      description="Convert currencies through a backend provider, optionally look up a historical date, and review the exact provider date or timestamp returned for the rate."
     >
       <Notice>
-        Static reference rates only. Base currency: {currencyBase}. Rate set date:{" "}
-        {currencyRatesDate}.
+        The converter prefers configured live-rate providers first and falls back to Frankfurter when needed.
+        Frankfurter rates are daily-updated reference rates, not real-time market quotes.
       </Notice>
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Field label="Amount">
           <input
             className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]"
             type="number"
-            value={Number.isNaN(amount) ? "" : amount}
-            onChange={(event) => setAmount(Number(event.target.value))}
+            min="0"
+            step="0.01"
+            inputMode="decimal"
+            value={amountInput}
+            onChange={(event) => setAmountInput(event.target.value)}
+            placeholder="100"
+            disabled={loading}
           />
         </Field>
-        <Field label="From currency">
+        <Field label="Base currency">
           <select
             className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]"
             value={from}
-            onChange={(event) => setFrom(event.target.value)}
+            onChange={(event) => {
+              const next = event.target.value;
+              setFrom(next);
+              if (next === to) {
+                const fallback = supportedCurrencyCodes.find((code) => code !== next) ?? next;
+                setTo(fallback);
+              }
+              setQuote(null);
+              setError("");
+            }}
+            disabled={loading}
           >
-            {currencyCodes.map((code) => (
+            {supportedCurrencyCodes.map((code) => (
               <option key={code} value={code}>
                 {code}
               </option>
             ))}
           </select>
         </Field>
-        <Field label="To currency">
+        <Field label="Target currency">
           <select
             className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]"
             value={to}
-            onChange={(event) => setTo(event.target.value)}
+            onChange={(event) => {
+              const next = event.target.value;
+              setTo(next);
+              if (next === from) {
+                const fallback = supportedCurrencyCodes.find((code) => code !== next) ?? next;
+                setFrom(fallback);
+              }
+              setQuote(null);
+              setError("");
+            }}
+            disabled={loading}
           >
-            {currencyCodes.map((code) => (
+            {supportedCurrencyCodes.map((code) => (
               <option key={code} value={code}>
                 {code}
               </option>
             ))}
           </select>
         </Field>
+        <Field label="Historical date" hint="Optional. Leave empty for the latest provider-supported rate.">
+          <input
+            className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]"
+            type="date"
+            max={new Date().toISOString().slice(0, 10)}
+            value={historicalDate}
+            onChange={(event) => {
+              setHistoricalDate(event.target.value);
+              setQuote(null);
+              setError("");
+            }}
+            disabled={loading}
+          />
+        </Field>
       </div>
-      {!result ? (
-        <EmptyState
-          title="Enter an amount to convert"
-          description="This tool uses bundled static rates for rough estimation only."
-        />
-      ) : (
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={buttonClass} onClick={handleConvert} disabled={!canSubmit}>
+          {loading ? "Fetching rate..." : historicalDate ? "Convert with historical rate" : "Convert with latest rate"}
+        </button>
+        <button
+          type="button"
+          className={secondaryButtonClass}
+          disabled={loading}
+          onClick={() => {
+            setFrom(to);
+            setTo(from);
+            setQuote(null);
+            setError("");
+          }}
+        >
+          Swap currencies
+        </button>
+        <button
+          type="button"
+          className={secondaryButtonClass}
+          disabled={loading || !historicalDate}
+          onClick={() => {
+            setHistoricalDate("");
+            setQuote(null);
+            setError("");
+          }}
+        >
+          Reset to latest
+        </button>
+      </div>
+      {hasInvalidAmount ? <Notice tone="error">Enter an amount greater than or equal to 0.</Notice> : null}
+      {loading ? <Notice>Fetching exchange-rate data for {from} to {to}. This can take a moment if the provider is slow.</Notice> : null}
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!quote ? (
+          <EmptyState
+            title={
+              loading
+                ? "Getting the latest available rate"
+                : error
+                  ? "Unable to load a conversion right now"
+                  : "Enter an amount and choose your currencies"
+            }
+            description={
+              loading
+                ? "The converter is requesting the rate, provider, and effective date from the backend."
+                : error
+                  ? "Check the amount, currencies, or date and try again. If the provider is unavailable, the tool will recover when the service is back."
+                  : "Run a conversion to see the provider, rate, converted amount, and the effective date or timestamp used for the quote."
+            }
+          />
+        ) : (
         <>
-          <OutputBlock title="Converted amount" value={`${result} ${to}`} multiline={false} />
-          <OutputBlock title="Reference rate" value={rateLabel} multiline={false} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <OutputBlock title="Converted amount" value={`${quote.convertedAmount} ${quote.target}`} multiline={false} />
+            <OutputBlock title="Reference rate" value={`1 ${quote.base} = ${quote.rate} ${quote.target}`} multiline={false} />
+            <OutputBlock title="Provider" value={quote.provider} multiline={false} />
+            <OutputBlock
+              title="Rate status"
+              value={
+                quote.rateStatus === "historical"
+                  ? "Historical"
+                  : quote.rateStatus === "daily-updated"
+                    ? "Daily-updated"
+                    : "Latest provider rate"
+              }
+              multiline={false}
+            />
+          </div>
+          <OutputBlock title="Effective rate date" value={dateLabel} multiline={false} />
+          <OutputBlock title="Provider note" value={conciseProviderNote} />
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
               className={buttonClass}
-              onClick={() => copy("converted amount", `${result} ${to}`)}
+              onClick={() => copy("currency conversion", resultSummary)}
+              disabled={loading}
             >
               Copy result
-            </button>
-            <button
-              type="button"
-              className={secondaryButtonClass}
-              onClick={() => {
-                setFrom(to);
-                setTo(from);
-              }}
-            >
-              Swap currencies
             </button>
           </div>
           {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}

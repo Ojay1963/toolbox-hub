@@ -3,11 +3,16 @@ import { siteMetadata } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-    },
+    rules: siteMetadata.shouldAllowIndexing
+      ? {
+          userAgent: "*",
+          allow: "/",
+        }
+      : {
+          userAgent: "*",
+          disallow: "/",
+        },
     sitemap: `${siteMetadata.siteUrl}/sitemap.xml`,
-    host: siteMetadata.siteUrl,
+    ...(siteMetadata.shouldAllowIndexing ? { host: siteMetadata.siteUrl } : {}),
   };
 }

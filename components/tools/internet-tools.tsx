@@ -1,10 +1,12 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useMemo, useState } from "react";
 import {
   buttonClass,
   EmptyState,
   Field,
+  formatNumber,
   inputClass,
   Notice,
   OutputBlock,
@@ -151,6 +153,15 @@ type ParsedUserAgent = {
   deviceType: string;
   raw: string;
 };
+
+async function getApiError(response: Response) {
+  try {
+    const data = (await response.json()) as { error?: string };
+    return data.error || "This service is temporarily unavailable. Please try again shortly.";
+  } catch {
+    return "This service is temporarily unavailable. Please try again shortly.";
+  }
+}
 
 function normalizeTargetUrl(value: string) {
   const trimmed = value.trim();
@@ -379,19 +390,54 @@ export function IpAddressLookupTool() {
 }
 
 export function DnsLookupTool() {
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState<Record<string, unknown> | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
+
+  async function handleLookup() {
+    setLoading(true);
+    setError("");
+    setResult(null);
+
+    try {
+      const response = await fetch(`/api/tools/dns-lookup?hostname=${encodeURIComponent(input.trim())}`);
+      if (!response.ok) {
+        throw new Error(await getApiError(response));
+      }
+      const payload = (await response.json()) as { ok: true; data: Record<string, unknown> };
+      setResult(payload.data);
+    } catch (lookupError) {
+      setError(lookupError instanceof Error ? lookupError.message : "DNS lookup is temporarily unavailable.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const output = result ? JSON.stringify(result, null, 2) : "";
+
   return (
     <ToolShell
       title="DNS Lookup"
-      description="This page is intentionally honest about the limits of a browser-only tools site."
+      description="Look up common DNS records through a server route so the browser can inspect host information without faking results."
     >
-      <Notice>
-        Coming soon. Real DNS lookups need server-side infrastructure or an external resolver, and
-        this project does not fake DNS results in the browser.
-      </Notice>
-      <EmptyState
-        title="Future-ready placeholder"
-        description="If server infrastructure is added later, a real DNS query flow can plug into this page without changing the route, SEO metadata, FAQ structure, or related-tool linking."
-      />
+      <Field label="Hostname" hint="Enter a hostname such as example.com. Protocols and paths are ignored automatically.">
+        <input className={inputClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="example.com" />
+      </Field>
+      <button type="button" className={buttonClass} onClick={handleLookup} disabled={!input.trim() || loading}>
+        {loading ? "Looking up DNS..." : "Lookup DNS"}
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!input.trim() ? (
+        <EmptyState title="Enter a hostname to inspect DNS records" description="This server route can resolve common DNS records such as A, AAAA, MX, TXT, NS, CNAME, and SOA." />
+      ) : result ? (
+        <>
+          <OutputBlock title="DNS records" value={output} />
+          <button type="button" className={buttonClass} onClick={() => copy("DNS records", output)}>Copy records</button>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
     </ToolShell>
   );
 }
@@ -623,19 +669,240 @@ export function WebpageSourceViewerTool() {
 }
 
 export function WebsiteScreenshotTool() {
+  const [input, setInput] = useState("");
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+  }, [previewUrl]);
+
+  async function handleCapture() {
+    setLoading(true);
+    setError("");
+
+    try {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      const response = await fetch(`/api/tools/website-screenshot-tool?url=${encodeURIComponent(input.trim())}`);
+      if (!response.ok) {
+        throw new Error(await getApiError(response));
+      }
+      const blob = await response.blob();
+      setPreviewUrl(URL.createObjectURL(blob));
+    } catch (captureError) {
+      setPreviewUrl("");
+      setError(captureError instanceof Error ? captureError.message : "Unable to capture a screenshot for that site.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <ToolShell title="Website Screenshot Tool" description="This page intentionally stays honest about the limits of a browser-only tools site.">
+    <ToolShell title="Website Screenshot Tool" description="Capture a website screenshot through a backend rendering service and review the image before downloading it.">
+      <Field label="Website URL">
+        <input className={inputClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="https://example.com" />
+      </Field>
       <Notice>
-        Coming soon. Reliable screenshots of remote websites usually require server-side rendering
-        or headless browser infrastructure. This project does not fake screenshot output from a URL.
+        Server-assisted rendering. If screenshot capture is not enabled for this deployment, the page will
+        show a clear unavailable message instead of a fake preview.
       </Notice>
-      <EmptyState
-        title="Server-side rendering will be needed"
-        description="A future version can plug a real screenshot service or headless-browser workflow into this route without changing the page URL, SEO structure, or related links."
-      />
+      <button type="button" className={buttonClass} onClick={handleCapture} disabled={!input.trim() || loading}>
+        {loading ? "Capturing screenshot..." : "Capture screenshot"}
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!input.trim() ? (
+        <EmptyState title="Enter a website URL to capture it" description="The backend will request a rendered screenshot and return it as an image download when available." />
+      ) : previewUrl ? (
+        <div className="space-y-4">
+          <div className="rounded-2xl bg-stone-50 p-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">Screenshot preview</p>
+            <img src={previewUrl} alt="Website screenshot preview" className="mt-3 w-full rounded-2xl border border-[color:var(--border)]" />
+          </div>
+          <a className={`${secondaryButtonClass} inline-flex`} href={previewUrl} download="website-screenshot.png">
+            Download screenshot
+          </a>
+        </div>
+      ) : null}
     </ToolShell>
   );
 }
+
+export function WebsiteSpeedTestTool() {
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState<{
+    finalUrl: string;
+    performanceScore: number;
+    accessibilityScore: number;
+    bestPracticesScore: number;
+    seoScore: number;
+    metrics: Record<string, string>;
+    notes: string[];
+  } | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleRun() {
+    setLoading(true);
+    setError("");
+    setResult(null);
+
+    try {
+      const response = await fetch(`/api/tools/website-speed-test?url=${encodeURIComponent(input.trim())}`);
+      if (!response.ok) {
+        throw new Error(await getApiError(response));
+      }
+      const payload = (await response.json()) as {
+        ok: true;
+        data: {
+          finalUrl: string;
+          performanceScore: number;
+          accessibilityScore: number;
+          bestPracticesScore: number;
+          seoScore: number;
+          metrics: Record<string, string>;
+          notes: string[];
+        };
+      };
+      setResult(payload.data);
+    } catch (runError) {
+      setError(runError instanceof Error ? runError.message : "Website speed testing is temporarily unavailable.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <ToolShell
+      title="Website Speed Test"
+      description="Run a backend website speed check and review real mobile performance, accessibility, best-practices, and SEO scores without faking results."
+    >
+      <Field
+        label="Website URL"
+        hint="Enter a full page URL to request a live mobile performance report."
+        >
+          <input
+            className={inputClass}
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder="https://example.com"
+          />
+        </Field>
+        <button type="button" className={buttonClass} onClick={handleRun} disabled={!input.trim() || loading}>
+          {loading ? "Running speed test..." : "Run speed test"}
+        </button>
+        <Notice>
+          Server-assisted analysis powered by PageSpeed data. Results reflect the latest mobile report available to the backend.
+        </Notice>
+        {error ? <Notice tone="error">{error}</Notice> : null}
+        {!input.trim() ? (
+          <EmptyState title="Enter a URL to test it" description="The report includes core performance metrics plus performance, accessibility, best-practices, and SEO scores when the backend service is available." />
+        ) : result ? (
+          <>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <OutputBlock title="Performance" value={`${result.performanceScore}/100`} multiline={false} />
+              <OutputBlock title="Accessibility" value={`${result.accessibilityScore}/100`} multiline={false} />
+              <OutputBlock title="Best practices" value={`${result.bestPracticesScore}/100`} multiline={false} />
+              <OutputBlock title="SEO" value={`${result.seoScore}/100`} multiline={false} />
+            </div>
+            <OutputBlock title="Metrics" value={Object.entries(result.metrics).map(([label, value]) => `${label}: ${value}`).join("\n")} />
+            {result.notes.length ? <OutputBlock title="Notable checks" value={result.notes.join("\n")} /> : null}
+          </>
+        ) : null}
+      </ToolShell>
+    );
+  }
+
+export function MobileFriendlyCheckerTool() {
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState<{
+    finalUrl: string;
+    verdict: string;
+    hasViewportMeta: boolean;
+    performanceScore: number;
+    accessibilityScore: number;
+    seoScore: number;
+    flags: Array<{ label: string; passed: boolean }>;
+    notes: string[];
+  } | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function handleCheck() {
+    setLoading(true);
+    setError("");
+    setResult(null);
+
+    try {
+      const response = await fetch(`/api/tools/mobile-friendly-checker?url=${encodeURIComponent(input.trim())}`);
+      if (!response.ok) {
+        throw new Error(await getApiError(response));
+      }
+      const payload = (await response.json()) as {
+        ok: true;
+        data: {
+          finalUrl: string;
+          verdict: string;
+          hasViewportMeta: boolean;
+          performanceScore: number;
+          accessibilityScore: number;
+          seoScore: number;
+          flags: Array<{ label: string; passed: boolean }>;
+          notes: string[];
+        };
+      };
+      setResult(payload.data);
+    } catch (checkError) {
+      setError(checkError instanceof Error ? checkError.message : "Mobile-friendly analysis is temporarily unavailable.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <ToolShell
+      title="Mobile Friendly Checker"
+      description="Check mobile-friendly signals through the backend using real page HTML inspection plus PageSpeed mobile analysis."
+    >
+      <Field
+        label="Website URL"
+        hint="Enter a page URL to request a mobile-focused report."
+        >
+          <input
+            className={inputClass}
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder="https://example.com"
+          />
+        </Field>
+        <button type="button" className={buttonClass} onClick={handleCheck} disabled={!input.trim() || loading}>
+          {loading ? "Checking mobile friendliness..." : "Check mobile friendliness"}
+        </button>
+        <Notice>
+          Server-assisted analysis. The checker combines backend HTML inspection with PageSpeed mobile signals instead of guessing from the current browser tab.
+        </Notice>
+        {error ? <Notice tone="error">{error}</Notice> : null}
+        {!input.trim() ? (
+          <EmptyState title="Enter a URL to review it" description="The report checks for a viewport meta tag and combines that with mobile performance, accessibility, and SEO signals." />
+        ) : result ? (
+          <>
+            <OutputBlock title="Verdict" value={result.verdict} multiline={false} />
+            <div className="grid gap-4 md:grid-cols-3">
+              <OutputBlock title="Viewport meta" value={result.hasViewportMeta ? "Present" : "Missing"} multiline={false} />
+              <OutputBlock title="Accessibility score" value={`${formatNumber(result.accessibilityScore, 0)}/100`} multiline={false} />
+              <OutputBlock title="SEO score" value={`${formatNumber(result.seoScore, 0)}/100`} multiline={false} />
+            </div>
+            <OutputBlock title="Checks" value={result.flags.map((flag) => `${flag.passed ? "PASS" : "FAIL"} - ${flag.label}`).join("\n")} />
+            {result.notes.length ? <OutputBlock title="Related mobile notes" value={result.notes.join("\n")} /> : null}
+          </>
+        ) : null}
+      </ToolShell>
+    );
+  }
 
 export function UserAgentParserTool() {
   const [input, setInput] = useState("");

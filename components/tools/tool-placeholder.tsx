@@ -1,8 +1,10 @@
 "use client";
 
-import type { ToolDefinition } from "@/lib/tools";
+import { getImplementationStatusMeta, type ToolDefinition } from "@/lib/tools";
 
 export function ToolPlaceholder({ tool }: { tool: ToolDefinition }) {
+  const statusMeta = getImplementationStatusMeta(tool);
+
   return (
     <section className="rounded-3xl border border-[color:var(--border)] bg-white p-6 shadow-sm">
       <div className="flex flex-wrap items-center gap-3">
@@ -10,7 +12,7 @@ export function ToolPlaceholder({ tool }: { tool: ToolDefinition }) {
           Tool UI Slot
         </span>
         <span className="rounded-full border border-[color:var(--border)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
-          {tool.implementationStatus}
+          {statusMeta.label}
         </span>
       </div>
       <h2 className="mt-4 text-2xl font-bold tracking-tight">Implementation placeholder</h2>

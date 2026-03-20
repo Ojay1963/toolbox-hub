@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
-import type { ToolDefinition } from "@/lib/tools";
+import { getToolRequiredEnvVars, isToolAvailableOnDeployment, type ToolDefinition } from "@/lib/tools";
+import { ToolUnavailable } from "@/components/tools/tool-unavailable";
 
 function LoadingToolPanel() {
   return (
@@ -36,6 +37,10 @@ const categoryRouterMap: Record<ToolDefinition["category"], ComponentType<{ tool
 };
 
 export function ToolRenderer({ tool }: { tool: ToolDefinition }) {
+  if (getToolRequiredEnvVars(tool).length > 0 && !isToolAvailableOnDeployment(tool)) {
+    return <ToolUnavailable tool={tool} />;
+  }
+
   const ToolRouter = categoryRouterMap[tool.category];
   return <ToolRouter tool={tool} />;
 }

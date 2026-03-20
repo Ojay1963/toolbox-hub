@@ -308,6 +308,42 @@ function decodeBase64Url(value: string) {
   return decodeBase64ToUtf8(normalized + padding);
 }
 
+function sanitizePreviewUrl(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  if (trimmed.startsWith("#") || trimmed.startsWith("/")) {
+    return trimmed;
+  }
+
+  try {
+    const parsed = new URL(trimmed, "https://example.com");
+    if (["http:", "https:", "mailto:", "tel:"].includes(parsed.protocol)) {
+      return parsed.protocol === "http:" || parsed.protocol === "https:" ? parsed.toString() : trimmed;
+    }
+  } catch {
+    return "";
+  }
+
+  return "";
+}
+
+function buildSafeMarkdownLink(label: string, rawUrl: string) {
+  const safeUrl = sanitizePreviewUrl(rawUrl);
+  const safeLabel = label
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  if (!safeUrl) {
+    return safeLabel;
+  }
+
+  return `<a href="${escapeHtml(safeUrl)}" rel="nofollow noopener noreferrer" target="_blank">${safeLabel}</a>`;
+}
+
 function convertInlineMarkdownToHtml(value: string) {
   return value
     .replace(/&/g, "&amp;")
@@ -316,7 +352,7 @@ function convertInlineMarkdownToHtml(value: string) {
     .replace(/`([^`]+)`/g, "<code>$1</code>")
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/\*([^*]+)\*/g, "<em>$1</em>")
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, rawUrl) => buildSafeMarkdownLink(label, rawUrl));
 }
 
 function markdownToHtml(value: string) {
@@ -361,6 +397,77 @@ function markdownToHtml(value: string) {
       return `<p>${lines.map((line) => convertInlineMarkdownToHtml(line.trim())).join("<br />")}</p>`;
     })
     .join("\n");
+}
+
+function downloadTextFile(contents: string, filename: string, mimeType = "text/plain;charset=utf-8") {
+  const anchor = document.createElement("a");
+  anchor.href = URL.createObjectURL(new Blob([contents], { type: mimeType }));
+  anchor.download = filename;
+  anchor.click();
+  window.setTimeout(() => URL.revokeObjectURL(anchor.href), 1000);
+}
+
+function sanitizePreviewHtml(value: string) {
+  if (typeof DOMParser === "undefined") {
+    return `<pre>${escapeHtml(value)}</pre>`;
+  }
+
+  const parser = new DOMParser();
+  const documentNode = parser.parseFromString(value, "text/html");
+
+  documentNode.querySelectorAll("script, iframe, object, embed, link[rel='import'], meta[http-equiv='refresh'], base").forEach((node) => {
+    node.remove();
+  });
+
+  documentNode.querySelectorAll("*").forEach((element) => {
+    [...element.attributes].forEach((attribute) => {
+      const name = attribute.name.toLowerCase();
+      const rawValue = attribute.value.trim();
+
+      if (name.startsWith("on") || name === "srcdoc") {
+        element.removeAttribute(attribute.name);
+        return;
+      }
+
+      if (["href", "src", "action", "formaction"].includes(name)) {
+        const safeUrl = sanitizePreviewUrl(rawValue);
+        if (!safeUrl) {
+          element.removeAttribute(attribute.name);
+          return;
+        }
+
+        element.setAttribute(attribute.name, safeUrl);
+      }
+    });
+
+    if (element instanceof HTMLAnchorElement && element.hasAttribute("href")) {
+      element.setAttribute("rel", "nofollow noopener noreferrer");
+      element.setAttribute("target", "_blank");
+    }
+  });
+
+  return documentNode.body.innerHTML;
+}
+
+function SandboxPreview({
+  title,
+  html,
+}: {
+  title: string;
+  html: string;
+}) {
+  return (
+    <div className="rounded-2xl bg-stone-50 p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">{title}</p>
+      <iframe
+        title={title}
+        className="mt-3 h-72 w-full rounded-2xl border border-[color:var(--border)] bg-white"
+        sandbox=""
+        referrerPolicy="no-referrer"
+        srcDoc={html}
+      />
+    </div>
+  );
 }
 
 function escapeMarkdownText(value: string) {
@@ -1903,21 +2010,20 @@ export function HtmlEncoderTool() {
 export function HtmlPreviewTool() {
   const [input, setInput] = useState("");
   const { copied, copy } = useCopyToClipboard();
+  const previewHtml = useMemo(() => sanitizePreviewHtml(input), [input]);
 
   return (
-    <ToolShell title="HTML Preview Tool" description="Preview HTML snippets locally with a live rendered panel and copy-ready source.">
+    <ToolShell title="HTML Preview Tool" description="Preview HTML snippets locally in a sanitized sandbox so untrusted markup cannot execute scripts or unsafe handlers.">
       <Field label="HTML input">
         <textarea className={textareaClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder={`<section>\n  <h2>Hello</h2>\n  <p>This is a preview.</p>\n</section>`} />
       </Field>
+      <Notice>Preview output is sanitized and rendered in a sandbox. Scripts, inline event handlers, and unsafe URLs are removed before preview.</Notice>
       {!input.trim() ? (
         <EmptyState title="Paste HTML to preview it" description="Enter HTML markup and the tool will render a local preview directly in the browser." />
       ) : (
         <>
           <OutputBlock title="HTML source" value={input} />
-          <div className="rounded-2xl bg-stone-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">Rendered preview</p>
-            <div className="prose prose-sm mt-3 max-w-none rounded-2xl border border-[color:var(--border)] bg-white p-4 text-slate-700" dangerouslySetInnerHTML={{ __html: input }} />
-          </div>
+          <SandboxPreview title="Rendered preview" html={previewHtml} />
           <button type="button" className={buttonClass} onClick={() => copy("HTML source", input)}>Copy HTML</button>
           {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
         </>
@@ -2023,16 +2129,77 @@ export function MarkdownToHtmlConverterTool() {
       ) : output ? (
         <>
           <OutputBlock title="HTML output" value={output} />
-          <div className="rounded-2xl bg-stone-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">Rendered preview</p>
-            <div className="prose prose-sm mt-3 max-w-none text-slate-700" dangerouslySetInnerHTML={{ __html: output }} />
-          </div>
+          <SandboxPreview title="Rendered preview" html={output} />
           <button type="button" className={buttonClass} onClick={() => copy("HTML output", output)}>
             Copy output
           </button>
           {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
         </>
       ) : null}
+    </ToolShell>
+  );
+}
+
+export function MarkdownEditorTool() {
+  const [input, setInput] = useState("## Project Notes\n\n- Write clearly\n- Ship small improvements\n- Review the preview before exporting\n\nVisit [Toolbox Hub](https://example.com) for more tools.");
+  const { copied, copy } = useCopyToClipboard();
+
+  const { html, error } = useMemo(() => {
+    const trimmed = input.trim();
+    if (!trimmed) {
+      return { html: "", error: "" };
+    }
+
+    try {
+      return { html: markdownToHtml(trimmed), error: "" };
+    } catch (conversionError) {
+      return {
+        html: "",
+        error: conversionError instanceof Error ? conversionError.message : "Unable to render that Markdown.",
+      };
+    }
+  }, [input]);
+
+  return (
+    <ToolShell title="Markdown Editor" description="Write Markdown with a live rendered preview, then copy or export the source or generated HTML locally in the browser.">
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div className="space-y-4">
+          <Field label="Markdown input" hint="Supports headings, lists, links, emphasis, blockquotes, and inline code.">
+            <textarea className={`${textareaClass} min-h-[26rem] font-mono`} value={input} onChange={(event) => setInput(event.target.value)} placeholder="Write Markdown here..." />
+          </Field>
+          <div className="flex flex-wrap gap-3">
+            <button type="button" className={buttonClass} onClick={() => copy("Markdown source", input)} disabled={!input.trim()}>
+              Copy Markdown
+            </button>
+            <button type="button" className={secondaryButtonClass} onClick={() => downloadTextFile(input, "markdown-editor.md")} disabled={!input.trim()}>
+              Export .md
+            </button>
+            <button type="button" className={secondaryButtonClass} onClick={() => setInput("")}>
+              Clear editor
+            </button>
+          </div>
+        </div>
+        <div className="space-y-4">
+          {error ? <Notice tone="error">{error}</Notice> : null}
+          {!input.trim() ? (
+            <EmptyState title="Start writing Markdown" description="The preview updates as you type, and you can export either the Markdown source or the generated HTML." />
+          ) : (
+            <>
+              <SandboxPreview title="Live preview" html={html} />
+              <OutputBlock title="HTML output" value={html || "<p></p>"} />
+              <div className="flex flex-wrap gap-3">
+                <button type="button" className={buttonClass} onClick={() => copy("HTML output", html)} disabled={!html}>
+                  Copy HTML
+                </button>
+                <button type="button" className={secondaryButtonClass} onClick={() => downloadTextFile(html, "markdown-editor.html", "text/html;charset=utf-8")} disabled={!html}>
+                  Export .html
+                </button>
+              </div>
+            </>
+          )}
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </div>
+      </div>
     </ToolShell>
   );
 }

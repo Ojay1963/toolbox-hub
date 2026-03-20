@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useState } from "react";
 import {
@@ -16,6 +17,12 @@ import {
 type DownloadItem = {
   name: string;
   url: string;
+};
+
+type ImageUploadItem = {
+  id: string;
+  file: File;
+  previewUrl: string;
 };
 
 type PdfLibModule = typeof import("pdf-lib");
@@ -53,6 +60,18 @@ function downloadItem(item: DownloadItem) {
   anchor.href = item.url;
   anchor.download = item.name;
   anchor.click();
+}
+
+function revokeImageUploads(items: ImageUploadItem[]) {
+  items.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+}
+
+function dedupeImageFormats(types: string[]) {
+  return Array.from(
+    new Set(
+      types.map((type) => (type ? type.replace("image/", "").toUpperCase() : "IMAGE")),
+    ),
+  );
 }
 
 function DownloadList({ items }: { items: DownloadItem[] }) {
@@ -109,6 +128,86 @@ async function textToDownload(text: string, name: string): Promise<DownloadItem>
     name,
     url: URL.createObjectURL(new Blob([text], { type: "text/plain;charset=utf-8" })),
   };
+}
+
+async function getApiError(response: Response) {
+  try {
+    const data = (await response.json()) as { error?: string };
+    return data.error || "This service is temporarily unavailable. Please try again shortly.";
+  } catch {
+    return "This service is temporarily unavailable. Please try again shortly.";
+  }
+}
+
+async function responseToDownloadItem(response: Response, fallbackName: string): Promise<DownloadItem> {
+  const disposition = response.headers.get("content-disposition") || "";
+  const match = disposition.match(/filename="([^"]+)"/i);
+  const name = match?.[1] || fallbackName;
+  const blob = await response.blob();
+  return {
+    name,
+    url: URL.createObjectURL(blob),
+  };
+}
+
+async function fileToUint8Array(file: File) {
+  return new Uint8Array(await file.arrayBuffer());
+}
+
+async function imageFileToCanvas(file: File) {
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+      const element = new Image();
+      element.onload = () => resolve(element);
+      element.onerror = () => reject(new Error("Unable to read that image file."));
+      element.src = objectUrl;
+    });
+    const canvas = document.createElement("canvas");
+    canvas.width = image.naturalWidth || image.width;
+    canvas.height = image.naturalHeight || image.height;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      throw new Error("Canvas is not available in this browser.");
+    }
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    return canvas;
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+async function canvasToPngBytes(canvas: HTMLCanvasElement) {
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"));
+  if (!blob) {
+    throw new Error("Unable to export that image for PDF conversion.");
+  }
+  return new Uint8Array(await blob.arrayBuffer());
+}
+
+async function embedSupportedImage(pdf: Awaited<ReturnType<PdfLibModule["PDFDocument"]["create"]>>, file: File) {
+  const normalizedType = file.type.toLowerCase();
+  if (normalizedType === "image/jpeg" || normalizedType === "image/jpg") {
+    const bytes = await fileToUint8Array(file);
+    return pdf.embedJpg(bytes);
+  }
+  if (normalizedType === "image/png") {
+    const bytes = await fileToUint8Array(file);
+    return pdf.embedPng(bytes);
+  }
+  const canvas = await imageFileToCanvas(file);
+  const pngBytes = await canvasToPngBytes(canvas);
+  return pdf.embedPng(pngBytes);
+}
+
+function addImagePage(pdf: Awaited<ReturnType<PdfLibModule["PDFDocument"]["create"]>>, image: Awaited<ReturnType<typeof embedSupportedImage>>) {
+  const page = pdf.addPage([image.width, image.height]);
+  page.drawImage(image, {
+    x: 0,
+    y: 0,
+    width: image.width,
+    height: image.height,
+  });
 }
 
 function formatPdfPointsToInches(points: number) {
@@ -280,6 +379,7 @@ export function PdfCompressorTool() {
   const [download, setDownload] = useState<DownloadItem | null>(null);
   const [resultText, setResultText] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => () => {
     if (download) URL.revokeObjectURL(download.url);
@@ -292,37 +392,42 @@ export function PdfCompressorTool() {
     }
 
     try {
+      setLoading(true);
       if (download) URL.revokeObjectURL(download.url);
-      const { PDFDocument } = await getPdfLib();
-      const source = await PDFDocument.load(await file.arrayBuffer());
-      const output = await PDFDocument.create();
-      const copiedPages = await output.copyPages(source, source.getPageIndices());
-      copiedPages.forEach((page) => output.addPage(page));
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/tools/pdf-compressor", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error(await getApiError(response));
+      }
 
-      output.setTitle("");
-      output.setSubject("");
-      output.setKeywords([]);
-      output.setProducer("Toolbox Hub PDF Compressor");
-
-      const bytes = await output.save({ useObjectStreams: true });
-      const nextDownload = await pdfBytesToDownload(bytes, `${file.name.replace(/\.pdf$/i, "")}-optimized.pdf`);
+      const blob = await response.blob();
+      const nextDownload = {
+        name: `${file.name.replace(/\.pdf$/i, "")}-optimized.pdf`,
+        url: URL.createObjectURL(blob),
+      };
       setDownload(nextDownload);
-      setResultText(`Original size: ${formatFileSize(file.size)}\nOptimized size: ${formatFileSize(bytes.length)}`);
+      setResultText(`Original size: ${formatFileSize(file.size)}\nOptimized size: ${formatFileSize(blob.size)}`);
       setError("");
-    } catch {
-      setError("Unable to optimize this PDF.");
+    } catch (compressionError) {
+      setError(compressionError instanceof Error ? compressionError.message : "Unable to optimize this PDF.");
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <ToolShell title="PDF Compressor" description="Run a basic local PDF optimization pass. This can help some files, but browser-side compression will not reduce every PDF equally well.">
+    <ToolShell title="PDF Compressor" description="Run a reduced-scope server-side PDF optimization pass. This can help some files, but complex PDFs may still shrink only a little.">
       <Field label="PDF file">
         <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
-      <Notice>Reduced-scope local optimization only. This tool re-saves the PDF cleanly and can reduce size in some cases, but it is not a full desktop-grade PDF compressor.</Notice>
-      <button type="button" className={buttonClass} onClick={handleCompress} disabled={!file}>
-        Optimize PDF
-      </button>
+      <Notice>Reduced-scope optimization. This workflow creates a cleaner server-side copy and may reduce size in some cases, but it is not a full desktop-grade PDF compressor.</Notice>
+        <button type="button" className={buttonClass} onClick={handleCompress} disabled={!file || loading}>
+          {loading ? "Optimizing PDF..." : "Optimize PDF"}
+        </button>
       {error ? <Notice tone="error">{error}</Notice> : null}
       {!file ? (
         <EmptyState title="Upload a PDF to optimize" description="This local workflow works best for some PDFs, but highly compressed or image-heavy files may not shrink much." />
@@ -456,6 +561,156 @@ export function JpgToPdfTool() {
         <>
           <Notice>{files.length} JPG image(s) selected.</Notice>
           {download ? <DownloadList items={[download]} /> : null}
+        </>
+      )}
+    </ToolShell>
+  );
+}
+
+export function ImageToPdfConverterTool() {
+  const [items, setItems] = useState<ImageUploadItem[]>([]);
+  const [download, setDownload] = useState<DownloadItem | null>(null);
+  const [result, setResult] = useState("");
+  const [error, setError] = useState("");
+  const { copied, copy } = useCopyToClipboard();
+
+  useEffect(() => () => {
+    revokeImageUploads(items);
+  }, [items]);
+
+  useEffect(() => () => {
+    if (download) URL.revokeObjectURL(download.url);
+  }, [download]);
+
+  function updateFiles(nextFiles: File[]) {
+    setItems((current) => {
+      revokeImageUploads(current);
+      return nextFiles.map((file, index) => ({
+        id: `${file.name}-${file.size}-${file.lastModified}-${index}`,
+        file,
+        previewUrl: URL.createObjectURL(file),
+      }));
+    });
+    if (download) {
+      URL.revokeObjectURL(download.url);
+      setDownload(null);
+    }
+    setResult("");
+    setError("");
+  }
+
+  function moveItem(index: number, direction: -1 | 1) {
+    setItems((current) => {
+      const nextIndex = index + direction;
+      if (nextIndex < 0 || nextIndex >= current.length) return current;
+      const next = [...current];
+      const [item] = next.splice(index, 1);
+      next.splice(nextIndex, 0, item);
+      return next;
+    });
+    if (download) {
+      URL.revokeObjectURL(download.url);
+      setDownload(null);
+    }
+    setResult("");
+  }
+
+  function removeItem(index: number) {
+    setItems((current) => {
+      const next = [...current];
+      const [removed] = next.splice(index, 1);
+      if (removed) {
+        URL.revokeObjectURL(removed.previewUrl);
+      }
+      return next;
+    });
+    if (download) {
+      URL.revokeObjectURL(download.url);
+      setDownload(null);
+    }
+    setResult("");
+  }
+
+  async function handleCreate() {
+    if (!items.length) {
+      setError("Upload one or more images first.");
+      return;
+    }
+
+    try {
+      if (download) URL.revokeObjectURL(download.url);
+      const { PDFDocument } = await getPdfLib();
+      const output = await PDFDocument.create();
+      for (const item of items) {
+        const image = await embedSupportedImage(output, item.file);
+        addImagePage(output, image);
+      }
+      const bytes = await output.save({ useObjectStreams: true });
+      const nextDownload = await pdfBytesToDownload(bytes, "images-to-pdf.pdf");
+      setDownload(nextDownload);
+      setResult(
+        `Images added: ${items.length}\nFormats: ${dedupeImageFormats(items.map((item) => item.file.type)).join(", ")}\nOutput size: ${formatFileSize(bytes.length)}`,
+      );
+      setError("");
+    } catch {
+      setError("Unable to create a PDF from those images.");
+      setDownload(null);
+      setResult("");
+    }
+  }
+
+  return (
+    <ToolShell title="Image to PDF Converter" description="Convert JPG, PNG, or WEBP images into one PDF locally in the browser, reorder pages, and download the finished document.">
+      <Field label="Image files" hint="Upload JPG, PNG, or WEBP images. The order below becomes the PDF page order.">
+        <input
+          type="file"
+          accept="image/jpeg,image/jpg,image/png,image/webp"
+          multiple
+          onChange={(event) => updateFiles(Array.from(event.target.files ?? []))}
+        />
+      </Field>
+      <div className="flex flex-wrap gap-3">
+        <button type="button" className={buttonClass} onClick={handleCreate} disabled={!items.length}>
+          Create PDF
+        </button>
+        <button type="button" className={secondaryButtonClass} onClick={() => updateFiles([])} disabled={!items.length}>
+          Clear images
+        </button>
+        <button type="button" className={secondaryButtonClass} onClick={() => copy("image order summary", items.map((item, index) => `${index + 1}. ${item.file.name}`).join("\n"))} disabled={!items.length}>
+          Copy order
+        </button>
+      </div>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!items.length ? (
+        <EmptyState title="Upload images to build a PDF" description="Add one or more images, reorder them if needed, then generate one PDF file for download." />
+      ) : (
+        <>
+          <Notice>{items.length} image(s) selected. Reorder them before generating the PDF if needed.</Notice>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {items.map((item, index) => (
+              <div key={item.id} className="rounded-2xl border border-[color:var(--border)] bg-white p-4">
+                <img src={item.previewUrl} alt={`Preview of ${item.file.name}`} className="h-40 w-full rounded-xl border border-[color:var(--border)] object-contain bg-stone-50" />
+                <div className="mt-3 space-y-1">
+                  <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">{index + 1}. {item.file.name}</p>
+                  <p className="text-xs text-[color:var(--muted)]">{formatFileSize(item.file.size)} · {(item.file.type || "image").replace("image/", "").toUpperCase()}</p>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button type="button" className={secondaryButtonClass} onClick={() => moveItem(index, -1)} disabled={index === 0}>
+                    Move up
+                  </button>
+                  <button type="button" className={secondaryButtonClass} onClick={() => moveItem(index, 1)} disabled={index === items.length - 1}>
+                    Move down
+                  </button>
+                  <button type="button" className={secondaryButtonClass} onClick={() => removeItem(index)}>
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+          {result ? <OutputBlock title="PDF summary" value={result} /> : null}
+          {download ? <DownloadList items={[download]} /> : null}
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
         </>
       )}
     </ToolShell>
@@ -599,13 +854,73 @@ export function PdfPageNumberAdderTool() {
 }
 
 export function ProtectPdfTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [password, setPassword] = useState("");
+  const [download, setDownload] = useState<DownloadItem | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => () => {
+    if (download) URL.revokeObjectURL(download.url);
+  }, [download]);
+
+  async function handleProtect() {
+    if (!file) {
+      setError("Upload a PDF file first.");
+      return;
+    }
+    if (password.trim().length < 6) {
+      setError("Enter a password with at least 6 characters.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      if (download) URL.revokeObjectURL(download.url);
+
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("password", password.trim());
+      const response = await fetch("/api/tools/protect-pdf", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error(await getApiError(response));
+      }
+
+      setDownload(await responseToDownloadItem(response, `${file.name.replace(/\.pdf$/i, "")}-protected.pdf`));
+      setError("");
+    } catch (protectError) {
+      setDownload(null);
+      setError(protectError instanceof Error ? protectError.message : "Unable to protect that PDF.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <ToolShell title="Protect PDF" description="Password-protecting PDFs reliably is not yet available in this browser-only implementation.">
+    <ToolShell title="Protect PDF" description="Protect a PDF with a password through a server-assisted workflow when the PDF protection service is enabled for this deployment.">
+      <Field label="PDF file">
+        <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <Field label="Open password" hint="Use at least 6 characters. This password will be required to open the protected PDF.">
+        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Enter a PDF password" />
+      </Field>
       <Notice>
-        Coming soon. Reliable PDF password protection is not practical with the current no-API,
-        browser-only tool stack, so this page stays honest instead of pretending to encrypt files.
+        Server-assisted processing. If PDF protection is not enabled for this deployment,
+        the page will show a clear unavailable message instead of pretending to encrypt your file.
       </Notice>
-      <EmptyState title="No fake PDF protection here" description="If a robust local encryption workflow becomes practical in this project, it can be added without changing the route or SEO structure." />
+      <button type="button" className={buttonClass} onClick={handleProtect} disabled={!file || loading}>
+        {loading ? "Protecting PDF..." : "Protect PDF"}
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : !file || !password.trim() ? (
+        <EmptyState title="Upload a PDF and enter a password" description="This route supports real server-side protection, but the encryption service must be enabled for this deployment." />
+      ) : download ? (
+        <DownloadList items={[download]} />
+      ) : (
+        <EmptyState title="Ready to protect your PDF" description="Run the server-side protection step to generate an encrypted download when the backend service is available." />
+      )}
     </ToolShell>
   );
 }
@@ -988,18 +1303,246 @@ export function PdfTextExtractorTool() {
   );
 }
 
-export function PdfOcrPlaceholderTool() {
+export function PdfToWordConverterTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [download, setDownload] = useState<DownloadItem | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => () => {
+    if (download) URL.revokeObjectURL(download.url);
+  }, [download]);
+
+  async function handleConvert() {
+    if (!file) {
+      setError("Upload a PDF file first.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      if (download) URL.revokeObjectURL(download.url);
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/tools/pdf-to-word", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error(await getApiError(response));
+      }
+
+      setDownload(await responseToDownloadItem(response, `${file.name.replace(/\.pdf$/i, "")}.docx`));
+      setError("");
+    } catch (conversionError) {
+      setError(conversionError instanceof Error ? conversionError.message : "Unable to convert that PDF into Word.");
+      setDownload(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <ToolShell title="PDF OCR" description="OCR for scanned PDFs is intentionally not faked in this browser-first version of the site.">
-      <Notice>
-        Coming soon. Reliable OCR usually needs server-side processing or heavier model infrastructure,
-        so this page stays honest until a real implementation is ready.
-      </Notice>
-      <EmptyState
-        title="No fake OCR results"
-        description="A future version will add a real OCR workflow for scanned PDFs. Until then, this page only explains the current limitation rather than pretending to extract text."
-      />
+    <ToolShell title="PDF to Word Converter" description="Extract selectable text from a PDF through a server-assisted workflow and export it as a real DOCX file without faking full layout preservation.">
+      <Field label="PDF file">
+        <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+        <Notice>
+          Server-assisted conversion. This version creates a real DOCX download from selectable PDF text,
+          but scanned PDFs still need OCR and complex layouts may not map perfectly into Word.
+        </Notice>
+        <button type="button" className={buttonClass} onClick={handleConvert} disabled={!file || loading}>
+          {loading ? "Converting to Word..." : "Convert to Word"}
+        </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? (
+        <EmptyState title="Upload a PDF to start" description="The server can pull selectable text from many PDFs and package it into a readable DOCX download." />
+      ) : (
+        <>
+          {download ? (
+            <>
+              <Notice tone="success">
+                Conversion completed. Download the generated DOCX file to review the extracted content safely.
+              </Notice>
+              <div className="flex flex-wrap gap-3">
+                <button type="button" className={secondaryButtonClass} onClick={() => downloadItem(download)}>
+                  Download .docx
+                </button>
+              </div>
+            </>
+          ) : null}
+        </>
+      )}
     </ToolShell>
+  );
+}
+
+export function PdfOcrPlaceholderTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [output, setOutput] = useState("");
+  const [download, setDownload] = useState<DownloadItem | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
+
+  useEffect(() => () => {
+    if (download) URL.revokeObjectURL(download.url);
+  }, [download]);
+
+  async function handleOcr() {
+    if (!file) {
+      setError("Upload a PDF file first.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      if (download) URL.revokeObjectURL(download.url);
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/tools/pdf-ocr", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error(await getApiError(response));
+      }
+
+      const payload = (await response.json()) as { ok: true; data: { text: string; fileName: string } };
+      setOutput(payload.data.text);
+      setDownload(await textToDownload(payload.data.text, payload.data.fileName));
+      setError("");
+    } catch (ocrError) {
+      setError(ocrError instanceof Error ? ocrError.message : "Unable to run OCR on that PDF.");
+      setOutput("");
+      setDownload(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <ToolShell title="PDF OCR" description="Extract text from scanned PDFs through a server-assisted OCR workflow and review the returned text before downloading it.">
+      <Field label="PDF file">
+        <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
+      </Field>
+      <Notice>
+        Server-assisted OCR. If OCR is not enabled for this deployment, the page will show a clear
+        unavailable message instead of pretending text extraction worked.
+      </Notice>
+      <button type="button" className={buttonClass} onClick={handleOcr} disabled={!file || loading}>
+        {loading ? "Running OCR..." : "Run OCR"}
+      </button>
+      {error ? <Notice tone="error">{error}</Notice> : null}
+      {!file ? (
+        <EmptyState title="Upload a scanned PDF to extract text" description="Use this workflow for image-based or scanned PDFs that do not already contain selectable text." />
+      ) : output ? (
+        <>
+          <OutputBlock title="OCR text" value={output} />
+          <div className="flex flex-wrap gap-3">
+            <button type="button" className={buttonClass} onClick={() => copy("OCR text", output)}>Copy text</button>
+            {download ? <button type="button" className={secondaryButtonClass} onClick={() => downloadItem(download)}>Download text file</button> : null}
+          </div>
+          {copied ? <Notice tone="success">Copied {copied} to your clipboard.</Notice> : null}
+        </>
+      ) : null}
+    </ToolShell>
+  );
+}
+
+export function WordToPdfConverterPlaceholderTool() {
+  const [file, setFile] = useState<File | null>(null);
+  const [download, setDownload] = useState<DownloadItem | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => () => {
+    if (download) URL.revokeObjectURL(download.url);
+  }, [download]);
+
+  function handleFileChange(nextFile: File | null) {
+    if (!nextFile) {
+      setFile(null);
+      setError("");
+      return;
+    }
+
+    const isDocx =
+      nextFile.name.toLowerCase().endsWith(".docx") ||
+      nextFile.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+      if (!isDocx) {
+        setFile(null);
+        setDownload(null);
+        setError("Please choose a .docx Word document.");
+        return;
+      }
+
+      setFile(nextFile);
+      setDownload(null);
+      setError("");
+    }
+
+  async function handleConvert() {
+    if (!file) {
+      setError("Please choose a .docx Word document first.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      if (download) URL.revokeObjectURL(download.url);
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("/api/tools/word-to-pdf", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new Error(await getApiError(response));
+      }
+
+      setDownload(await responseToDownloadItem(response, `${file.name.replace(/\.docx$/i, "")}.pdf`));
+      setError("");
+    } catch (conversionError) {
+      setError(conversionError instanceof Error ? conversionError.message : "Unable to convert that Word document into PDF.");
+      setDownload(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+      return (
+      <ToolShell title="Word to PDF Converter" description="Convert DOCX files into PDF with a server-assisted workflow that extracts readable document text and formats it into a clean PDF export.">
+        <Field label=".docx file" hint="Upload a DOCX file to convert it on the server and download the generated PDF.">
+          <input
+            type="file"
+            accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
+          />
+        </Field>
+        <Notice>
+          Server-assisted conversion. This version focuses on extracting readable DOCX text and placing it
+          into a clean PDF document. Complex Word layouts may still simplify during export.
+        </Notice>
+        <button type="button" className={buttonClass} onClick={handleConvert} disabled={!file || loading}>
+          {loading ? "Converting to PDF..." : "Convert to PDF"}
+        </button>
+        {error ? <Notice tone="error">{error}</Notice> : null}
+        {!file ? (
+          <EmptyState
+            title="Upload a DOCX file to start"
+            description="The server will extract the document text and generate a clean PDF for download."
+          />
+        ) : download ? (
+          <DownloadList items={[download]} />
+        ) : (
+          <OutputBlock
+            title="Uploaded document"
+            value={`File: ${file.name}\nSize: ${formatFileSize(file.size)}\nStatus: Ready for server-side conversion.\nOutput: A readable PDF generated from extracted document text.`}
+          />
+        )}
+      </ToolShell>
   );
 }
 

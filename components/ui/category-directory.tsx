@@ -2,7 +2,7 @@
 
 import { useDeferredValue, useId, useMemo, useState } from "react";
 import { ToolCard } from "@/components/ui/tool-card";
-import type { ToolDefinition } from "@/lib/tools";
+import { type ToolDefinition } from "@/lib/tools";
 
 type DirectoryFilter = "all" | "working-local" | "reduced-scope-local" | "planned";
 
@@ -50,20 +50,25 @@ export function CategoryDirectory({
 
   const visibleTools = filteredTools.slice(0, visibleCount);
   const hasMore = visibleCount < filteredTools.length;
+  const workingCount = tools.filter((tool) => tool.implementationStatus === "working-local").length;
+  const reducedCount = tools.filter((tool) => tool.implementationStatus === "reduced-scope-local").length;
+  const plannedCount = tools.filter(
+    (tool) => tool.implementationStatus === "planned-local" || tool.implementationStatus === "coming-soon",
+  ).length;
 
   const filterOptions: Array<{ key: DirectoryFilter; label: string }> = [
     { key: "all", label: `All (${tools.length})` },
     {
       key: "working-local",
-      label: `Working (${tools.filter((tool) => tool.implementationStatus === "working-local").length})`,
+      label: `Working (${workingCount})`,
     },
     {
       key: "reduced-scope-local",
-      label: `Reduced (${tools.filter((tool) => tool.implementationStatus === "reduced-scope-local").length})`,
+      label: `Reduced (${reducedCount})`,
     },
     {
       key: "planned",
-      label: `Planned (${tools.filter((tool) => tool.implementationStatus === "planned-local" || tool.implementationStatus === "coming-soon").length})`,
+      label: `Planned (${plannedCount})`,
     },
   ];
 

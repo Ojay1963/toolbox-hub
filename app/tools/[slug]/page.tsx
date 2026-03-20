@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ToolPage } from "@/components/tool-page";
 import {
   buildBreadcrumbJsonLd,
@@ -8,7 +8,16 @@ import {
   buildMetadata,
   buildSoftwareApplicationJsonLd,
 } from "@/lib/seo";
-import { getPopularTools, getRecentTools, getTool, isExpandedSeoTool, tools } from "@/lib/tools";
+import {
+  getCanonicalToolSlug,
+  getPopularTools,
+  getRecentTools,
+  getTool,
+  isAliasToolSlug,
+  isExpandedSeoTool,
+  shouldIndexTool,
+  tools,
+} from "@/lib/tools";
 
 export function generateStaticParams() {
   return tools.map((tool) => ({ slug: tool.slug }));
@@ -25,10 +34,15 @@ export async function generateMetadata({
     return {};
   }
 
+  const canonicalSlug = getCanonicalToolSlug(tool.slug);
+  const shouldIndex = shouldIndexTool(tool);
+
   return buildMetadata({
     title: tool.seoTitle,
     description: tool.seoDescription,
     pathname: `/tools/${tool.slug}`,
+    canonicalPathname: `/tools/${canonicalSlug}`,
+    index: shouldIndex,
     keywords: [
       ...tool.keywords,
       tool.name,
@@ -47,6 +61,9 @@ export default async function ToolDetailPage({
   const tool = getTool(slug);
   if (!tool) {
     notFound();
+  }
+  if (isAliasToolSlug(tool.slug)) {
+    permanentRedirect(`/tools/${getCanonicalToolSlug(tool.slug)}`);
   }
 
   const relatedTools = tool.relatedToolSlugs

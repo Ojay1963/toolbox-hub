@@ -1,12 +1,20 @@
 import Link from "next/link";
+import { siteMetadata } from "@/lib/seo";
 import { categories, getPopularTools } from "@/lib/tools";
 
 export function Footer() {
   const quickLinks = getPopularTools(6);
+  const siteLinks = [
+    { href: "/about", label: "About" },
+    { href: "/contact", label: "Contact" },
+    { href: "/privacy-policy", label: "Privacy Policy" },
+    { href: "/terms-of-use", label: "Terms of Use" },
+    { href: "/disclaimer", label: "Disclaimer" },
+  ];
 
   return (
     <footer className="border-t border-[color:var(--border)] bg-white/70">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.9fr] lg:px-8">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr] lg:px-8">
         <div>
           <h2 className="text-xl font-bold tracking-tight">Toolbox Hub</h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
@@ -17,6 +25,14 @@ export function Footer() {
             No accounts, no clutter, and no deceptive claims. Each page is built to stay fast,
             mobile-friendly, and easy to extend as new tools are added.
           </p>
+          {siteMetadata.contactEmail ? (
+            <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+              Contact:{" "}
+              <a href={`mailto:${siteMetadata.contactEmail}`} className="font-semibold text-[color:var(--primary)] underline-offset-4 hover:underline">
+                {siteMetadata.contactEmail}
+              </a>
+            </p>
+          ) : null}
         </div>
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--primary-dark)]">
@@ -30,6 +46,22 @@ export function Footer() {
                 className="transition hover:text-[color:var(--primary)]"
               >
                 {category.name}
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--primary-dark)]">
+            Site
+          </h3>
+          <nav aria-label="Footer site links" className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
+            {siteLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="block transition hover:text-[color:var(--primary)]"
+              >
+                {link.label}
               </Link>
             ))}
           </nav>

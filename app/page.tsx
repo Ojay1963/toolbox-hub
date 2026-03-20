@@ -9,25 +9,40 @@ import {
   buildCollectionPageJsonLd,
   buildFaqJsonLd,
   buildMetadata,
+  siteMetadata,
 } from "@/lib/seo";
-import { categories, getPopularTools, getRecentTools, getToolsByCategory, getTrendingTools, tools } from "@/lib/tools";
+import {
+  categories,
+  getIndexableTools,
+  getPopularTools,
+  getRecentTools,
+  getToolsByCategory,
+  getTrendingTools,
+  tools,
+} from "@/lib/tools";
 
 const SearchBox = dynamic(() => import("@/components/ui/search-box").then((module) => module.SearchBox));
 
 export const metadata = buildMetadata({
   title: "Free Online Tools for Images, PDFs, Text, Developers, and More",
   description:
-    "Use more than 150 free online tools for image editing, PDF tasks, text cleanup, generators, calculators, converters, and developer workflows.",
+    `Use ${siteMetadata.indexableToolCount} public tool pages for image editing, PDF tasks, text cleanup, generators, calculators, converters, and developer workflows.`,
   pathname: "/",
   keywords: ["free online tools", "browser tools", "seo-friendly tools"],
 });
 
 export default function HomePage() {
   const totalTools = tools.length;
+  const publicTools = getIndexableTools();
+  const publicToolSlugs = new Set(publicTools.map((tool) => tool.slug));
+  const indexableToolsCount = publicTools.length;
   const featuredCategories = categories.map((category) => ({
     category,
-    count: getToolsByCategory(category.slug).length,
+    count: getToolsByCategory(category.slug).filter((tool) => publicToolSlugs.has(tool.slug)).length,
   }));
+  const publicCategoryCountBySlug = new Map(
+    featuredCategories.map(({ category, count }) => [category.slug, count]),
+  );
   const popularTools = getPopularTools(6);
   const latestTools = getRecentTools(6);
   const trendingTools = getTrendingTools(6);
@@ -38,10 +53,8 @@ export default function HomePage() {
     category,
     tools: getPopularTools(2, category.slug),
   }));
-  const workingToolsCount = tools.filter((tool) => tool.implementationStatus === "working-local").length;
-  const reducedScopeCount = tools.filter(
-    (tool) => tool.implementationStatus === "reduced-scope-local",
-  ).length;
+  const workingToolsCount = publicTools.filter((tool) => tool.implementationStatus === "working-local").length;
+  const reducedScopeCount = publicTools.filter((tool) => tool.implementationStatus === "reduced-scope-local").length;
   const homepageFaq = [
     {
       question: "Do these tools require an account?",
@@ -99,9 +112,9 @@ export default function HomePage() {
             </p>
             <div className="mt-6 max-w-3xl">
               <SearchBox
-                tools={tools}
-                title={`Search ${totalTools} tools without digging through menus`}
-                description="Search by tool name, keyword, category, or task. Popular tools and recent additions are suggested before you type, and category filters help narrow the list quickly."
+                tools={publicTools}
+                title={`Search ${indexableToolsCount} public tool pages without digging through menus`}
+                description="Search by tool name, keyword, category, or task. Popular tools and recent additions are suggested before you type, and results stay focused on public launch-ready pages."
                 maxResults={6}
                 suggestedTools={searchSuggestions}
                 sectionId="search-tools"
@@ -136,8 +149,8 @@ export default function HomePage() {
               <p className="mt-2 text-sm text-[color:var(--muted)]">fully working local tools</p>
             </div>
             <div className="rounded-3xl bg-white p-5">
-              <p className="text-3xl font-black">{totalTools}</p>
-              <p className="mt-2 text-sm text-[color:var(--muted)]">indexed tool pages</p>
+              <p className="text-3xl font-black">{indexableToolsCount}</p>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">indexable tool pages</p>
             </div>
             <div className="rounded-3xl bg-white p-5">
               <p className="text-3xl font-black">{reducedScopeCount}</p>
@@ -228,7 +241,7 @@ export default function HomePage() {
                 ))}
               </div>
               <p className="mt-4 text-xs text-[color:var(--muted)]">
-                {getToolsByCategory(category.slug).length} tools in this category
+                {publicCategoryCountBySlug.get(category.slug) ?? 0} public tool pages in this category
               </p>
             </section>
           ))}
