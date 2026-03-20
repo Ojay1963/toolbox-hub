@@ -35,7 +35,99 @@ const MAX_PUBLIC_FILE_BYTES = 25 * 1024 * 1024;
 const DEFAULT_FETCH_TIMEOUT_MS = 12_000;
 const RATE_LIMIT_TIMEOUT_MS = 5_000;
 
+class SimpleDOMMatrix {
+  a = 1;
+  b = 0;
+  c = 0;
+  d = 1;
+  e = 0;
+  f = 0;
+
+  constructor(init?: number[] | { a?: number; b?: number; c?: number; d?: number; e?: number; f?: number }) {
+    if (Array.isArray(init)) {
+      if (init.length >= 6) {
+        [this.a, this.b, this.c, this.d, this.e, this.f] = init;
+      }
+    } else if (init && typeof init === "object") {
+      this.a = init.a ?? this.a;
+      this.b = init.b ?? this.b;
+      this.c = init.c ?? this.c;
+      this.d = init.d ?? this.d;
+      this.e = init.e ?? this.e;
+      this.f = init.f ?? this.f;
+    }
+  }
+
+  multiplySelf(other: SimpleDOMMatrix) {
+    const a = this.a * other.a + this.c * other.b;
+    const b = this.b * other.a + this.d * other.b;
+    const c = this.a * other.c + this.c * other.d;
+    const d = this.b * other.c + this.d * other.d;
+    const e = this.a * other.e + this.c * other.f + this.e;
+    const f = this.b * other.e + this.d * other.f + this.f;
+
+    this.a = a;
+    this.b = b;
+    this.c = c;
+    this.d = d;
+    this.e = e;
+    this.f = f;
+    return this;
+  }
+
+  preMultiplySelf(other: SimpleDOMMatrix) {
+    const matrix = new SimpleDOMMatrix([other.a, other.b, other.c, other.d, other.e, other.f]);
+    matrix.multiplySelf(this);
+    this.a = matrix.a;
+    this.b = matrix.b;
+    this.c = matrix.c;
+    this.d = matrix.d;
+    this.e = matrix.e;
+    this.f = matrix.f;
+    return this;
+  }
+
+  translate(tx = 0, ty = 0) {
+    return this.multiplySelf(new SimpleDOMMatrix([1, 0, 0, 1, tx, ty]));
+  }
+
+  scale(scaleX = 1, scaleY = scaleX) {
+    return this.multiplySelf(new SimpleDOMMatrix([scaleX, 0, 0, scaleY, 0, 0]));
+  }
+
+  invertSelf() {
+    const determinant = this.a * this.d - this.b * this.c;
+    if (!determinant) {
+      this.a = Number.NaN;
+      this.b = Number.NaN;
+      this.c = Number.NaN;
+      this.d = Number.NaN;
+      this.e = Number.NaN;
+      this.f = Number.NaN;
+      return this;
+    }
+
+    const a = this.d / determinant;
+    const b = -this.b / determinant;
+    const c = -this.c / determinant;
+    const d = this.a / determinant;
+    const e = (this.c * this.f - this.d * this.e) / determinant;
+    const f = (this.b * this.e - this.a * this.f) / determinant;
+
+    this.a = a;
+    this.b = b;
+    this.c = c;
+    this.d = d;
+    this.e = e;
+    this.f = f;
+    return this;
+  }
+}
+
 async function getPdfJs() {
+  if (typeof globalThis.DOMMatrix === "undefined") {
+    globalThis.DOMMatrix = SimpleDOMMatrix as unknown as typeof DOMMatrix;
+  }
   return import("pdfjs-dist/legacy/build/pdf.mjs");
 }
 
