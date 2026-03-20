@@ -1339,19 +1339,18 @@ export function BackgroundRemoverTool() {
   }
   
   return (
-      <ToolShell title="Remove Background From Image" description="Upload an image, process it through the backend background-removal service, and preview or download the resulting transparent PNG.">
-        <Field label="Image file" hint="Upload JPG, PNG, or WebP to remove its background through the server route.">
+      <ToolShell title="Remove Background From Image" description="Remove the background from your image and download a transparent PNG.">
+        <Field label="Image file" hint="Upload a JPG, PNG, or WebP image.">
           <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
         </Field>
         <button type="button" className={buttonClass} onClick={handleRemove} disabled={!file || loading}>
           {loading ? "Removing background..." : "Remove background"}
         </button>
-        <Notice>Server-assisted processing. If background removal is not enabled on this deployment, the page will show a clear unavailable message instead of faking a result.</Notice>
         {error ? <Notice tone="error">{error}</Notice> : null}
         {!file ? (
           <EmptyState
             title="Upload an image to remove its background"
-            description="The processed result will be returned as a transparent PNG when the backend service is available."
+            description="You’ll get a transparent PNG when the result is ready."
           />
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
@@ -1375,7 +1374,7 @@ export function BackgroundRemoverTool() {
               ) : (
                 <div className="mt-3 space-y-3 text-sm leading-7 text-[color:var(--muted)]">
                   <p>File selected: <span className="font-medium text-[color:var(--foreground)]">{file.name}</span> ({formatFileSize(file.size)})</p>
-                  <p>Run the server-assisted background-removal step to generate a transparent PNG preview.</p>
+                  <p>Remove the background to generate a transparent PNG preview.</p>
                 </div>
               )}
             </div>
@@ -1392,11 +1391,11 @@ export function GifToMp4ConverterTool() {
   return (
     <ToolShell
       title="GIF to MP4 Converter"
-      description="Preview an uploaded GIF and review the current limits of lightweight browser-side GIF-to-video conversion."
+      description="Convert GIF files to MP4 video."
     >
       <Field
         label="Animated GIF"
-        hint="Upload a GIF file to preview the kind of input this future conversion workflow will accept."
+        hint="Upload a GIF file."
       >
         <input
           type="file"
@@ -1404,14 +1403,11 @@ export function GifToMp4ConverterTool() {
           onChange={(event) => setFile(event.target.files?.[0] ?? null)}
         />
       </Field>
-      <Notice>
-        Coming soon. Reliable GIF-to-MP4 conversion in the browser can become heavy across devices and
-        codecs, so this page does not fake a video export with misleading output.
-      </Notice>
+      <Notice>This tool is currently unavailable. Please try again later.</Notice>
       {!file ? (
         <EmptyState
-          title="Upload a GIF to preview the future workflow"
-          description="You can inspect the selected input here today, but the route intentionally stops short of pretending it can deliver a robust MP4 conversion with the current lightweight stack."
+          title="Upload a GIF to preview it"
+          description="Preview your file here while this tool is unavailable."
         />
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -1432,14 +1428,7 @@ export function GifToMp4ConverterTool() {
               Current functionality
             </p>
             <div className="mt-3 space-y-3 text-sm leading-7 text-[color:var(--muted)]">
-              <p>
-                This page currently previews the uploaded GIF and explains why a dependable MP4 export
-                is not shipped yet.
-              </p>
-              <p>
-                A later version may add a real conversion workflow once codec support and performance
-                tradeoffs can be handled honestly across common browsers.
-              </p>
+              <p>This tool is currently unavailable.</p>
               <p>
                 File selected: <span className="font-medium text-[color:var(--foreground)]">{file.name}</span>
                 {" "}({formatFileSize(file.size)})
@@ -1857,7 +1846,7 @@ export function ImageCropperProTool() {
   }
 
   return (
-    <ToolShell title="Image Cropper Pro" description="Crop images locally with aspect presets and precise numeric crop controls for a more advanced browser-side workflow.">
+    <ToolShell title="Image Cropper Pro" description="Crop images with presets and precise size controls.">
       <Field label="Supported file types" hint="JPG, PNG, WebP">
         <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
@@ -1937,7 +1926,7 @@ export function GifMakerTool() {
   }
 
   return (
-    <ToolShell title="GIF Maker" description="Create a real animated GIF from multiple uploaded images using browser-side processing and a lightweight encoder.">
+    <ToolShell title="GIF Maker" description="Create an animated GIF from multiple uploaded images.">
       <Field label="Image frames" hint="Upload 2 or more JPG, PNG, or WebP images in the order you want them animated.">
         <input type="file" accept={supportedTypes} multiple onChange={(event) => setFiles(Array.from(event.target.files ?? []))} />
       </Field>
@@ -2039,8 +2028,8 @@ export function VideoToGifConverterTool() {
   }
 
   return (
-    <ToolShell title="Video to GIF Converter" description="Convert a short uploaded video clip into a real GIF locally with browser-side frame capture and lightweight encoding.">
-      <Field label="Supported file types" hint="Use short MP4 or WebM clips for the best browser-side results.">
+    <ToolShell title="Video to GIF Converter" description="Convert a short video clip into a GIF.">
+      <Field label="Supported file types" hint="Use a short MP4 or WebM clip for the best results.">
         <input type="file" accept="video/mp4,video/webm" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -2050,7 +2039,7 @@ export function VideoToGifConverterTool() {
         <Field label="Frame delay (ms)"><input className={imageInputClass()} type="number" min="80" max="500" step="10" value={frameDelay} onChange={(event) => setFrameDelay(Number(event.target.value))} /></Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleGenerate} disabled={!file}>Convert to GIF</button>
-      <Notice>For a fast browser-side experience, this tool is tuned for short clips and a modest frame count.</Notice>
+      <Notice>Short clips usually convert faster and produce smaller GIF files.</Notice>
       {error ? <Notice tone="error">{error}</Notice> : null}
       {!file ? <EmptyState title="Upload a short video clip" description="Choose a short MP4 or WebM file, set the capture range, and export a real GIF locally." /> : <>
         {previewUrl ? (
@@ -2114,7 +2103,7 @@ export function ImageColorPaletteGeneratorTool() {
   const output = useMemo(() => colors.join("\n"), [colors]);
 
   return (
-    <ToolShell title="Image Color Palette Generator" description="Extract a compact dominant color palette from an uploaded image using local browser-side sampling.">
+    <ToolShell title="Image Color Palette Generator" description="Extract a compact color palette from an uploaded image.">
       <Field label="Supported file types" hint="JPG, PNG, WebP">
         <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>

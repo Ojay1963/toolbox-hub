@@ -4,8 +4,6 @@ import { useDeferredValue, useId, useMemo, useState } from "react";
 import { ToolCard } from "@/components/ui/tool-card";
 import { type ToolDefinition } from "@/lib/tools";
 
-type DirectoryFilter = "all" | "working-local" | "reduced-scope-local" | "planned";
-
 export function CategoryDirectory({
   tools,
   title = "Browse the full directory",
@@ -16,7 +14,6 @@ export function CategoryDirectory({
   description?: string;
 }) {
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<DirectoryFilter>("all");
   const [visibleCount, setVisibleCount] = useState(12);
   const deferredQuery = useDeferredValue(query);
   const inputId = useId().replace(/:/g, "");
@@ -25,17 +22,6 @@ export function CategoryDirectory({
     const normalizedQuery = deferredQuery.trim().toLowerCase();
 
     return tools.filter((tool) => {
-      const matchesFilter =
-        filter === "all"
-          ? true
-          : filter === "planned"
-            ? tool.implementationStatus === "planned-local" || tool.implementationStatus === "coming-soon"
-            : tool.implementationStatus === filter;
-
-      if (!matchesFilter) {
-        return false;
-      }
-
       if (!normalizedQuery) {
         return true;
       }
@@ -46,32 +32,10 @@ export function CategoryDirectory({
 
       return haystack.includes(normalizedQuery);
     });
-  }, [deferredQuery, filter, tools]);
+  }, [deferredQuery, tools]);
 
   const visibleTools = filteredTools.slice(0, visibleCount);
   const hasMore = visibleCount < filteredTools.length;
-  const workingCount = tools.filter((tool) => tool.implementationStatus === "working-local").length;
-  const reducedCount = tools.filter((tool) => tool.implementationStatus === "reduced-scope-local").length;
-  const plannedCount = tools.filter(
-    (tool) => tool.implementationStatus === "planned-local" || tool.implementationStatus === "coming-soon",
-  ).length;
-
-  const filterOptions: Array<{ key: DirectoryFilter; label: string }> = [
-    { key: "all", label: `All (${tools.length})` },
-    {
-      key: "working-local",
-      label: `Working (${workingCount})`,
-    },
-    {
-      key: "reduced-scope-local",
-      label: `Reduced (${reducedCount})`,
-    },
-    {
-      key: "planned",
-      label: `Planned (${plannedCount})`,
-    },
-  ];
-
   return (
     <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-6 shadow-sm">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -108,32 +72,11 @@ export function CategoryDirectory({
         <div id={`${inputId}-hint`} className="sr-only">
           Use this field to narrow the tools shown in the category directory.
         </div>
-        <div className="flex flex-wrap gap-2">
-          {filterOptions.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              aria-pressed={filter === option.key}
-              onClick={() => {
-                setFilter(option.key);
-                setVisibleCount(12);
-              }}
-              className={`rounded-full px-3 py-2 text-sm transition ${
-                filter === option.key
-                  ? "bg-[color:var(--primary)] text-white"
-                  : "border border-[color:var(--border)] bg-white text-[color:var(--muted)] hover:border-[color:var(--primary)]"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
       </div>
 
       {!filteredTools.length ? (
         <div className="mt-6 rounded-2xl border border-dashed border-[color:var(--border)] bg-stone-50 p-5 text-sm text-[color:var(--muted)]">
-          No tools match this filter yet. Try a broader keyword or switch the status filter back to
-          all.
+          No tools match that search yet. Try a broader keyword.
         </div>
       ) : (
         <>

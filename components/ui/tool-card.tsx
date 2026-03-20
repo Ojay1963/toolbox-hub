@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getImplementationStatusMeta, type ToolDefinition } from "@/lib/tools";
+import { type ToolDefinition } from "@/lib/tools";
 
 export function ToolCard({
   tool,
@@ -8,8 +8,6 @@ export function ToolCard({
   tool: ToolDefinition;
   compact?: boolean;
 }) {
-  const statusMeta = getImplementationStatusMeta(tool);
-
   if (compact) {
     return (
       <Link
@@ -34,9 +32,6 @@ export function ToolCard({
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full bg-[color:var(--soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
           {tool.category.replace(/-/g, " ")}
-        </span>
-        <span className="rounded-full border border-[color:var(--border)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
-          {statusMeta.shortLabel}
         </span>
       </div>
       <h3 className="text-lg font-bold tracking-tight">{tool.name}</h3>

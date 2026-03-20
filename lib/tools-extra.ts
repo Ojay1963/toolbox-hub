@@ -1,3 +1,4 @@
+import { normalizePublicCopy, normalizePublicList } from "@/lib/public-copy";
 import type { ToolDefinition } from "@/lib/tools";
 
 type ExtraToolInput = Omit<ToolDefinition, "relatedToolSlugs" | "faq"> & {
@@ -8,21 +9,22 @@ type ExtraToolInput = Omit<ToolDefinition, "relatedToolSlugs" | "faq"> & {
 };
 
 function makeExtraTool(input: ExtraToolInput): Omit<ToolDefinition, "relatedToolSlugs"> {
+  const shouldNormalize = input.implementationStatus !== "coming-soon" && input.implementationStatus !== "planned-local";
   return {
     name: input.name,
     slug: input.slug,
     category: input.category,
-    shortDescription: input.shortDescription,
-    longDescription: input.longDescription,
+    shortDescription: shouldNormalize ? normalizePublicCopy(input.shortDescription) : input.shortDescription,
+    longDescription: shouldNormalize ? normalizePublicCopy(input.longDescription) : input.longDescription,
     keywords: input.keywords,
-    howToUse: input.howToUse,
+    howToUse: shouldNormalize ? normalizePublicList(input.howToUse) : input.howToUse,
     implementationStatus: input.implementationStatus,
     seoTitle: input.seoTitle,
-    seoDescription: input.seoDescription,
-    statusNote: input.statusNote,
+    seoDescription: shouldNormalize ? normalizePublicCopy(input.seoDescription) : input.seoDescription,
+    statusNote: shouldNormalize && input.statusNote ? normalizePublicCopy(input.statusNote) : input.statusNote,
     faq: [
-      { question: input.faq1, answer: input.faqAnswer1 },
-      { question: input.faq2, answer: input.faqAnswer2 },
+      { question: input.faq1, answer: shouldNormalize ? normalizePublicCopy(input.faqAnswer1) : input.faqAnswer1 },
+      { question: input.faq2, answer: shouldNormalize ? normalizePublicCopy(input.faqAnswer2) : input.faqAnswer2 },
     ],
   };
 }

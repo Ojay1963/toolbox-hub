@@ -4,7 +4,7 @@ import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { FaqList } from "@/components/ui/faq-list";
 import { RelatedTools } from "@/components/ui/related-tools";
 import { Section } from "@/components/ui/section";
-import { getImplementationStatusMeta, type ToolDefinition } from "@/lib/tools";
+import { type ToolDefinition } from "@/lib/tools";
 
 export function ToolPage({
   tool,
@@ -18,8 +18,6 @@ export function ToolPage({
   categoryRecentTools: ToolDefinition[];
 }) {
   const categoryLabel = tool.category.replace(/-/g, " ");
-  const statusMeta = getImplementationStatusMeta(tool);
-
   return (
     <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
       <div className="space-y-8">
@@ -45,11 +43,6 @@ export function ToolPage({
             {tool.name}
           </p>
           <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">{tool.name}</h1>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <span className="rounded-full bg-[color:var(--soft)] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
-              {statusMeta.label}
-            </span>
-          </div>
           <p className="mt-4 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
             {tool.longDescription}
           </p>
@@ -61,11 +54,11 @@ export function ToolPage({
         <Section title="About this tool">
           <p>{tool.longDescription}</p>
           <p>
-            This page belongs to the{" "}
+            Browse more options in{" "}
             <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
               {categoryLabel}
             </Link>{" "}
-            category, so you can move to similar workflows if you need another option or a related task.
+            if you want a similar tool.
           </p>
           {relatedTools.length ? (
             <p>
@@ -78,28 +71,17 @@ export function ToolPage({
                   </Link>
                 </span>
               ))}
-              , which can help if you need a nearby workflow instead of starting your search again.
+              .
             </p>
           ) : null}
         </Section>
 
         <Section title="How to use">
-          <p>
-            Follow these steps to use {tool.name.toLowerCase()} with the current browser-first
-            workflow.
-          </p>
           <ol className="space-y-3 pl-5">
             {tool.howToUse.map((step) => (
               <li key={step}>{step}</li>
             ))}
           </ol>
-          <p>
-            If your task changes midway, you can also move to the{" "}
-            <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
-              {categoryLabel}
-            </Link>{" "}
-            category page or use the related tools below to stay in the same topic cluster.
-          </p>
         </Section>
 
         <Section title="FAQ">
@@ -136,38 +118,31 @@ export function ToolPage({
       <div className="space-y-6">
         <AdPlaceholder
           slot={`tool-${tool.slug}-sidebar`}
-          label="Tool sidebar slot"
+          label="Advertisement"
           format="sidebar"
         />
         <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
           <h2 className="text-lg font-bold tracking-tight">Quick notes</h2>
           <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">{tool.shortDescription}</p>
-          {tool.statusNote ? (
-            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">{tool.statusNote}</p>
-          ) : (
-            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-              {statusMeta.summary}
-            </p>
-          )}
         </section>
         <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-          <h2 className="text-lg font-bold tracking-tight">Internal links</h2>
+          <h2 className="text-lg font-bold tracking-tight">Explore more</h2>
           <div className="mt-4 space-y-5 text-sm text-[color:var(--muted)]">
             <div className="space-y-3">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
-                Main paths
+                Browse
               </p>
               <Link href="/" className="block transition hover:text-[color:var(--primary)]">
                 Browse all tools
               </Link>
               <Link href="/#search-tools" className="block transition hover:text-[color:var(--primary)]">
-                Search the full directory
+                Search all tools
               </Link>
               <Link
                 href={`/category/${tool.category}`}
                 className="block transition hover:text-[color:var(--primary)]"
               >
-                Explore more {categoryLabel}
+                More {categoryLabel}
               </Link>
             </div>
             <div className="space-y-3">
@@ -200,7 +175,7 @@ export function ToolPage({
             </div>
             <div className="space-y-3">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
-                New in {categoryLabel}
+                More in {categoryLabel}
               </p>
               {categoryRecentTools.map((item) => (
                 <Link
@@ -232,7 +207,7 @@ export function ToolPage({
       <div className="lg:col-span-2">
         <AdPlaceholder
           slot={`tool-${tool.slug}-post-related-banner`}
-          label="Tool content banner"
+          label="Advertisement"
           format="leaderboard"
         />
       </div>

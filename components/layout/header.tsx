@@ -14,7 +14,7 @@ export function Header() {
             </div>
             <div>
               <p className="text-lg font-bold tracking-tight">Toolbox Hub</p>
-              <p className="text-sm text-[color:var(--muted)]">{toolCount}+ free browser-first tools</p>
+              <p className="text-sm text-[color:var(--muted)]">{toolCount}+ free online tools</p>
             </div>
           </Link>
           <nav

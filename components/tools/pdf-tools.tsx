@@ -420,17 +420,17 @@ export function PdfCompressorTool() {
   }
 
   return (
-    <ToolShell title="PDF Compressor" description="Run a reduced-scope server-side PDF optimization pass. This can help some files, but complex PDFs may still shrink only a little.">
+    <ToolShell title="PDF Compressor" description="Reduce PDF size and download an optimized copy. Results may vary by file.">
       <Field label="PDF file">
         <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
-      <Notice>Reduced-scope optimization. This workflow creates a cleaner server-side copy and may reduce size in some cases, but it is not a full desktop-grade PDF compressor.</Notice>
+      <Notice>Results can vary depending on how the original PDF was created.</Notice>
         <button type="button" className={buttonClass} onClick={handleCompress} disabled={!file || loading}>
           {loading ? "Optimizing PDF..." : "Optimize PDF"}
         </button>
       {error ? <Notice tone="error">{error}</Notice> : null}
       {!file ? (
-        <EmptyState title="Upload a PDF to optimize" description="This local workflow works best for some PDFs, but highly compressed or image-heavy files may not shrink much." />
+        <EmptyState title="Upload a PDF to optimize" description="Some PDFs shrink more than others, especially image-heavy or already compressed files." />
       ) : (
         <>
           {resultText ? <OutputBlock title="Optimization summary" value={resultText} /> : null}
@@ -900,26 +900,22 @@ export function ProtectPdfTool() {
   }
 
   return (
-    <ToolShell title="Protect PDF" description="Protect a PDF with a password through a server-assisted workflow when the PDF protection service is enabled for this deployment.">
+    <ToolShell title="Protect PDF" description="Add a password to a PDF and download the protected file.">
       <Field label="PDF file">
         <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
       <Field label="Open password" hint="Use at least 6 characters. This password will be required to open the protected PDF.">
         <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Enter a PDF password" />
       </Field>
-      <Notice>
-        Server-assisted processing. If PDF protection is not enabled for this deployment,
-        the page will show a clear unavailable message instead of pretending to encrypt your file.
-      </Notice>
       <button type="button" className={buttonClass} onClick={handleProtect} disabled={!file || loading}>
         {loading ? "Protecting PDF..." : "Protect PDF"}
       </button>
       {error ? <Notice tone="error">{error}</Notice> : !file || !password.trim() ? (
-        <EmptyState title="Upload a PDF and enter a password" description="This route supports real server-side protection, but the encryption service must be enabled for this deployment." />
+        <EmptyState title="Upload a PDF and enter a password" description="Choose a file, add a password, and protect the PDF." />
       ) : download ? (
         <DownloadList items={[download]} />
       ) : (
-        <EmptyState title="Ready to protect your PDF" description="Run the server-side protection step to generate an encrypted download when the backend service is available." />
+        <EmptyState title="Ready to protect your PDF" description="Run the tool to create a protected PDF." />
       )}
     </ToolShell>
   );
@@ -1095,20 +1091,20 @@ export function PdfUnlockTool() {
       const pdf = await PDFDocument.load(await file.arrayBuffer());
       const bytes = await pdf.save({ useObjectStreams: true });
       setDownload(await pdfBytesToDownload(bytes, `${file.name.replace(/\.pdf$/i, "")}-readable-copy.pdf`));
-      setStatus("This PDF opened successfully in the current browser-side workflow. You can download a clean local copy, but this tool does not remove real password protection.");
+      setStatus("This PDF opened successfully. You can download a readable copy.");
       setError("");
     } catch {
       if (download) URL.revokeObjectURL(download.url);
       setDownload(null);
       setStatus("");
-      setError("This PDF appears to be protected or unreadable. With the current browser-friendly stack, the site can detect that state honestly but cannot safely remove real PDF password protection.");
+      setError("This PDF appears to be protected or unreadable.");
     }
   }
 
   return (
-    <ToolShell title="PDF Unlock Tool" description="Inspect whether a PDF opens in the current browser-side workflow and stay honest about real password-protection limits.">
+    <ToolShell title="PDF Unlock Tool" description="Check whether a PDF can be opened and reviewed.">
       <Notice>
-        Reduced scope only. This tool can detect whether a PDF opens in the current local stack, but it does not fake password removal for protected files.
+        Password-protected files may need the correct password before they can be opened.
       </Notice>
       <Field label="PDF file">
         <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
@@ -1343,20 +1339,19 @@ export function PdfToWordConverterTool() {
   }
 
   return (
-    <ToolShell title="PDF to Word Converter" description="Extract selectable text from a PDF through a server-assisted workflow and export it as a real DOCX file without faking full layout preservation.">
+    <ToolShell title="PDF to Word Converter" description="Convert PDF text into a DOCX file you can download and edit.">
       <Field label="PDF file">
         <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
         <Notice>
-          Server-assisted conversion. This version creates a real DOCX download from selectable PDF text,
-          but scanned PDFs still need OCR and complex layouts may not map perfectly into Word.
+          Best for PDFs with selectable text. Scanned files and complex layouts may need extra cleanup.
         </Notice>
         <button type="button" className={buttonClass} onClick={handleConvert} disabled={!file || loading}>
           {loading ? "Converting to Word..." : "Convert to Word"}
         </button>
       {error ? <Notice tone="error">{error}</Notice> : null}
       {!file ? (
-        <EmptyState title="Upload a PDF to start" description="The server can pull selectable text from many PDFs and package it into a readable DOCX download." />
+        <EmptyState title="Upload a PDF to start" description="Upload a PDF, convert it, and download the DOCX file." />
       ) : (
         <>
           {download ? (
@@ -1422,20 +1417,16 @@ export function PdfOcrPlaceholderTool() {
   }
 
   return (
-    <ToolShell title="PDF OCR" description="Extract text from scanned PDFs through a server-assisted OCR workflow and review the returned text before downloading it.">
+    <ToolShell title="PDF OCR" description="Extract text from scanned PDFs and download the result.">
       <Field label="PDF file">
         <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
-      <Notice>
-        Server-assisted OCR. If OCR is not enabled for this deployment, the page will show a clear
-        unavailable message instead of pretending text extraction worked.
-      </Notice>
       <button type="button" className={buttonClass} onClick={handleOcr} disabled={!file || loading}>
         {loading ? "Running OCR..." : "Run OCR"}
       </button>
       {error ? <Notice tone="error">{error}</Notice> : null}
       {!file ? (
-        <EmptyState title="Upload a scanned PDF to extract text" description="Use this workflow for image-based or scanned PDFs that do not already contain selectable text." />
+        <EmptyState title="Upload a scanned PDF" description="Use this tool to extract text from image-based or scanned PDFs." />
       ) : output ? (
         <>
           <OutputBlock title="OCR text" value={output} />
@@ -1513,8 +1504,8 @@ export function WordToPdfConverterPlaceholderTool() {
   }
 
       return (
-      <ToolShell title="Word to PDF Converter" description="Convert DOCX files into PDF with a server-assisted workflow that extracts readable document text and formats it into a clean PDF export.">
-        <Field label=".docx file" hint="Upload a DOCX file to convert it on the server and download the generated PDF.">
+    <ToolShell title="Word to PDF Converter" description="Convert a DOCX file into a PDF you can download.">
+        <Field label=".docx file" hint="Upload a DOCX file and download the converted PDF.">
           <input
             type="file"
             accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -1522,8 +1513,7 @@ export function WordToPdfConverterPlaceholderTool() {
           />
         </Field>
         <Notice>
-          Server-assisted conversion. This version focuses on extracting readable DOCX text and placing it
-          into a clean PDF document. Complex Word layouts may still simplify during export.
+          Complex Word layouts may look a little different in the final PDF.
         </Notice>
         <button type="button" className={buttonClass} onClick={handleConvert} disabled={!file || loading}>
           {loading ? "Converting to PDF..." : "Convert to PDF"}
@@ -1532,14 +1522,14 @@ export function WordToPdfConverterPlaceholderTool() {
         {!file ? (
           <EmptyState
             title="Upload a DOCX file to start"
-            description="The server will extract the document text and generate a clean PDF for download."
+            description="Upload a DOCX file, convert it, and download the PDF."
           />
         ) : download ? (
           <DownloadList items={[download]} />
         ) : (
           <OutputBlock
             title="Uploaded document"
-            value={`File: ${file.name}\nSize: ${formatFileSize(file.size)}\nStatus: Ready for server-side conversion.\nOutput: A readable PDF generated from extracted document text.`}
+            value={`File: ${file.name}\nSize: ${formatFileSize(file.size)}\nStatus: Ready to convert.\nOutput: Downloadable PDF file.`}
           />
         )}
       </ToolShell>

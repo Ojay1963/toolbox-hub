@@ -54,7 +54,6 @@ export default function HomePage() {
     tools: getPopularTools(2, category.slug),
   }));
   const workingToolsCount = publicTools.filter((tool) => tool.implementationStatus === "working-local").length;
-  const reducedScopeCount = publicTools.filter((tool) => tool.implementationStatus === "reduced-scope-local").length;
   const homepageFaq = [
     {
       question: "Do these tools require an account?",
@@ -62,11 +61,11 @@ export default function HomePage() {
     },
     {
       question: "Are files uploaded to a server?",
-      answer: "Many tools are designed for local browser-side processing. Where a tool has limits, the page explains that clearly instead of pretending otherwise.",
+      answer: "Many tools work right in your browser. Some tools need an online request to finish the job.",
     },
     {
       question: `Are all ${totalTools} tools identical in scope?`,
-      answer: "No. Some are fully working locally, some are reduced-scope by design, and a small number stay honest as future-ready placeholders until a reliable implementation is practical.",
+      answer: "No. Some tools are more advanced than others, and a few are still being finished.",
     },
   ];
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([{ name: "Home", pathname: "/" }]);
@@ -106,20 +105,17 @@ export default function HomePage() {
               Free online tools for PDF, image, text, developer, and calculator tasks.
             </h1>
             <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
-              Toolbox Hub gives you a clean set of practical tools that work fast on desktop and
-              mobile. Use browser-first workflows for common file, text, coding, conversion, and
-              calculation tasks without a login or bloated interface.
+              Toolbox Hub gives you practical tools for files, text, images, PDFs, code, and everyday calculations. Open a tool, use it quickly, and download what you need.
             </p>
             <div className="mt-6 max-w-3xl">
               <SearchBox
                 tools={publicTools}
-                title={`Search ${indexableToolsCount} public tool pages without digging through menus`}
-                description="Search by tool name, keyword, category, or task. Popular tools and recent additions are suggested before you type, and results stay focused on public launch-ready pages."
+                title={`Search ${indexableToolsCount} tools`}
+                description="Search by tool name, keyword, category, or task."
                 maxResults={6}
                 suggestedTools={searchSuggestions}
                 sectionId="search-tools"
                 showCategoryFilter
-                showStatusFilter
               />
             </div>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -146,19 +142,15 @@ export default function HomePage() {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-3xl bg-[color:var(--soft)] p-5">
               <p className="text-3xl font-black">{workingToolsCount}</p>
-              <p className="mt-2 text-sm text-[color:var(--muted)]">fully working local tools</p>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">tools ready to use</p>
             </div>
             <div className="rounded-3xl bg-white p-5">
               <p className="text-3xl font-black">{indexableToolsCount}</p>
               <p className="mt-2 text-sm text-[color:var(--muted)]">indexable tool pages</p>
             </div>
-            <div className="rounded-3xl bg-white p-5">
-              <p className="text-3xl font-black">{reducedScopeCount}</p>
-              <p className="mt-2 text-sm text-[color:var(--muted)]">honestly reduced-scope tools</p>
-            </div>
             <AdPlaceholder
               slot="homepage-hero-rail"
-              label="Hero sponsor slot"
+              label="Advertisement"
               format="rectangle"
             />
           </div>
@@ -173,8 +165,7 @@ export default function HomePage() {
           <div>
             <h2 className="mt-2 text-3xl font-black tracking-tight">Fastest paths into the directory</h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
-              These tools balance popularity, freshness, and real implementation quality so new visitors
-              can start with a small confident set instead of facing the full directory at once.
+              Start with a few popular tools instead of scrolling through everything at once.
             </p>
           </div>
           <Link href="/#search-tools" className="text-sm font-semibold text-[color:var(--primary)]">
@@ -217,8 +208,7 @@ export default function HomePage() {
         </p>
         <h2 className="mt-2 text-3xl font-black tracking-tight">Popular tools inside each section</h2>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
-          Instead of showing every tool at once, these short lists surface a couple of strong
-          entry points in each category so discovery stays focused.
+          A few useful picks from each category to help you get started faster.
         </p>
         <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {discoveryCategories.map(({ category, tools: categoryTools }) => (
@@ -241,7 +231,7 @@ export default function HomePage() {
                 ))}
               </div>
               <p className="mt-4 text-xs text-[color:var(--muted)]">
-                {publicCategoryCountBySlug.get(category.slug) ?? 0} public tool pages in this category
+                {publicCategoryCountBySlug.get(category.slug) ?? 0} tools in this category
               </p>
             </section>
           ))}
@@ -276,8 +266,7 @@ export default function HomePage() {
         </p>
         <h2 className="mt-2 text-3xl font-black tracking-tight">Popular starting points</h2>
         <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
-          These tools are weighted toward broad usefulness, strong local implementations, and clear
-          starting points for new visitors.
+          A simple set of popular tools to help you start quickly.
         </p>
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {popularTools.map((tool) => (
@@ -289,7 +278,7 @@ export default function HomePage() {
       <section className="mt-10">
         <AdPlaceholder
           slot="homepage-mid-banner"
-          label="Homepage banner slot"
+          label="Advertisement"
           format="leaderboard"
         />
       </section>
@@ -301,8 +290,7 @@ export default function HomePage() {
           </p>
           <h2 className="mt-2 text-3xl font-black tracking-tight">Recently added without the noise of a full dump</h2>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
-            Recent additions help returning visitors spot new capabilities without scrolling through
-            the full directory.
+            See what was added recently.
           </p>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {latestTools.map((tool) => (
@@ -313,14 +301,13 @@ export default function HomePage() {
         <div className="space-y-6">
           <AdPlaceholder
             slot="homepage-sidebar-rail"
-            label="Homepage sidebar slot"
+            label="Advertisement"
             format="sidebar"
           />
           <div className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
             <h2 className="text-lg font-bold tracking-tight">Browse by intent</h2>
             <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-              If the homepage still feels broad, jump straight into one category and keep the next
-              search scoped there.
+              Jump straight into a category if you already know the kind of tool you need.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {categories.map((category) => (
@@ -341,24 +328,24 @@ export default function HomePage() {
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
           Why people use this site
         </p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight">Built for speed, clarity, and honest scope</h2>
+        <h2 className="mt-2 text-3xl font-black tracking-tight">Built for speed and clarity</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <div className="rounded-3xl bg-stone-50 p-5">
             <h3 className="text-lg font-bold tracking-tight">Fast to open</h3>
             <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-              The site keeps pages lightweight and static where possible so people can get to the tool they need quickly.
+              The site stays lightweight so you can get to the tool you need quickly.
             </p>
           </div>
           <div className="rounded-3xl bg-stone-50 p-5">
-            <h3 className="text-lg font-bold tracking-tight">Clear about limitations</h3>
+            <h3 className="text-lg font-bold tracking-tight">Easy to understand</h3>
             <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-              Reduced-scope and future-ready tools are labeled clearly instead of pretending to offer live data or high-quality conversion they do not have.
+              Tool pages keep the instructions and results simple and easy to follow.
             </p>
           </div>
           <div className="rounded-3xl bg-stone-50 p-5">
             <h3 className="text-lg font-bold tracking-tight">Easy to navigate</h3>
             <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-              Categories, related tools, search, and internal links make it easy to move from one task to the next without friction.
+              Categories, related tools, and search make it easy to move from one task to the next.
             </p>
           </div>
         </div>

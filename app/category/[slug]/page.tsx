@@ -42,7 +42,7 @@ export async function generateMetadata({
 
   return buildMetadata({
     title: `${category.title} - ${categoryTools.length} Public Tool Pages`,
-    description: `${category.description} Browse ${categoryTools.length} public tool pages with internal links, how-to content, FAQs, and clear implementation scope notes.`,
+    description: `${category.description} Browse ${categoryTools.length} tools with clear how-to steps, FAQs, and related links.`,
     pathname: `/category/${category.slug}`,
     keywords: [
       category.name,
@@ -75,15 +75,15 @@ export default async function CategoryPage({
   const categoryFaq = [
     {
       question: `What kind of tools are in ${category.name}?`,
-      answer: `${category.name} includes focused utilities that fit the same mobile-friendly, SEO-aware site structure used across the rest of the directory, with this page focused on the public tool pages that are indexable on the current deployment.`,
+      answer: `${category.name} includes tools for common tasks in this category, all collected in one place.`,
     },
     {
       question: `Are all ${category.name.toLowerCase()} fully local?`,
-      answer: "Many are fully local, while some are reduced-scope or future-ready if a reliable browser-only implementation is not practical yet.",
+      answer: "Some tools run right in your browser, while others may need an online request to finish the job.",
     },
     {
       question: `How do I find related tools outside ${category.name}?`,
-      answer: "Use the internal links to other categories and related tools throughout the site to move between similar tasks quickly.",
+      answer: "Use the related categories and links on this page to find similar tools.",
     },
   ];
   const crossLinks = getPopularTools(6).filter((tool) => tool.category !== category.slug).slice(0, 6);
@@ -144,11 +144,11 @@ export default async function CategoryPage({
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-3xl bg-[color:var(--soft)] p-5">
               <p className="text-3xl font-black">{categoryTools.length}</p>
-              <p className="mt-2 text-sm text-[color:var(--muted)]">public tool pages in this category</p>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">tools in this category</p>
             </div>
             <div className="rounded-3xl bg-white p-5">
               <p className="text-3xl font-black">{workingCount}</p>
-              <p className="mt-2 text-sm text-[color:var(--muted)]">working local tools</p>
+              <p className="mt-2 text-sm text-[color:var(--muted)]">ready to use</p>
             </div>
           </div>
         </div>
@@ -158,10 +158,9 @@ export default async function CategoryPage({
         <SearchBox
           tools={categoryTools}
           title={`Search inside ${category.name}`}
-          description={`Search only within ${category.name.toLowerCase()} public tool pages so it is easier to find the right launch-ready page without leaving this section.`}
+          description={`Search only within ${category.name.toLowerCase()} tools.`}
           maxResults={6}
           compact
-          showStatusFilter
           suggestedTools={[...popularInCategory, ...recentInCategory].filter(
             (tool, index, collection) => collection.findIndex((candidate) => candidate.slug === tool.slug) === index,
           )}
@@ -192,14 +191,14 @@ export default async function CategoryPage({
             <CategoryDirectory
               tools={categoryTools}
               title={`${categoryTools.length} public tool pages with lighter filtering`}
-              description="Search inside this category, filter by implementation status, and reveal more public pages only when you need them."
+              description="Search inside this category and reveal more tools only when you need them."
             />
           </div>
         </section>
         <div className="space-y-6">
           <AdPlaceholder
             slot={`category-${category.slug}-sidebar`}
-            label="Category sidebar slot"
+            label="Advertisement"
             format="sidebar"
           />
           <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
@@ -220,7 +219,7 @@ export default async function CategoryPage({
             </div>
           </section>
           <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-            <h2 className="text-lg font-bold tracking-tight">Internal links</h2>
+            <h2 className="text-lg font-bold tracking-tight">Explore more</h2>
             <div className="mt-4 space-y-3">
               {crossLinks.map((tool) => (
                 <Link
@@ -236,8 +235,7 @@ export default async function CategoryPage({
           <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
             <h2 className="text-lg font-bold tracking-tight">Trending in {category.name}</h2>
             <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-              A shorter list of strong and recently improved tools helps reduce choice overload in
-              this section.
+              A few useful picks in this category.
             </p>
             <div className="mt-4 space-y-3">
               {trendingInCategory.map((tool) => (
@@ -271,7 +269,7 @@ export default async function CategoryPage({
       <section className="mt-10">
         <AdPlaceholder
           slot={`category-${category.slug}-content-banner`}
-          label="Category content banner"
+          label="Advertisement"
           format="leaderboard"
         />
       </section>

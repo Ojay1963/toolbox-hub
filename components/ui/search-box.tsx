@@ -13,7 +13,6 @@ export function SearchBox({
   suggestedTools = [],
   sectionId,
   showCategoryFilter = false,
-  showStatusFilter = false,
   compact = false,
 }: {
   tools: ToolDefinition[];
@@ -23,20 +22,15 @@ export function SearchBox({
   suggestedTools?: ToolDefinition[];
   sectionId?: string;
   showCategoryFilter?: boolean;
-  showStatusFilter?: boolean;
   compact?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<"all" | ToolCategorySlug>("all");
-  const [statusFilter, setStatusFilter] = useState<"all" | ToolDefinition["implementationStatus"]>("all");
   const deferredQuery = useDeferredValue(query);
   const inputId = useId().replace(/:/g, "");
   const suggestionList = suggestedTools.slice(0, 6);
   const filteredTools = tools.filter((tool) => {
     if (categoryFilter !== "all" && tool.category !== categoryFilter) {
-      return false;
-    }
-    if (statusFilter !== "all" && tool.implementationStatus !== statusFilter) {
       return false;
     }
     return true;
@@ -96,11 +90,9 @@ export function SearchBox({
     ).length;
   }, [deferredQuery, filteredTools]);
 
-  const visibleSuggestions =
-    suggestionList
-      .filter((tool) => (categoryFilter === "all" ? true : tool.category === categoryFilter))
-      .filter((tool) => (statusFilter === "all" ? true : tool.implementationStatus === statusFilter))
-      .slice(0, 6);
+  const visibleSuggestions = suggestionList
+    .filter((tool) => (categoryFilter === "all" ? true : tool.category === categoryFilter))
+    .slice(0, 6);
 
   const quickQueries = ["PDF", "image", "text", "JSON", "hash", "calculator"];
 
@@ -165,31 +157,6 @@ export function SearchBox({
             ))}
         </div>
       ) : null}
-      {showStatusFilter ? (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {[
-            { value: "all", label: "All statuses" },
-            { value: "working-local", label: "Working only" },
-            { value: "reduced-scope-local", label: "Reduced scope" },
-            { value: "planned-local", label: "Planned" },
-            { value: "coming-soon", label: "Coming soon" },
-          ].map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              aria-pressed={statusFilter === option.value}
-              className={`rounded-full px-3 py-2 text-sm transition ${
-                statusFilter === option.value
-                  ? "bg-[color:var(--primary)] text-white"
-                  : "border border-[color:var(--border)] text-[color:var(--muted)] hover:border-[color:var(--primary)]"
-              }`}
-              onClick={() => setStatusFilter(option.value as "all" | ToolDefinition["implementationStatus"])}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-      ) : null}
       <div className="mt-5" aria-live="polite">
         {!query ? (
           <div className="space-y-4">
@@ -238,14 +205,13 @@ export function SearchBox({
                 <ToolCard key={tool.slug} tool={tool} />
               ))}
             </div>
-            {(categoryFilter !== "all" || statusFilter !== "all" || query) && (
+            {(categoryFilter !== "all" || query) && (
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
                   onClick={() => {
                     setQuery("");
                     setCategoryFilter("all");
-                    setStatusFilter("all");
                   }}
                   className="rounded-full border border-[color:var(--border)] px-3 py-2 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)]"
                 >

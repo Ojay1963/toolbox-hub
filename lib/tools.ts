@@ -1,3 +1,4 @@
+import { normalizePublicCopy, normalizePublicList } from "@/lib/public-copy";
 import { extraToolDrafts } from "@/lib/tools-extra";
 
 export type ToolCategorySlug =
@@ -67,32 +68,33 @@ type ServiceBackedToolConfig = {
 };
 
 export const categories: CategoryDefinition[] = [
-  { slug: "image-tools", name: "Image Tools", title: "Free Online Image Tools", description: "Compress, resize, crop, convert, rotate, and prepare images with browser-first workflows.", hero: "A scalable image-tools category with practical browser-first workflows and SEO-friendly landing pages." },
-  { slug: "pdf-tools", name: "PDF Tools", title: "Free Online PDF Tools", description: "Organize, convert, protect, and optimize PDFs with practical browser-side or clearly scoped workflows.", hero: "This category is structured for lightweight PDF utilities now and deeper implementations later." },
-  { slug: "text-tools", name: "Text Tools", title: "Free Online Text Tools", description: "Count, format, sort, and clean text using focused utilities that are easy to extend.", hero: "Text tools fit especially well with the registry-first architecture because they are simple to add and scale." },
-  { slug: "developer-tools", name: "Developer Tools", title: "Free Online Developer Tools", description: "Format, minify, encode, decode, and test common developer data directly in the browser.", hero: "The developer-tools section is ready for browser-side utilities without server infrastructure or paid APIs." },
-  { slug: "generator-tools", name: "Generator Tools", title: "Free Online Generator Tools", description: "Generate passwords, QR codes, UUIDs, names, and random values from one reusable template system.", hero: "Generator tools are ideal for the shared-card and shared-metadata approach used across the site." },
-  { slug: "calculator-tools", name: "Calculator Tools", title: "Free Online Calculator Tools", description: "Handle everyday finance, health, age, date, and percentage calculations with simple interfaces.", hero: "Calculator pages are organized to stay lightweight now and accept browser-side math logic later." },
-  { slug: "converter-tools", name: "Converter Tools", title: "Free Online Converter Tools", description: "Convert measurements, temperatures, time values, and currencies with honest scope and clear labeling.", hero: "Converters are grouped under one scalable category so new conversion types can be added with minimal code churn." },
-  { slug: "internet-tools", name: "Internet Tools", title: "Free Online Internet Tools", description: "Inspect IP and DNS-related information with transparent scope boundaries for browser-only implementations.", hero: "This category is designed to surface internet utilities without pretending the browser can do more than it really can." },
+  { slug: "image-tools", name: "Image Tools", title: "Free Online Image Tools", description: "Compress, resize, crop, convert, rotate, and edit images in one place.", hero: "Explore image tools for quick edits, conversions, and downloads." },
+  { slug: "pdf-tools", name: "PDF Tools", title: "Free Online PDF Tools", description: "Merge, split, convert, protect, and organize PDF files online.", hero: "Use PDF tools for everyday file edits, conversions, and quick fixes." },
+  { slug: "text-tools", name: "Text Tools", title: "Free Online Text Tools", description: "Count, format, sort, and clean text with simple online tools.", hero: "Explore text tools for writing, cleanup, and quick edits." },
+  { slug: "developer-tools", name: "Developer Tools", title: "Free Online Developer Tools", description: "Format, encode, decode, validate, and inspect common developer data.", hero: "Use developer tools for quick formatting, testing, and debugging tasks." },
+  { slug: "generator-tools", name: "Generator Tools", title: "Free Online Generator Tools", description: "Generate passwords, QR codes, UUIDs, names, and random values.", hero: "Explore generators for quick ideas, codes, IDs, and random picks." },
+  { slug: "calculator-tools", name: "Calculator Tools", title: "Free Online Calculator Tools", description: "Calculate payments, dates, percentages, health metrics, and more.", hero: "Use calculators for everyday finance, planning, and quick math." },
+  { slug: "converter-tools", name: "Converter Tools", title: "Free Online Converter Tools", description: "Convert units, currencies, temperatures, timestamps, and more.", hero: "Use converters for fast unit, date, and file format changes." },
+  { slug: "internet-tools", name: "Internet Tools", title: "Free Online Internet Tools", description: "Check websites, DNS records, links, and other web details.", hero: "Explore internet tools for website checks, lookups, and quick tests." },
 ];
 
 function makeTool(input: ToolInput): ToolDraft {
+  const shouldNormalize = input.implementationStatus !== "coming-soon" && input.implementationStatus !== "planned-local";
   return {
     name: input.name,
     slug: input.slug,
     category: input.category,
-    shortDescription: input.shortDescription,
-    longDescription: input.longDescription,
+    shortDescription: shouldNormalize ? normalizePublicCopy(input.shortDescription) : input.shortDescription,
+    longDescription: shouldNormalize ? normalizePublicCopy(input.longDescription) : input.longDescription,
     keywords: input.keywords,
-    howToUse: input.howToUse,
+    howToUse: shouldNormalize ? normalizePublicList(input.howToUse) : input.howToUse,
     implementationStatus: input.implementationStatus,
     seoTitle: input.seoTitle,
-    seoDescription: input.seoDescription,
-    statusNote: input.statusNote,
+    seoDescription: shouldNormalize ? normalizePublicCopy(input.seoDescription) : input.seoDescription,
+    statusNote: shouldNormalize && input.statusNote ? normalizePublicCopy(input.statusNote) : input.statusNote,
     faq: [
-      { question: input.faq1, answer: input.faqAnswer1 },
-      { question: input.faq2, answer: input.faqAnswer2 },
+      { question: input.faq1, answer: shouldNormalize ? normalizePublicCopy(input.faqAnswer1) : input.faqAnswer1 },
+      { question: input.faq2, answer: shouldNormalize ? normalizePublicCopy(input.faqAnswer2) : input.faqAnswer2 },
     ],
   };
 }

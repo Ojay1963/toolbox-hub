@@ -18,12 +18,12 @@ export function Footer() {
         <div>
           <h2 className="text-xl font-bold tracking-tight">Toolbox Hub</h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
-            A clean collection of practical browser-side tools for PDFs, images, text,
-            developer workflows, calculations, generators, and converters.
+            A clean collection of free tools for PDFs, images, text, developers,
+            calculators, generators, and converters.
           </p>
           <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-            No accounts, no clutter, and no deceptive claims. Each page is built to stay fast,
-            mobile-friendly, and easy to extend as new tools are added.
+            No accounts, no clutter, and no confusing extras. Each page is built to stay fast,
+            mobile-friendly, and easy to use.
           </p>
           {siteMetadata.contactEmail ? (
             <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
@@ -85,7 +85,7 @@ export function Footer() {
       </div>
       <div className="border-t border-[color:var(--border)]/80">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-sm text-[color:var(--muted)] sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <p>Built for fast online utility, honest scope notes, and strong internal linking.</p>
+          <p>Fast online tools with clear pages and helpful links.</p>
           <Link href="/" className="transition hover:text-[color:var(--primary)]">
             Back to homepage
           </Link>

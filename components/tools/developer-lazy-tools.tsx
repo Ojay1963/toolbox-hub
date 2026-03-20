@@ -328,14 +328,13 @@ export function FileChecksumGeneratorTool() {
 
 export function KeywordDifficultyCheckerPlaceholderTool() {
   return (
-    <ToolShell title="Keyword Difficulty Checker" description="True keyword difficulty depends on live search and SERP data, so this page stays honest until a real data-backed implementation is added.">
+    <ToolShell title="Keyword Difficulty Checker" description="Check back soon for this tool.">
       <Notice>
-        Coming soon. Reliable keyword difficulty scoring usually needs external ranking data and should
-        not be guessed locally without the evidence behind it.
+        This tool is not available yet.
       </Notice>
       <EmptyState
-        title="No fake difficulty score"
-        description="A future version can add a real difficulty workflow when trustworthy live data is available. Until then, this page explains the limitation instead of inventing a misleading score."
+        title="Coming soon"
+        description="We’re still working on this tool."
       />
     </ToolShell>
   );

@@ -331,11 +331,11 @@ export function IpAddressLookupTool() {
   return (
     <ToolShell
       title="IP Address Lookup"
-      description="Inspect browser-visible network information locally. This reduced-scope tool does not claim public IP or geolocation lookups without an external service."
+      description="Check the network details available from your browser."
     >
       <Notice>
-        Reduced scope only. This page can show browser-visible network details and possible local
-        IP candidates, but it does not perform a real public-IP lookup.
+        This tool can show the network details your browser makes available, including possible local
+        IP candidates.
       </Notice>
       <button type="button" className={buttonClass} onClick={handleInspect} disabled={loading}>
         {loading ? "Inspecting browser network info..." : "Inspect browser network info"}
@@ -478,8 +478,8 @@ function StatusCheckTool({
   return (
     <ToolShell title={title} description={description}>
       <Notice>
-        Reduced scope only. Browser-based checks work only for URLs that allow cross-origin requests.
-        Many sites will block this, and blocked results are reported honestly instead of guessed.
+        Some websites block browser checks. If that happens, the tool will let you know instead of
+        showing a guessed result.
       </Notice>
       <Field label="URL to check" hint="Enter a full URL or hostname. HTTPS is added automatically when missing.">
         <input className={inputClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="https://example.com" />
@@ -531,7 +531,7 @@ export function HttpStatusCodeCheckerTool() {
   return (
     <StatusCheckTool
       title="HTTP Status Code Checker"
-      description="Check a URL status from the browser when the target site allows it. This reduced-scope version does not fake results for blocked URLs."
+      description="Check a URL response when the site allows access."
     />
   );
 }
@@ -540,7 +540,7 @@ export function UrlStatusCheckerTool() {
   return (
     <StatusCheckTool
       title="URL Status Checker"
-      description="Check reachable URL response status from the browser with honest cross-origin and visibility limits."
+      description="Check a URL response when the site allows access."
     />
   );
 }
@@ -575,10 +575,9 @@ export function UrlRedirectCheckerTool() {
   }
 
   return (
-    <ToolShell title="URL Redirect Checker" description="Inspect redirect behavior where the browser can access it. This reduced-scope version reports only what the browser is allowed to expose.">
+    <ToolShell title="URL Redirect Checker" description="Check redirect behavior for links you can access.">
       <Notice>
-        Reduced scope only. Full redirect-chain inspection usually needs a server. This page shows
-        only the redirect details the browser can genuinely access for the entered URL.
+        Some redirects may be hidden by the website or browser, so the results can vary by URL.
       </Notice>
       <Field label="URL to inspect" hint="Enter a full URL or hostname. HTTPS is added automatically when missing.">
         <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={input} onChange={(event) => setInput(event.target.value)} placeholder="https://example.com" />
@@ -636,10 +635,9 @@ export function WebpageSourceViewerTool() {
   }
 
   return (
-    <ToolShell title="Webpage Source Viewer" description="Fetch visible webpage source from the browser when the remote site allows it. This reduced-scope version does not fake blocked results.">
+    <ToolShell title="Webpage Source Viewer" description="View page source for sites you can access.">
       <Notice>
-        Reduced scope only. This tool can read remote source only when the target allows browser access.
-        Many websites block this through CORS, and blocked requests are reported honestly.
+        Some websites block source access, so this tool may not work for every URL.
       </Notice>
       <Field label="URL to fetch" hint="Enter a full URL or hostname. HTTPS is added automatically when missing.">
         <input className={inputClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="https://example.com" />
@@ -703,20 +701,16 @@ export function WebsiteScreenshotTool() {
   }
 
   return (
-    <ToolShell title="Website Screenshot Tool" description="Capture a website screenshot through a backend rendering service and review the image before downloading it.">
+    <ToolShell title="Website Screenshot Tool" description="Capture a screenshot of a website and download the image.">
       <Field label="Website URL">
         <input className={inputClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="https://example.com" />
       </Field>
-      <Notice>
-        Server-assisted rendering. If screenshot capture is not enabled for this deployment, the page will
-        show a clear unavailable message instead of a fake preview.
-      </Notice>
       <button type="button" className={buttonClass} onClick={handleCapture} disabled={!input.trim() || loading}>
         {loading ? "Capturing screenshot..." : "Capture screenshot"}
       </button>
       {error ? <Notice tone="error">{error}</Notice> : null}
       {!input.trim() ? (
-        <EmptyState title="Enter a website URL to capture it" description="The backend will request a rendered screenshot and return it as an image download when available." />
+        <EmptyState title="Enter a website URL to capture it" description="The tool will create a preview and let you download the screenshot." />
       ) : previewUrl ? (
         <div className="space-y-4">
           <div className="rounded-2xl bg-stone-50 p-4">
@@ -779,7 +773,7 @@ export function WebsiteSpeedTestTool() {
   return (
     <ToolShell
       title="Website Speed Test"
-      description="Run a backend website speed check and review real mobile performance, accessibility, best-practices, and SEO scores without faking results."
+      description="Check a website’s performance, accessibility, best practices, and SEO."
     >
       <Field
         label="Website URL"
@@ -795,12 +789,9 @@ export function WebsiteSpeedTestTool() {
         <button type="button" className={buttonClass} onClick={handleRun} disabled={!input.trim() || loading}>
           {loading ? "Running speed test..." : "Run speed test"}
         </button>
-        <Notice>
-          Server-assisted analysis powered by PageSpeed data. Results reflect the latest mobile report available to the backend.
-        </Notice>
         {error ? <Notice tone="error">{error}</Notice> : null}
         {!input.trim() ? (
-          <EmptyState title="Enter a URL to test it" description="The report includes core performance metrics plus performance, accessibility, best-practices, and SEO scores when the backend service is available." />
+          <EmptyState title="Enter a URL to test it" description="View performance, accessibility, best practices, and SEO scores for the page." />
         ) : result ? (
           <>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -866,7 +857,7 @@ export function MobileFriendlyCheckerTool() {
   return (
     <ToolShell
       title="Mobile Friendly Checker"
-      description="Check mobile-friendly signals through the backend using real page HTML inspection plus PageSpeed mobile analysis."
+      description="Check whether a page is mobile-friendly."
     >
       <Field
         label="Website URL"
@@ -882,12 +873,9 @@ export function MobileFriendlyCheckerTool() {
         <button type="button" className={buttonClass} onClick={handleCheck} disabled={!input.trim() || loading}>
           {loading ? "Checking mobile friendliness..." : "Check mobile friendliness"}
         </button>
-        <Notice>
-          Server-assisted analysis. The checker combines backend HTML inspection with PageSpeed mobile signals instead of guessing from the current browser tab.
-        </Notice>
         {error ? <Notice tone="error">{error}</Notice> : null}
         {!input.trim() ? (
-          <EmptyState title="Enter a URL to review it" description="The report checks for a viewport meta tag and combines that with mobile performance, accessibility, and SEO signals." />
+          <EmptyState title="Enter a URL to review it" description="See a simple mobile-friendly report for the page." />
         ) : result ? (
           <>
             <OutputBlock title="Verdict" value={result.verdict} multiline={false} />
