@@ -14,7 +14,7 @@ export default function DisclaimerPage() {
     <StaticPage
       eyebrow="Trust"
       title="Disclaimer"
-      intro="Toolbox Hub provides practical free online tools, but tool output should be reviewed carefully before it is used in high-stakes, professional, or compliance-sensitive situations."
+      intro="Toolbox Hub provides practical free online tools, but important results should always be reviewed carefully before they are used in formal, professional, or high-stakes situations."
       sections={[
         {
           title: "General Information Only",
@@ -26,15 +26,15 @@ export default function DisclaimerPage() {
         {
           title: "No Guarantee of Completeness",
           paragraphs: [
-            "Some tools depend on device support, simplified processing, or third-party services. That means results may vary by browser, device, file structure, service availability, or the quality of the input data.",
+            "Some tools depend on browser support, simplified processing, or outside services. That means results may vary by device, file structure, service availability, or the quality of the input data.",
             "Some tools may simplify layout, formatting, metadata, or website checks, so you should review important outputs carefully.",
           ],
         },
         {
-          title: "Third-Party Dependencies",
+          title: "Outside Services",
           paragraphs: [
             "Certain tools may rely on outside providers for exchange rates, OCR, website analysis, screenshots, document workflows, or image processing. Those providers can fail, rate limit requests, return delayed data, or change behavior independently of the site.",
-            "When a provider is unavailable, the site should show an honest message instead of pretending to return a successful result.",
+            "When a provider is unavailable, Toolbox Hub may pause that feature or show that the page is temporarily unavailable.",
           ],
         },
         {

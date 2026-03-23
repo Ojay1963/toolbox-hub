@@ -65,10 +65,12 @@ export default async function ToolDetailPage({
   if (isAliasToolSlug(tool.slug)) {
     permanentRedirect(`/tools/${getCanonicalToolSlug(tool.slug)}`);
   }
+  const shouldIndex = shouldIndexTool(tool);
 
   const relatedTools = tool.relatedToolSlugs
     .map((slug) => getTool(slug))
-    .filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate));
+    .filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate))
+    .filter((candidate) => shouldIndexTool(candidate));
   const categoryPopularTools = getPopularTools(4, tool.category).filter((item) => item.slug !== tool.slug);
   const categoryRecentTools = getRecentTools(4, tool.category).filter((item) => item.slug !== tool.slug);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
@@ -76,24 +78,30 @@ export default async function ToolDetailPage({
     { name: tool.category.replace(/-/g, " "), pathname: `/category/${tool.category}` },
     { name: tool.name, pathname: `/tools/${tool.slug}` },
   ]);
-  const faqJsonLd = buildFaqJsonLd(
-    tool.faq.map((item) => ({
-      question: item.question,
-      answer: item.answer,
-    })),
-  );
-  const howToJsonLd = buildHowToJsonLd(
-    `How to use ${tool.name}`,
-    tool.seoDescription,
-    tool.howToUse,
-    `/tools/${tool.slug}`,
-  );
-  const softwareJsonLd = buildSoftwareApplicationJsonLd({
-    name: tool.name,
-    description: tool.seoDescription,
-    pathname: `/tools/${tool.slug}`,
-    category: "UtilityApplication",
-  });
+  const faqJsonLd = shouldIndex
+    ? buildFaqJsonLd(
+      tool.faq.map((item) => ({
+        question: item.question,
+        answer: item.answer,
+      })),
+    )
+    : null;
+  const howToJsonLd = shouldIndex
+    ? buildHowToJsonLd(
+      `How to use ${tool.name}`,
+      tool.seoDescription,
+      tool.howToUse,
+      `/tools/${tool.slug}`,
+    )
+    : null;
+  const softwareJsonLd = shouldIndex
+    ? buildSoftwareApplicationJsonLd({
+      name: tool.name,
+      description: tool.seoDescription,
+      pathname: `/tools/${tool.slug}`,
+      category: "UtilityApplication",
+    })
+    : null;
 
   return (
     <>
@@ -101,18 +109,24 @@ export default async function ToolDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
-      />
+      {faqJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      ) : null}
+      {howToJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
+        />
+      ) : null}
+      {softwareJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
+        />
+      ) : null}
       <ToolPage
         tool={tool}
         relatedTools={relatedTools}

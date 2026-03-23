@@ -1002,6 +1002,551 @@ export const blogArticles: BlogArticle[] = [
     ],
     relatedToolSlugs: ["website-speed-test", "mobile-friendly-checker", "website-screenshot-tool", "dns-lookup"],
   },
+  {
+    slug: "how-to-convert-jpg-to-png-online",
+    title: "How to Convert JPG to PNG Online",
+    description:
+      "Learn how to convert JPG to PNG online, when PNG is the better choice, and what to expect before you save the new file.",
+    h1: "How to Convert JPG to PNG Online",
+    intro:
+      "Converting JPG to PNG is useful when you need a file that fits a different workflow than a typical photo. JPG is great for smaller photo files, but PNG can be a better choice when you want cleaner editing, sharper graphics, or a format that works more smoothly in design tools and publishing tasks. The conversion itself is easy, but it helps to know why you are changing formats before you do it. For example, a store owner might convert a product image before adding labels, a student might switch a screenshot into PNG before marking it up, and a site editor might save a graphic in a format that is easier to reuse later. The main benefit is not magically improving an old image. It is creating a version that suits your next step better.",
+    primaryKeyword: "how to convert jpg to png online",
+    sections: [
+      {
+        title: "When JPG to PNG makes sense",
+        content: (
+          <>
+            <p>
+              JPG is often the right format for photos because it keeps file size lower, but PNG can be more
+              practical when you want to edit an image again, preserve cleaner text edges, or use a format
+              that some design workflows prefer.
+            </p>
+            <p>
+              The{" "}
+              <Link href="/tools/jpg-to-png-converter" className="font-semibold text-[color:var(--primary)]">
+                JPG to PNG Converter
+              </Link>{" "}
+              is a good fit when your goal is format compatibility rather than smaller size.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "Simple steps to convert the file",
+        content: (
+          <>
+            <h3 className="text-lg font-bold tracking-tight text-[color:var(--foreground)]">1. Upload the JPG</h3>
+            <p>Choose the photo, screenshot, or graphic you want to save as PNG.</p>
+            <h3 className="mt-5 text-lg font-bold tracking-tight text-[color:var(--foreground)]">2. Convert it to PNG</h3>
+            <p>Create the PNG copy and check that the image still looks right for your next task.</p>
+            <h3 className="mt-5 text-lg font-bold tracking-tight text-[color:var(--foreground)]">3. Download the result</h3>
+            <p>Save the PNG and keep the original JPG if you may still need the smaller version later.</p>
+          </>
+        ),
+      },
+      {
+        title: "What conversion does and does not change",
+        content: (
+          <>
+            <p>
+              Converting JPG to PNG changes the file format, but it does not restore detail that was already
+              lost in the original JPG. If the source image looks soft or compressed, the PNG will usually
+              keep that same appearance.
+            </p>
+            <p>
+              If the file feels too large after conversion, use{" "}
+              <Link href="/tools/image-compressor" className="font-semibold text-[color:var(--primary)]">
+                Image Compressor
+              </Link>{" "}
+              or switch to{" "}
+              <Link href="/tools/image-to-webp-converter" className="font-semibold text-[color:var(--primary)]">
+                Image to WebP Converter
+              </Link>{" "}
+              for a lighter web-friendly version.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "Useful examples and next steps",
+        content: (
+          <>
+            <p>
+              A common example is turning a JPG screenshot into PNG before adding notes in an editor. Another
+              is converting a product image into PNG so it is easier to reuse in promotional graphics.
+            </p>
+            <p>
+              If you need to trim the framing first, visit{" "}
+              <Link href="/tools/crop-image" className="font-semibold text-[color:var(--primary)]">
+                Crop Image
+              </Link>
+              . If you later need the opposite format for smaller photo files, use{" "}
+              <Link href="/tools/png-to-jpg-converter" className="font-semibold text-[color:var(--primary)]">
+                PNG to JPG Converter
+              </Link>
+              .
+            </p>
+          </>
+        ),
+      },
+    ],
+    faq: [
+      {
+        question: "Why would I convert JPG to PNG online?",
+        answer: "People usually do it when they want a PNG copy for editing, cleaner graphics workflows, or format compatibility rather than a smaller file.",
+      },
+      {
+        question: "Will converting JPG to PNG improve image quality?",
+        answer: "No. It changes the format, but it does not bring back detail that was already lost in the JPG.",
+      },
+      {
+        question: "Is PNG always better than JPG?",
+        answer: "Not always. PNG can be more useful for some graphics and editing tasks, while JPG is often better for smaller photo files.",
+      },
+      {
+        question: "What should I use after converting JPG to PNG?",
+        answer: "Crop Image, Image Compressor, or PNG to JPG Converter are common next steps depending on whether you need editing, smaller size, or another format.",
+      },
+    ],
+    relatedToolSlugs: ["jpg-to-png-converter", "png-to-jpg-converter", "crop-image", "image-compressor"],
+  },
+  {
+    slug: "how-to-reduce-image-size-for-websites",
+    title: "How to Reduce Image Size for Websites",
+    description:
+      "Learn how to reduce image size for websites so pages load faster without making product photos, blog images, or graphics look poor.",
+    h1: "How to Reduce Image Size for Websites",
+    intro:
+      "Large images are one of the most common reasons a page feels slower than it should. Reducing image size for websites helps pages load faster, keeps uploads manageable, and makes browsing smoother on phones and slower connections. The best approach is not only about heavy compression. In many cases, the cleanest result comes from combining the right dimensions, the right file type, and a sensible compression level. For example, a blog image may only need a smaller width than the original photo, a product picture may need lighter compression than a background image, and a banner may work better in WebP than in an older format. If you handle those choices well, you can keep the image looking clear while removing a surprising amount of weight. That makes the page easier to use without sacrificing the visual part that matters.",
+    primaryKeyword: "how to reduce image size for websites",
+    sections: [
+      {
+        title: "Resize before you compress",
+        content: (
+          <>
+            <p>
+              Many website images are larger than they need to be. If an uploaded photo is 3000 pixels wide
+              but the page only shows it at 1200 pixels, resizing first often removes more unnecessary weight
+              than compression alone.
+            </p>
+            <p>
+              Use{" "}
+              <Link href="/tools/image-resizer" className="font-semibold text-[color:var(--primary)]">
+                Image Resizer
+              </Link>{" "}
+              to match the dimensions to the actual layout before you worry about file size.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "Choose the right format for the page",
+        content: (
+          <>
+            <p>
+              Photos often work well as JPG or WebP, while graphics with sharper edges may work better in PNG.
+              Picking the right format can reduce file size without over-compressing the image itself.
+            </p>
+            <p>
+              If you want a more web-focused format, try{" "}
+              <Link href="/tools/image-to-webp-converter" className="font-semibold text-[color:var(--primary)]">
+                Image to WebP Converter
+              </Link>
+              . If you need a different graphics format,{" "}
+              <Link href="/tools/jpg-to-png-converter" className="font-semibold text-[color:var(--primary)]">
+                JPG to PNG Converter
+              </Link>{" "}
+              can help.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "Compress in small steps",
+        content: (
+          <>
+            <p>
+              Once the dimensions and format are right, compress the image gently and compare the result. It
+              is better to lower the file size in small steps than to push quality down until the page looks
+              cheap or blurry.
+            </p>
+            <p>
+              The{" "}
+              <Link href="/tools/image-compressor" className="font-semibold text-[color:var(--primary)]">
+                Image Compressor
+              </Link>{" "}
+              is the easiest next step when the image still feels too heavy after resizing.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "Practical examples for common pages",
+        content: (
+          <>
+            <p>
+              A blog banner might be resized first, then lightly compressed. A product photo might need a
+              balance between visible detail and faster loading. A screenshot for a help page may need clean
+              text edges, which means the format choice matters as much as compression.
+            </p>
+            <p>
+              If a test page still feels slow after image cleanup, the{" "}
+              <Link href="/tools/website-speed-test" className="font-semibold text-[color:var(--primary)]">
+                Website Speed Test
+              </Link>{" "}
+              can help you review performance from the page side too.
+            </p>
+          </>
+        ),
+      },
+    ],
+    faq: [
+      {
+        question: "What is the best way to reduce image size for a website?",
+        answer: "Start by resizing the image to the dimensions you actually need, then choose the right format and apply light compression if the file is still too large.",
+      },
+      {
+        question: "Should I resize or compress first?",
+        answer: "Resize first when the dimensions are larger than needed. Compress after that if you still want a lighter file.",
+      },
+      {
+        question: "Does changing the format help reduce image size?",
+        answer: "Yes. A better-suited format such as WebP or JPG can reduce file size depending on the image and how it will be used.",
+      },
+      {
+        question: "Which tools should I use together for website images?",
+        answer: "Image Resizer, Image Compressor, and Image to WebP Converter are a strong combination for many website image workflows.",
+      },
+    ],
+    relatedToolSlugs: ["image-compressor", "image-resizer", "image-to-webp-converter", "website-speed-test"],
+  },
+  {
+    slug: "what-is-json-and-why-use-a-json-formatter",
+    title: "What Is JSON and Why Use a JSON Formatter?",
+    description:
+      "Learn what JSON is, why people use it to share structured data, and how a JSON formatter makes it easier to read, validate, and fix.",
+    h1: "What Is JSON and Why Use a JSON Formatter?",
+    intro:
+      "JSON is a simple text format used to store and share structured information. You might see it in app settings, exported data, API responses, product feeds, or copied snippets from online services. At a glance, JSON can look confusing because it uses braces, brackets, keys, and values in a format that is easy for computers to process but not always easy for people to read. That is where a JSON formatter helps. It turns compact or messy JSON into a cleaner layout so you can scan the structure, spot missing commas or quotes, and understand what is actually in the data. For someone reviewing a webhook payload, checking a copied settings file, or preparing sample data for a teammate, that can save a lot of time. A formatter does not change the meaning of the data. It just makes the structure easier to understand and work with.",
+    primaryKeyword: "what is json and why use a json formatter",
+    sections: [
+      {
+        title: "What JSON is in plain language",
+        content: (
+          <>
+            <p>
+              JSON is a way to organize information as text. It usually stores items as key-and-value pairs,
+              lists, and nested groups so apps and services can exchange data in a predictable format.
+            </p>
+            <p>
+              You do not need to be technical to benefit from it. If you have ever copied structured data from
+              a service, export, or settings page, you have likely seen JSON already.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "Why a JSON formatter is useful",
+        content: (
+          <>
+            <p>
+              Compact JSON often appears as one long block of text. A formatter adds spacing and indentation
+              so each object, list, and value is easier to follow.
+            </p>
+            <p>
+              The{" "}
+              <Link href="/tools/json-formatter" className="font-semibold text-[color:var(--primary)]">
+                JSON Formatter
+              </Link>{" "}
+              is helpful when you want readable output and a quick way to spot structure problems before using
+              the data elsewhere.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "A simple example",
+        content: (
+          <>
+            <p>
+              Imagine you copy a one-line response that contains a customer name, order number, and list of
+              items. In raw form, it may be hard to scan. After formatting, each part becomes easier to read,
+              which makes mistakes easier to catch.
+            </p>
+            <p>
+              If you need to keep working with the data afterward,{" "}
+              <Link href="/tools/json-to-csv-converter" className="font-semibold text-[color:var(--primary)]">
+                JSON to CSV Converter
+              </Link>{" "}
+              and{" "}
+              <Link href="/tools/csv-to-json-converter" className="font-semibold text-[color:var(--primary)]">
+                CSV to JSON Converter
+              </Link>{" "}
+              are useful follow-up tools.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "How it differs from schema validation",
+        content: (
+          <>
+            <p>
+              Formatting makes JSON readable. Schema validation goes further by checking whether the data fits
+              a defined set of rules, such as required fields or expected value types.
+            </p>
+            <p>
+              If you need that extra check, use{" "}
+              <Link href="/tools/json-schema-validator" className="font-semibold text-[color:var(--primary)]">
+                JSON Schema Validator
+              </Link>{" "}
+              after the structure is already easy to read.
+            </p>
+          </>
+        ),
+      },
+    ],
+    faq: [
+      {
+        question: "What is JSON used for?",
+        answer: "JSON is commonly used to store and share structured data in settings files, exports, app responses, and many other everyday workflows.",
+      },
+      {
+        question: "Why should I use a JSON formatter?",
+        answer: "A JSON formatter makes messy or compact JSON easier to read and can help you catch problems faster.",
+      },
+      {
+        question: "Does a JSON formatter change the data?",
+        answer: "No. It changes the layout so the structure is easier to inspect, but it does not change the meaning of the data.",
+      },
+      {
+        question: "When do I need JSON Schema Validator instead?",
+        answer: "Use it when you want to check whether the JSON follows a defined structure or set of required rules, not just whether it is readable.",
+      },
+    ],
+    relatedToolSlugs: ["json-formatter", "json-schema-validator", "json-to-csv-converter", "csv-to-json-converter"],
+  },
+  {
+    slug: "how-to-split-pdf-pages-online",
+    title: "How to Split PDF Pages Online",
+    description:
+      "Learn how to split PDF pages online so you can separate long documents, save specific page ranges, and keep only the parts you need.",
+    h1: "How to Split PDF Pages Online",
+    intro:
+      "Splitting PDF pages is useful when one file contains more than you want to share, print, or save. Instead of sending a full handbook, report, scan, or contract, you can separate only the pages that matter and work with a smaller file. That makes everyday document tasks much easier. A student might save just one chapter from a long PDF, an office worker might pull out a signed page from a document packet, and a business owner might separate invoices before filing them. It is also a good cleanup step before merging files again in a better order or compressing the final version for email. The main advantage is control. You do not have to keep every page tied to the original document when only part of it is useful for the next step.",
+    primaryKeyword: "how to split pdf pages online",
+    sections: [
+      {
+        title: "When splitting a PDF helps most",
+        content: (
+          <>
+            <p>
+              PDF splitting is helpful when a file contains extra pages, mixed topics, or one small section
+              you want to send separately. It is often faster than trying to rebuild the document from
+              scratch.
+            </p>
+            <p>
+              The{" "}
+              <Link href="/tools/pdf-split" className="font-semibold text-[color:var(--primary)]">
+                PDF Split
+              </Link>{" "}
+              tool is ideal when your goal is to isolate a page range or break a long file into smaller parts.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "How to split PDF pages step by step",
+        content: (
+          <>
+            <h3 className="text-lg font-bold tracking-tight text-[color:var(--foreground)]">1. Upload the PDF</h3>
+            <p>Choose the document that includes the pages you want to separate.</p>
+            <h3 className="mt-5 text-lg font-bold tracking-tight text-[color:var(--foreground)]">2. Pick the pages or range</h3>
+            <p>Select the exact pages you want as separate files or choose a range to keep together.</p>
+            <h3 className="mt-5 text-lg font-bold tracking-tight text-[color:var(--foreground)]">3. Download the result</h3>
+            <p>Save the new files and keep the original PDF if you may need it later.</p>
+          </>
+        ),
+      },
+      {
+        title: "Examples of useful PDF splitting",
+        content: (
+          <>
+            <p>
+              You might split a training manual into chapter files, separate one receipt from a month-end PDF,
+              or extract only the signature page from a contract packet.
+            </p>
+            <p>
+              If you later want to combine selected parts in a fresh order,{" "}
+              <Link href="/tools/pdf-merge" className="font-semibold text-[color:var(--primary)]">
+                PDF Merge
+              </Link>{" "}
+              is the natural next step.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "What to do after splitting",
+        content: (
+          <>
+            <p>
+              Once the file is trimmed to the pages you actually need, you may want to compress it for easier
+              sharing or convert it into another format for editing or image use.
+            </p>
+            <p>
+              Try{" "}
+              <Link href="/tools/pdf-compressor" className="font-semibold text-[color:var(--primary)]">
+                PDF Compressor
+              </Link>{" "}
+              if the new file is still large, or{" "}
+              <Link href="/tools/pdf-to-jpg" className="font-semibold text-[color:var(--primary)]">
+                PDF to JPG
+              </Link>{" "}
+              if you need pages as images instead.
+            </p>
+          </>
+        ),
+      },
+    ],
+    faq: [
+      {
+        question: "How do I split PDF pages online?",
+        answer: "Upload the PDF, choose the pages or page range you want, and download the separated files.",
+      },
+      {
+        question: "When is splitting better than merging?",
+        answer: "Splitting is better when you want to remove extra pages or isolate only part of a document. Merging is for combining files afterward.",
+      },
+      {
+        question: "Can splitting a PDF make it easier to share?",
+        answer: "Yes. Smaller files are often easier to email, upload, organize, and review than a full document with unrelated pages.",
+      },
+      {
+        question: "What tools should I use after splitting a PDF?",
+        answer: "PDF Merge, PDF Compressor, and PDF to JPG are common follow-up tools depending on whether you want to reorder, reduce size, or convert the output.",
+      },
+    ],
+    relatedToolSlugs: ["pdf-split", "pdf-merge", "pdf-compressor", "pdf-to-jpg"],
+  },
+  {
+    slug: "best-free-developer-tools-online",
+    title: "Best Free Developer Tools Online",
+    description:
+      "See the best free developer tools online for formatting data, checking text differences, creating IDs, and handling everyday web tasks more quickly.",
+    h1: "Best Free Developer Tools Online",
+    intro:
+      "A good set of free developer tools can save time on the small tasks that appear all day long. You may need to clean JSON, compare two versions of text, generate sample IDs, convert copied data, or write a quick Markdown draft without opening a full editor. These jobs are not always complicated, but they interrupt flow when the right tool is hard to find. A focused online collection helps because each page is built for one practical task. Instead of using a heavy app or searching through menus, you can open the exact tool, finish the job, and move on. The most useful developer tools are usually the simple ones you return to often. They help with debugging, content preparation, data cleanup, and lightweight formatting without adding extra friction to the day.",
+    primaryKeyword: "best free developer tools online",
+    sections: [
+      {
+        title: "Best tools for JSON and data cleanup",
+        content: (
+          <>
+            <p>
+              Start with{" "}
+              <Link href="/tools/json-formatter" className="font-semibold text-[color:var(--primary)]">
+                JSON Formatter
+              </Link>{" "}
+              when you need readable JSON, quick validation, or a better view of copied data. If the next step
+              is conversion,{" "}
+              <Link href="/tools/json-to-csv-converter" className="font-semibold text-[color:var(--primary)]">
+                JSON to CSV Converter
+              </Link>{" "}
+              and{" "}
+              <Link href="/tools/csv-to-json-converter" className="font-semibold text-[color:var(--primary)]">
+                CSV to JSON Converter
+              </Link>{" "}
+              help with moving between formats.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "Best tools for writing and comparing content",
+        content: (
+          <>
+            <p>
+              Use{" "}
+              <Link href="/tools/markdown-editor" className="font-semibold text-[color:var(--primary)]">
+                Markdown Editor
+              </Link>{" "}
+              for drafting clean formatted text with a live preview. When you need to check what changed
+              between two drafts,{" "}
+              <Link href="/tools/text-compare-tool" className="font-semibold text-[color:var(--primary)]">
+                Text Compare Tool
+              </Link>{" "}
+              is more useful than reading both versions line by line.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "Best tools for quick values and encoded text",
+        content: (
+          <>
+            <p>
+              If you need sample IDs,{" "}
+              <Link href="/tools/uuid-generator" className="font-semibold text-[color:var(--primary)]">
+                UUID Generator
+              </Link>{" "}
+              is a fast option. For copied strings and link-safe text,{" "}
+              <Link href="/tools/base64-encoder" className="font-semibold text-[color:var(--primary)]">
+                Base64 Encoder
+              </Link>
+              ,{" "}
+              <Link href="/tools/base64-decoder" className="font-semibold text-[color:var(--primary)]">
+                Base64 Decoder
+              </Link>
+              , and{" "}
+              <Link href="/tools/url-encoder" className="font-semibold text-[color:var(--primary)]">
+                URL Encoder
+              </Link>{" "}
+              cover common everyday tasks.
+            </p>
+          </>
+        ),
+      },
+      {
+        title: "How to pick the right one quickly",
+        content: (
+          <>
+            <p>
+              Ask what kind of problem you actually have. If the issue is structure, start with JSON Formatter.
+              If the issue is wording or revision, use Markdown Editor or Text Compare Tool. If the issue is
+              values and pasted strings, use UUID or encoding tools.
+            </p>
+            <p>
+              For a broader view of nearby utilities, browse the{" "}
+              <Link href="/category/developer-tools" className="font-semibold text-[color:var(--primary)]">
+                Developer Tools category
+              </Link>
+              .
+            </p>
+          </>
+        ),
+      },
+    ],
+    faq: [
+      {
+        question: "What are the best free developer tools online for everyday use?",
+        answer: "JSON Formatter, Markdown Editor, Text Compare Tool, UUID Generator, and simple encoding tools are some of the most useful everyday options.",
+      },
+      {
+        question: "Which developer tool should I open first?",
+        answer: "Pick the tool based on the exact problem: data formatting, draft comparison, writing, ID generation, or encoded text cleanup.",
+      },
+      {
+        question: "Are simple online developer tools still useful if I use full apps too?",
+        answer: "Yes. They are helpful for quick one-off tasks when you want to solve a small problem fast without leaving your current workflow for long.",
+      },
+      {
+        question: "Where can I find more developer tools on the site?",
+        answer: "Visit the Developer Tools category page to browse more tools for formatting, conversion, and everyday cleanup tasks.",
+      },
+    ],
+    relatedToolSlugs: ["json-formatter", "markdown-editor", "text-compare-tool", "uuid-generator", "url-encoder"],
+  },
 ];
 
 export function getBlogArticle(slug: string) {

@@ -14,33 +14,33 @@ export default function AboutPage() {
     <StaticPage
       eyebrow="About"
       title="About Toolbox Hub"
-      intro="Toolbox Hub is a free online tools website built to make common tasks simple. Open a tool, use it quickly, and move on."
+      intro="Toolbox Hub is a public website that brings together practical online tools for everyday tasks. The goal is simple: make common jobs easier to finish with clear pages, straightforward instructions, and useful related links."
       sections={[
         {
-          title: "What the Site Tries to Do Well",
+          title: "What Toolbox Hub Offers",
           paragraphs: [
-            "The site focuses on practical utility across PDFs, images, text, developer workflows, generators, calculators, converters, and internet tools. The goal is not to overwhelm people with gimmicks, but to make common tasks easier to complete quickly.",
-            "The goal is to keep tools easy to use, fast to open, and clear about what you can expect.",
+            "Toolbox Hub covers practical tasks across PDFs, images, text, web and data workflows, generators, calculators, converters, and related utility pages.",
+            "The site is built for people who want a straightforward tool page, clear steps, and a quick result without hunting through menus or creating an account first.",
           ],
           bullets: [
-            "Fast pages with a shared structure",
-            "Clear how-to steps, FAQ sections, and related tools",
-            "Simple tool pages with clear instructions",
+            "Clear tool pages with simple how-to steps",
+            "Helpful FAQs and related tool links",
             "Mobile-friendly navigation and category browsing",
+            "Guides and support pages that are easy to find",
           ],
         },
         {
           title: "How the Site Is Organized",
           paragraphs: [
-            "Tools are grouped into clear categories so it is easy to find similar options.",
-            "Each tool page includes the tool itself, simple steps, common questions, and related links.",
+            "Tools are grouped into categories so it is easier to find similar options without searching the whole site every time.",
+            "Each tool page is designed to explain what the tool does, how to use it, and where to go next if a related task would be more useful.",
           ],
         },
         {
-          title: "What the Site Does Not Promise",
+          title: "What You Can Expect",
           paragraphs: [
-            "Toolbox Hub is made for quick everyday tasks, not specialist professional work.",
-            "For important documents or high-stakes decisions, it is still a good idea to review the results carefully.",
+            "Toolbox Hub is built to be useful, clear, and easy to navigate, but it is still wise to review important files and results before relying on them for formal or high-stakes use.",
+            "The site keeps its language and page structure simple so visitors can quickly understand the purpose of each tool and decide whether it fits the task.",
           ],
         },
         {
@@ -48,6 +48,13 @@ export default function AboutPage() {
           paragraphs: [
             "The site is useful for students, creators, developers, small teams, marketers, and everyday users who need a quick browser-accessible tool for formatting, converting, generating, checking, or inspecting common content.",
             "It is especially useful when you want a straightforward utility without creating an account or installing a large desktop app first.",
+          ],
+        },
+        {
+          title: "Questions or Feedback",
+          paragraphs: [
+            "If you need to report a problem, ask a site-related question, or reach out about accessibility, privacy, or business matters, use the public contact details on the contact page.",
+            "You can also review the privacy policy, terms of use, and disclaimer pages for more information about how the site is run and what to expect from its tools.",
           ],
         },
       ]}

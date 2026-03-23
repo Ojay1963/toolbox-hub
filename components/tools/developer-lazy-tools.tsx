@@ -328,13 +328,13 @@ export function FileChecksumGeneratorTool() {
 
 export function KeywordDifficultyCheckerPlaceholderTool() {
   return (
-    <ToolShell title="Keyword Difficulty Checker" description="Check back soon for this tool.">
+    <ToolShell title="Keyword Difficulty Checker" description="This page stays simple because the tool is not active on this site right now.">
       <Notice>
-        This tool is not available yet.
+        This tool is not available right now.
       </Notice>
       <EmptyState
-        title="Coming soon"
-        description="We’re still working on this tool."
+        title="Unavailable"
+        description="This tool is not active on this site right now."
       />
     </ToolShell>
   );

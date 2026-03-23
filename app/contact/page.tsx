@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { buildMetadata, siteMetadata } from "@/lib/seo";
+import { buildMetadata, getPublicContactEmail } from "@/lib/seo";
 
 export const metadata = buildMetadata({
   title: "Contact",
@@ -18,7 +18,7 @@ const contactTopics = [
 ];
 
 export default function ContactPage() {
-  const contactEmail = siteMetadata.contactEmail;
+  const contactEmail = getPublicContactEmail();
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
@@ -28,9 +28,9 @@ export default function ContactPage() {
         </p>
         <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Contact Toolbox Hub</h1>
         <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
-          Use this page to contact Toolbox Hub about broken tools, accessibility issues, privacy questions,
+          Use this page to contact Toolbox Hub about tool issues, accessibility questions, privacy requests,
           business inquiries, or legal notices. Including the tool name, page URL, browser, and a short
-          description of the issue will help us investigate more quickly.
+          description of the issue helps us review the message more quickly.
         </p>
       </section>
 
@@ -45,33 +45,34 @@ export default function ContactPage() {
             ))}
           </ul>
           <p className="mt-5 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-            If you report a problem, include the tool name, the page URL, the browser/device used,
-            and a short explanation of what happened. That makes it much easier to reproduce and fix
-            the issue.
+            If you report a problem, include the tool name, the page URL, the browser or device used,
+            and a short explanation of what happened. That makes it easier to review the issue and respond
+            with the right next step.
           </p>
         </section>
 
         <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8">
           <h2 className="text-2xl font-black tracking-tight">Contact details</h2>
           <div className="mt-4 space-y-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
-            {contactEmail ? (
-              <p>
-                Email:{" "}
+            <p>
+              Email:{" "}
+              {contactEmail ? (
                 <a
                   href={`mailto:${contactEmail}`}
                   className="font-semibold text-[color:var(--primary)] underline-offset-4 hover:underline"
                 >
                   {contactEmail}
                 </a>
-              </p>
-            ) : (
-              <p>
-                Support, business, privacy, and legal requests are handled by email.
-              </p>
-            )}
+              ) : (
+                <span className="font-semibold text-[color:var(--foreground)]">Contact email unavailable</span>
+              )}
+            </p>
             <p>
-              Response times can vary depending on request volume and the type of issue, but accessibility,
-              security, abuse, and legal reports should include enough context for prompt triage.
+              Response times vary, but messages with clear details are easier to review and answer quickly.
+            </p>
+            <p>
+              For general site information, you can also review the About, Privacy Policy, Terms of Use, and
+              Disclaimer pages linked below.
             </p>
           </div>
           <div className="mt-6 rounded-3xl bg-stone-50 p-5">

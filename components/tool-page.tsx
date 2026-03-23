@@ -4,7 +4,7 @@ import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { FaqList } from "@/components/ui/faq-list";
 import { RelatedTools } from "@/components/ui/related-tools";
 import { Section } from "@/components/ui/section";
-import { type ToolDefinition } from "@/lib/tools";
+import { shouldIndexTool, type ToolDefinition } from "@/lib/tools";
 
 export function ToolPage({
   tool,
@@ -18,7 +18,11 @@ export function ToolPage({
   categoryRecentTools: ToolDefinition[];
 }) {
   const categoryLabel = tool.category.replace(/-/g, " ");
+  const isPubliclyActive = shouldIndexTool(tool);
   const primaryRelatedTools = relatedTools.slice(0, 3);
+  const visiblePeopleAlsoSearchFor = tool.peopleAlsoSearchFor.filter(
+    (item) => !item.href || shouldIndexTool(item.href.replace("/tools/", "")),
+  );
   return (
     <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
       <div className="space-y-8">
@@ -45,7 +49,7 @@ export function ToolPage({
           </p>
           <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">{tool.name}</h1>
           <p className="mt-4 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
-            {tool.longDescription}
+            {isPubliclyActive ? tool.longDescription : tool.shortDescription}
           </p>
           {primaryRelatedTools.length ? (
             <p className="mt-4 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
@@ -66,43 +70,71 @@ export function ToolPage({
           </div>
         </section>
 
-        <Section title={`About ${tool.name}`}>
-          <p>{tool.longDescription}</p>
-          <p>
-            You can also explore{" "}
-            <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
-              {categoryLabel}
-            </Link>{" "}
-            for similar tools in the same category.
-          </p>
-          {relatedTools.length ? (
+        {isPubliclyActive ? (
+          <>
+            <Section title={`About ${tool.name}`}>
+              <p>{tool.longDescription}</p>
+              <p>
+                You can also explore{" "}
+                <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
+                  {categoryLabel}
+                </Link>{" "}
+                for similar tools in the same category.
+              </p>
+              {relatedTools.length ? (
+                <p>
+                  If you need a slightly different result, try{" "}
+                  {relatedTools.map((item, index) => (
+                    <span key={item.slug}>
+                      {index > 0 ? (index === relatedTools.length - 1 ? ", and " : ", ") : ""}
+                      <Link href={`/tools/${item.slug}`} className="font-semibold text-[color:var(--primary)]">
+                        {item.name}
+                      </Link>
+                    </span>
+                  ))}
+                  .
+                </p>
+              ) : null}
+            </Section>
+
+            <Section title={`How to use ${tool.name.toLowerCase()}`}>
+              <ol className="space-y-3 pl-5">
+                {tool.howToUse.map((step) => (
+                  <li key={step}>{step}</li>
+                ))}
+              </ol>
+            </Section>
+          </>
+        ) : (
+          <Section title="Try a working alternative">
             <p>
-              If you need a slightly different result, try{" "}
-              {relatedTools.map((item, index) => (
-                <span key={item.slug}>
-                  {index > 0 ? (index === relatedTools.length - 1 ? ", and " : ", ") : ""}
-                  <Link href={`/tools/${item.slug}`} className="font-semibold text-[color:var(--primary)]">
-                    {item.name}
-                  </Link>
-                </span>
-              ))}
-              .
+              This page is not being promoted right now. You can still browse the{" "}
+              <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
+                {categoryLabel}
+              </Link>{" "}
+              section for tools that are ready to use today.
             </p>
-          ) : null}
-        </Section>
+            {relatedTools.length ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                {relatedTools.slice(0, 4).map((item) => (
+                  <Link
+                    key={`alternative-${item.slug}`}
+                    href={`/tools/${item.slug}`}
+                    className="rounded-2xl border border-[color:var(--border)] bg-stone-50 px-4 py-4 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
+                  >
+                    <span className="block font-semibold text-[color:var(--foreground)]">{item.name}</span>
+                    <span className="mt-1 block leading-6">{item.shortDescription}</span>
+                  </Link>
+                ))}
+              </div>
+            ) : null}
+          </Section>
+        )}
 
-        <Section title={`How to use ${tool.name.toLowerCase()}`}>
-          <ol className="space-y-3 pl-5">
-            {tool.howToUse.map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
-        </Section>
-
-        {tool.peopleAlsoSearchFor.length ? (
+        {visiblePeopleAlsoSearchFor.length ? (
           <Section title="People also search for">
             <div className="flex flex-wrap gap-3">
-              {tool.peopleAlsoSearchFor.map((item) =>
+              {visiblePeopleAlsoSearchFor.map((item) =>
                 item.href ? (
                   <Link
                     key={`${item.phrase}-${item.href}`}
@@ -124,9 +156,11 @@ export function ToolPage({
           </Section>
         ) : null}
 
-        <Section title={`${tool.name} FAQs`}>
-          <FaqList items={tool.faq} />
-        </Section>
+        {isPubliclyActive ? (
+          <Section title={`${tool.name} FAQs`}>
+            <FaqList items={tool.faq} />
+          </Section>
+        ) : null}
 
         <Section title={`Related ${categoryLabel}`}>
           <RelatedTools tools={relatedTools} />
@@ -163,7 +197,9 @@ export function ToolPage({
         />
         <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
           <h2 className="text-lg font-bold tracking-tight">Quick notes</h2>
-          <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">{tool.shortDescription}</p>
+          <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+            {isPubliclyActive ? tool.shortDescription : "This page is not being promoted right now. Use the links below to open similar tools that are ready to use."}
+          </p>
         </section>
         <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
           <h2 className="text-lg font-bold tracking-tight">Explore more</h2>
@@ -189,7 +225,7 @@ export function ToolPage({
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
                 Related tools
               </p>
-              {relatedTools.map((item) => (
+              {relatedTools.length ? relatedTools.map((item) => (
                 <Link
                   key={item.slug}
                   href={`/tools/${item.slug}`}
@@ -197,7 +233,9 @@ export function ToolPage({
                 >
                   {item.name}
                 </Link>
-              ))}
+              )) : (
+                <p className="leading-7">Browse the category for other working options.</p>
+              )}
             </div>
             <div className="space-y-3">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
@@ -229,19 +267,21 @@ export function ToolPage({
             </div>
           </div>
         </section>
-        <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-          <h2 className="text-lg font-bold tracking-tight">Keywords covered</h2>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {tool.keywords.slice(0, 8).map((keyword) => (
-              <span
-                key={keyword}
-                className="rounded-full border border-[color:var(--border)] px-3 py-2 text-sm text-[color:var(--muted)]"
-              >
-                {keyword}
-              </span>
-            ))}
-          </div>
-        </section>
+        {isPubliclyActive ? (
+          <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
+            <h2 className="text-lg font-bold tracking-tight">Keywords covered</h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {tool.keywords.slice(0, 8).map((keyword) => (
+                <span
+                  key={keyword}
+                  className="rounded-full border border-[color:var(--border)] px-3 py-2 text-sm text-[color:var(--muted)]"
+                >
+                  {keyword}
+                </span>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
 
       <div className="lg:col-span-2">

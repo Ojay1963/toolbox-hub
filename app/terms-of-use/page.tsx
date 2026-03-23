@@ -14,7 +14,7 @@ export default function TermsOfUsePage() {
     <StaticPage
       eyebrow="Legal"
       title="Terms of Use"
-      intro="These Terms of Use govern access to and use of Toolbox Hub. By using the site, you agree to use it lawfully, respectfully, and within the limits explained on each tool page."
+      intro="These Terms of Use explain the basic rules for using Toolbox Hub. By using the site, you agree to use it lawfully, respectfully, and in line with the purpose of each page."
       sections={[
         {
           title: "Using the Site",
@@ -26,8 +26,8 @@ export default function TermsOfUsePage() {
         {
           title: "Tool Scope and Accuracy",
           paragraphs: [
-            "The site includes a mix of tools with different levels of complexity. Some tools provide straightforward calculations or formatting, while others may depend on device support, third-party services, or simplified processing.",
-            "You are responsible for reviewing outputs before relying on them for legal, financial, medical, security, or compliance-sensitive decisions. The site aims to be honest about limitations and does not guarantee that every result is complete, current, or suitable for every use case.",
+            "The site includes a range of tools for different tasks. Some pages handle simple formatting or conversion, while others depend on browser support, outside services, or the quality of the file or text you provide.",
+            "You are responsible for reviewing outputs before relying on them for legal, financial, medical, security, or compliance-sensitive decisions. Toolbox Hub aims to describe tools clearly, but it cannot guarantee that every result will be complete or suitable for every purpose.",
           ],
         },
         {
@@ -47,15 +47,15 @@ export default function TermsOfUsePage() {
         {
           title: "Availability and Changes",
           paragraphs: [
-            "Because the site depends on software, hosting, and some external services, any tool may change, be rate limited, become unavailable, or be removed without notice.",
-            "The operator may update tool behavior, page copy, limits, or these terms as the site evolves.",
+            "Because the site depends on software, hosting, and in some cases outside services, any tool may change, become temporarily unavailable, or be removed.",
+            "Toolbox Hub may update tool behavior, page copy, limits, or these terms as the site changes over time.",
           ],
         },
         {
           title: "Disclaimer of Warranties and Liability",
           paragraphs: [
             'The site is provided on an "as is" and "as available" basis without guarantees of uninterrupted service, perfect output fidelity, or suitability for every purpose.',
-            "To the extent allowed by law, the operator is not liable for losses arising from site downtime, incorrect outputs, broken third-party services, file corruption, or decisions made based on tool results.",
+            "To the extent allowed by law, Toolbox Hub is not liable for losses arising from site downtime, incorrect outputs, unavailable outside services, file corruption, or decisions made based on tool results.",
           ],
         },
       ]}

@@ -39,6 +39,7 @@ const siteUrlHostname = new URL(resolvedSiteUrl).hostname.toLowerCase();
 const isLocalSiteUrl = /^(localhost|127\.0\.0\.1)$/.test(siteUrlHostname);
 const isPreviewDeployment = process.env.VERCEL_ENV === "preview";
 const indexableToolCount = getIndexableTools().length;
+const resolvedContactEmail = normalizeEmail(process.env.NEXT_PUBLIC_CONTACT_EMAIL);
 
 export const siteMetadata = {
   name: "Toolbox Hub",
@@ -46,10 +47,14 @@ export const siteMetadata = {
     `A fast, SEO-friendly collection of ${indexableToolCount} public tool pages for images, PDFs, text, developers, generators, calculators, converters, and internet tasks.`,
   siteUrl: resolvedSiteUrl,
   indexableToolCount,
-  contactEmail: normalizeEmail(process.env.NEXT_PUBLIC_CONTACT_EMAIL),
+  contactEmail: resolvedContactEmail,
   isLocalSiteUrl,
   shouldAllowIndexing: !isLocalSiteUrl && !isPreviewDeployment,
 };
+
+export function getPublicContactEmail() {
+  return resolvedContactEmail;
+}
 
 export function absoluteUrl(pathname: string) {
   return new URL(pathname, siteMetadata.siteUrl).toString();

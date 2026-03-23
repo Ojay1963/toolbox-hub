@@ -10,7 +10,7 @@ export function ToolUnavailable({ tool }: { tool: ToolDefinition }) {
       </div>
       <h2 className="mt-4 text-2xl font-bold tracking-tight">{tool.name} is not available right now</h2>
       <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
-        Please try again later.
+        This page stays available so you can understand the workflow and choose a nearby alternative if needed.
       </p>
     </section>
   );

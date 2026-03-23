@@ -24,6 +24,12 @@ export function Header() {
             <Link href="/#search-tools" className="transition hover:text-[color:var(--primary)]">
               Search
             </Link>
+            <Link href="/about" className="transition hover:text-[color:var(--primary)]">
+              About
+            </Link>
+            <Link href="/contact" className="transition hover:text-[color:var(--primary)]">
+              Contact
+            </Link>
             {categories.map((category) => (
               <Link
                 key={category.slug}
@@ -46,6 +52,18 @@ export function Header() {
                 className="rounded-full border border-[color:var(--border)] px-3 py-2 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
               >
                 Search tools
+              </Link>
+              <Link
+                href="/about"
+                className="rounded-full border border-[color:var(--border)] px-3 py-2 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
+              >
+                About
+              </Link>
+              <Link
+                href="/contact"
+                className="rounded-full border border-[color:var(--border)] px-3 py-2 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
+              >
+                Contact
               </Link>
               {categories.map((category) => (
                 <Link

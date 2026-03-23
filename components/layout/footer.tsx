@@ -1,11 +1,14 @@
 import Link from "next/link";
-import { siteMetadata } from "@/lib/seo";
+import { getPublicContactEmail } from "@/lib/seo";
 import { categories, getPopularTools } from "@/lib/tools";
 
 export function Footer() {
+  const contactEmail = getPublicContactEmail();
   const quickLinks = getPopularTools(6);
+  const currentYear = new Date().getFullYear();
   const siteLinks = [
     { href: "/about", label: "About" },
+    { href: "/blog", label: "Guides" },
     { href: "/contact", label: "Contact" },
     { href: "/privacy-policy", label: "Privacy Policy" },
     { href: "/terms-of-use", label: "Terms of Use" },
@@ -18,21 +21,21 @@ export function Footer() {
         <div>
           <h2 className="text-xl font-bold tracking-tight">Toolbox Hub</h2>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
-            A clean collection of free tools for PDFs, images, text, developers,
-            calculators, generators, and converters.
+            Toolbox Hub is a public website for free online tools, practical guides, and clear help pages for everyday digital tasks.
           </p>
           <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-            No accounts, no clutter, and no confusing extras. Each page is built to stay fast,
-            mobile-friendly, and easy to use.
+            The site is designed to stay fast, mobile-friendly, and easy to understand, with public pages for contact, privacy, terms, and general site information.
           </p>
-          {siteMetadata.contactEmail ? (
-            <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
-              Contact:{" "}
-              <a href={`mailto:${siteMetadata.contactEmail}`} className="font-semibold text-[color:var(--primary)] underline-offset-4 hover:underline">
-                {siteMetadata.contactEmail}
+          <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">
+            Contact:{" "}
+            {contactEmail ? (
+              <a href={`mailto:${contactEmail}`} className="font-semibold text-[color:var(--primary)] underline-offset-4 hover:underline">
+                {contactEmail}
               </a>
-            </p>
-          ) : null}
+            ) : (
+              <span className="font-semibold text-[color:var(--foreground)]">Contact email unavailable</span>
+            )}
+          </p>
         </div>
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--primary-dark)]">
@@ -85,10 +88,18 @@ export function Footer() {
       </div>
       <div className="border-t border-[color:var(--border)]/80">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-sm text-[color:var(--muted)] sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <p>Fast online tools with clear pages and helpful links.</p>
-          <Link href="/" className="transition hover:text-[color:var(--primary)]">
-            Back to homepage
-          </Link>
+          <p>{currentYear} Toolbox Hub. Free online tools with clear help and public site pages.</p>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/contact" className="transition hover:text-[color:var(--primary)]">
+              Contact
+            </Link>
+            <Link href="/privacy-policy" className="transition hover:text-[color:var(--primary)]">
+              Privacy
+            </Link>
+            <Link href="/" className="transition hover:text-[color:var(--primary)]">
+              Back to homepage
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

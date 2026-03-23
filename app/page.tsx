@@ -57,15 +57,15 @@ export default function HomePage() {
   const homepageFaq = [
     {
       question: "Do these tools require an account?",
-      answer: "No. The site is intentionally built without auth so people can open a page and use a tool immediately.",
+      answer: "No. You can open a tool page and use it without creating an account.",
     },
     {
       question: "Are files uploaded to a server?",
-      answer: "Many tools work right in your browser. Some tools need an online request to finish the job.",
+      answer: "Many tools work right in your browser. Some tools use online processing when that is needed to complete the task.",
     },
     {
       question: `Are all ${totalTools} tools identical in scope?`,
-      answer: "No. Some tools are more advanced than others, and a few are still being finished.",
+      answer: "No. Tool pages cover different tasks, so the scope depends on the job each tool is built to handle.",
     },
   ];
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([{ name: "Home", pathname: "/" }]);
@@ -105,7 +105,7 @@ export default function HomePage() {
               Free online tools for PDF, image, text, developer, and calculator tasks.
             </h1>
             <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
-              Toolbox Hub gives you practical tools for files, text, images, PDFs, code, and everyday calculations. Open a tool, use it quickly, and download what you need.
+              Toolbox Hub is a public website with practical tools for files, text, images, PDFs, code, and everyday calculations. Open a tool, get the result you need, and move on with clear page guidance, public policy pages, and easy site navigation.
             </p>
             <div className="mt-6 max-w-3xl">
               <SearchBox
@@ -138,6 +138,17 @@ export default function HomePage() {
                 Browse converters
               </Link>
             </div>
+            <p className="mt-5 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
+              Want to learn more about the site first? Visit{" "}
+              <Link href="/about" className="font-semibold text-[color:var(--primary)]">
+                About
+              </Link>
+              ,{" "}
+              <Link href="/contact" className="font-semibold text-[color:var(--primary)]">
+                Contact
+              </Link>
+              , or the public policy pages linked in the footer.
+            </p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-3xl bg-[color:var(--soft)] p-5">
@@ -328,8 +339,8 @@ export default function HomePage() {
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
           Why people use this site
         </p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight">Built for speed and clarity</h2>
-        <div className="mt-6 grid gap-4 md:grid-cols-3">
+        <h2 className="mt-2 text-3xl font-black tracking-tight">Built for speed, clarity, and confidence</h2>
+        <div className="mt-6 grid gap-4 md:grid-cols-4">
           <div className="rounded-3xl bg-stone-50 p-5">
             <h3 className="text-lg font-bold tracking-tight">Fast to open</h3>
             <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
@@ -346,6 +357,12 @@ export default function HomePage() {
             <h3 className="text-lg font-bold tracking-tight">Easy to navigate</h3>
             <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
               Categories, related tools, and search make it easy to move from one task to the next.
+            </p>
+          </div>
+          <div className="rounded-3xl bg-stone-50 p-5">
+            <h3 className="text-lg font-bold tracking-tight">Clear public pages</h3>
+            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+              About, contact, privacy, terms, and disclaimer pages are easy to find and written in plain language.
             </p>
           </div>
         </div>
