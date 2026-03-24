@@ -24,9 +24,6 @@ export function Header() {
             <Link href="/tools" className="transition hover:text-[color:var(--primary)]">
               Tools
             </Link>
-            <Link href="/#search-tools" className="transition hover:text-[color:var(--primary)]">
-              Search
-            </Link>
             <Link href="/about" className="transition hover:text-[color:var(--primary)]">
               About
             </Link>
@@ -46,7 +43,7 @@ export function Header() {
             </Link>
           </div>
         </div>
-        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3 lg:hidden">
+        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:hidden">
           <Link
             href="/"
             className="rounded-full border border-[color:var(--border)] bg-white px-4 py-2.5 text-center text-sm font-semibold text-[color:var(--foreground)]"
@@ -58,12 +55,6 @@ export function Header() {
             className="rounded-full border border-[color:var(--border)] bg-white px-4 py-2.5 text-center text-sm font-semibold text-[color:var(--foreground)]"
           >
             Tools
-          </Link>
-          <Link
-            href="/#search-tools"
-            className="rounded-full bg-[color:var(--primary)] px-4 py-2.5 text-center text-sm font-semibold text-white"
-          >
-            Search
           </Link>
           <Link
             href="/category/text-tools"
@@ -95,12 +86,6 @@ export function Header() {
                 className="rounded-2xl border border-[color:var(--border)] px-4 py-3 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
               >
                 Tools
-              </Link>
-              <Link
-                href="/#search-tools"
-                className="rounded-2xl border border-[color:var(--border)] px-4 py-3 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
-              >
-                Search tools
               </Link>
               <Link
                 href="/category/text-tools"
