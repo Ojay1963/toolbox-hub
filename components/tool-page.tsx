@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ToolRenderer } from "@/components/tools/tool-renderer";
 import { AdPlaceholder } from "@/components/ui/ad-placeholder";
+import { CategorySidebar } from "@/components/ui/category-sidebar";
 import { FaqList } from "@/components/ui/faq-list";
 import { RelatedTools } from "@/components/ui/related-tools";
 import { Section } from "@/components/ui/section";
@@ -24,9 +25,16 @@ export function ToolPage({
     (item) => !item.href || shouldIndexTool(item.href.replace("/tools/", "")),
   );
   return (
-    <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
-      <div className="space-y-8">
-        <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-sm sm:p-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
+        <CategorySidebar
+          activeCategory={tool.category}
+          title="Browse Categories"
+          description="Use the category menu to move between sections without starting over."
+        />
+        <div className="min-w-0 grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div className="min-w-0 space-y-8">
+            <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-sm sm:p-8">
           <nav
             aria-label="Breadcrumb"
             className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--muted)]"
@@ -68,7 +76,7 @@ export function ToolPage({
           <div className="mt-8">
             <ToolRenderer tool={tool} />
           </div>
-        </section>
+            </section>
 
         {isPubliclyActive ? (
           <>
@@ -187,9 +195,9 @@ export function ToolPage({
             ))}
           </div>
         </Section>
-      </div>
+          </div>
 
-      <div className="space-y-6">
+          <div className="min-w-0 space-y-6">
         <AdPlaceholder
           slot={`tool-${tool.slug}-sidebar`}
           label="Advertisement"
@@ -282,14 +290,16 @@ export function ToolPage({
             </div>
           </section>
         ) : null}
-      </div>
+          </div>
 
-      <div className="lg:col-span-2">
-        <AdPlaceholder
-          slot={`tool-${tool.slug}-post-related-banner`}
-          label="Advertisement"
-          format="leaderboard"
-        />
+          <div className="xl:col-span-2">
+            <AdPlaceholder
+              slot={`tool-${tool.slug}-post-related-banner`}
+              label="Advertisement"
+              format="leaderboard"
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

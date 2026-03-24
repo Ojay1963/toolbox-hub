@@ -3,7 +3,7 @@ import type { CategoryDefinition } from "@/lib/tools";
 
 export function CategoryCard({
   category,
-  count,
+  count: _count,
 }: {
   category: CategoryDefinition;
   count: number;
@@ -16,7 +16,7 @@ export function CategoryCard({
       <div className="flex items-center justify-between gap-4">
         <h3 className="text-xl font-bold tracking-tight">{category.name}</h3>
         <span className="rounded-full bg-[color:var(--soft)] px-3 py-1 text-xs font-semibold text-[color:var(--primary-dark)]">
-          {count} tools
+          Browse tools
         </span>
       </div>
       <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">{category.description}</p>

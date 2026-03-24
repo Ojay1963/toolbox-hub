@@ -3,6 +3,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { notFound } from "next/navigation";
 import { AdPlaceholder } from "@/components/ui/ad-placeholder";
+import { CategorySidebar } from "@/components/ui/category-sidebar";
 import { FaqList } from "@/components/ui/faq-list";
 import { ToolCard } from "@/components/ui/tool-card";
 import {
@@ -66,7 +67,6 @@ export default async function CategoryPage({
   }
 
   const categoryTools = getToolsByCategory(category.slug).filter((tool) => shouldIndexTool(tool));
-  const workingCount = categoryTools.filter((tool) => tool.implementationStatus === "working-local").length;
   const popularInCategory = getPopularTools(6, category.slug);
   const recentInCategory = getRecentTools(4, category.slug);
   const trendingInCategory = getTrendingTools(4, category.slug);
@@ -103,7 +103,7 @@ export default async function CategoryPage({
   const categoryFaqJsonLd = buildFaqJsonLd(categoryFaq);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
@@ -116,7 +116,14 @@ export default async function CategoryPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(categoryFaqJsonLd) }}
       />
-      <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-8 shadow-sm sm:p-10">
+      <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
+        <CategorySidebar
+          activeCategory={category.slug}
+          title="Browse Categories"
+          description="Move between sections without losing your place in the directory."
+        />
+        <div className="min-w-0 space-y-8">
+      <section className="min-w-0 rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[color:var(--primary-dark)]">
@@ -143,12 +150,20 @@ export default async function CategoryPage({
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-3xl bg-[color:var(--soft)] p-5">
-              <p className="text-3xl font-black">{categoryTools.length}</p>
-              <p className="mt-2 text-sm text-[color:var(--muted)]">tools in this category</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+                Browse tools
+              </p>
+              <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+                Open the featured picks below or use the directory search to narrow this category quickly.
+              </p>
             </div>
             <div className="rounded-3xl bg-white p-5">
-              <p className="text-3xl font-black">{workingCount}</p>
-              <p className="mt-2 text-sm text-[color:var(--muted)]">ready to use</p>
+              <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+                Helpful next steps
+              </p>
+              <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+                Each category page includes related links, search, and lighter browsing paths for mobile and desktop.
+              </p>
             </div>
           </div>
         </div>
@@ -158,7 +173,7 @@ export default async function CategoryPage({
         <SearchBox
           tools={categoryTools}
           title={`Search inside ${category.name}`}
-          description={`Search only within ${category.name.toLowerCase()} tools.`}
+          description={`Search only within ${category.name.toLowerCase()} tools and jump to the right page faster.`}
           maxResults={6}
           compact
           suggestedTools={[...popularInCategory, ...recentInCategory].filter(
@@ -190,12 +205,12 @@ export default async function CategoryPage({
           <div className="mt-8">
             <CategoryDirectory
               tools={categoryTools}
-              title={`${categoryTools.length} public tool pages with lighter filtering`}
+              title="Browse the full category"
               description="Search inside this category and reveal more tools only when you need them."
             />
           </div>
         </section>
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <AdPlaceholder
             slot={`category-${category.slug}-sidebar`}
             label="Advertisement"
@@ -302,6 +317,8 @@ export default async function CategoryPage({
           </div>
         </div>
       </section>
+        </div>
+      </div>
     </div>
   );
 }

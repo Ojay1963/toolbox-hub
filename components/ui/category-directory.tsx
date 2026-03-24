@@ -48,9 +48,7 @@ export function CategoryDirectory({
             {description}
           </p>
         </div>
-        <p className="text-sm text-[color:var(--muted)]">
-          Showing {visibleTools.length} of {filteredTools.length} matching tools
-        </p>
+        <p className="text-sm text-[color:var(--muted)]">Browse tools in this section</p>
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
@@ -67,7 +65,7 @@ export function CategoryDirectory({
           }}
           placeholder="Filter this category by name or keyword"
           aria-describedby={`${inputId}-hint`}
-          className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]"
+          className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm"
         />
         <div id={`${inputId}-hint`} className="sr-only">
           Use this field to narrow the tools shown in the category directory.
@@ -90,9 +88,9 @@ export function CategoryDirectory({
               <button
                 type="button"
                 onClick={() => setVisibleCount((current) => current + 12)}
-                className="rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                className="rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
               >
-                Show 12 more tools
+                Show more tools
               </button>
             </div>
           ) : null}

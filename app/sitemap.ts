@@ -38,7 +38,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       )
       .map((tool) => tool.slug),
   );
-  const staticPages = ["/about", "/blog", "/contact", "/privacy-policy", "/terms-of-use", "/disclaimer"];
+  const staticPages = ["/about", "/blog", "/contact", "/privacy-policy", "/terms-of-use", "/disclaimer", "/tools"];
   const highValueCategorySlugs = new Set(["image-tools", "pdf-tools", "text-tools", "developer-tools"]);
 
   return [
@@ -52,7 +52,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       url: `${siteMetadata.siteUrl}${pathname}`,
       lastModified,
       changeFrequency: "monthly" as const,
-      priority: pathname === "/blog" ? 0.82 : pathname === "/contact" ? 0.62 : 0.54,
+      priority: pathname === "/blog" ? 0.82 : pathname === "/tools" ? 0.86 : pathname === "/contact" ? 0.62 : 0.54,
     })),
     ...categories.map((category) => ({
       url: `${siteMetadata.siteUrl}/category/${category.slug}`,

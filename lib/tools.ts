@@ -515,6 +515,269 @@ function buildCategorySpecificFaqs(tool: ToolDraft): FaqItem[] {
   }
 }
 
+const weakToolContentOverrides = new Map<string, { longDescription: string; faq: FaqItem[] }>([
+  ["blur-image-tool", {
+    longDescription: "Blur Image Tool helps when an image shows more detail than you want to share. You can soften faces, names, license plates, messy backgrounds, or screenshot sections before posting, sending, or saving the image. It is also useful for quick design effects when you want text or a subject to stand out against a softer background.",
+    faq: [
+      {
+        question: "When should I blur an image instead of cropping it?",
+        answer: "Use blur when you still need the full frame but want to hide part of it. Crop when the extra area does not matter and removing it gives you a cleaner result.",
+      },
+      {
+        question: "Can blur help protect private details in a screenshot?",
+        answer: "Yes. Blurring names, account numbers, addresses, or other sensitive details can make an image safer to share while keeping the rest of the screenshot visible.",
+      },
+    ],
+  }],
+  ["text-reverser", {
+    longDescription: "Text Reverser is handy when you want to flip a word, phrase, or full block of text for styling tests, puzzles, mirrored labels, or playful social posts. It saves time when reversing longer text by hand and lets you quickly see how spaces, punctuation, and line breaks behave in the result.",
+    faq: [
+      {
+        question: "Is text reversal useful for mirrored designs or decals?",
+        answer: "Yes. People often reverse text when preparing mirrored labels, window decals, or novelty designs that need to read correctly after printing or transfer.",
+      },
+      {
+        question: "Does reversed text still keep punctuation and spaces?",
+        answer: "It usually keeps the same characters, but their positions change because the full sequence is reversed. That is why the result can look unusual with punctuation-heavy text.",
+      },
+    ],
+  }],
+  ["text-to-slug-converter", {
+    longDescription: "When a headline or file name needs to become a clean URL, Text to Slug Converter removes the messy parts quickly. It turns spaces, punctuation, and mixed casing into a short slug you can use for blog posts, CMS entries, product pages, or saved notes without cleaning the text by hand.",
+    faq: [
+      {
+        question: "Why can a slug look shorter than the original title?",
+        answer: "A good slug removes extra punctuation, repeated separators, and filler words that do not help readability. The goal is a clean URL, not a perfect copy of the full title.",
+      },
+      {
+        question: "Should every slug stay lowercase?",
+        answer: "Lowercase slugs are easier to read, copy, and keep consistent across pages. That is why most sites use lowercase as the default format.",
+      },
+    ],
+  }],
+  ["json-to-csv-converter", {
+    longDescription: "If you have JSON from an API, export, or log and need it in spreadsheet form, JSON to CSV Converter gives you a faster route than manual cleanup. It is most useful for arrays of similar objects where each key should become a column and each item should become a row.",
+    faq: [
+      {
+        question: "What happens if some JSON objects use different keys?",
+        answer: "The CSV can still be created, but some rows may have blank cells where a key is missing. Consistent object structure usually gives the cleanest spreadsheet result.",
+      },
+      {
+        question: "When is JSON to CSV better than copying data into a sheet by hand?",
+        answer: "It is better when the data already exists in JSON and you want a quick export for filtering, sorting, or sharing. Manual cleanup takes longer and is easier to get wrong.",
+      },
+    ],
+  }],
+  ["html-decoder", {
+    longDescription: "HTML Decoder helps when copied text is full of codes like &amp; and &lt; and you want the readable version back. It is useful for email snippets, CMS content, code samples, and copied page text where encoded characters make the text harder to read or reuse.",
+    faq: [
+      {
+        question: "Will HTML Decoder turn common entities back into symbols?",
+        answer: "Yes. It is useful for converting common encoded characters such as ampersands, quotes, angle brackets, and apostrophes back into normal text.",
+      },
+      {
+        question: "Should I decode text before editing copied HTML snippets?",
+        answer: "Usually yes if your goal is to work with the readable text. Decoding first makes it easier to review wording without entity codes getting in the way.",
+      },
+    ],
+  }],
+  ["discount-calculator", {
+    longDescription: "Discount Calculator is for the everyday question of what a sale really costs before you check out. Enter the original price and discount to see the amount saved and the final price, whether you are comparing store offers, planning a promotion, or checking if a deal is worth it.",
+    faq: [
+      {
+        question: "Can I compare two discounts with this calculator?",
+        answer: "Yes. It is useful for checking whether one sale offer beats another, especially when two stores use different discount percentages on similar items.",
+      },
+      {
+        question: "Is a percentage discount enough to judge the best deal?",
+        answer: "Not always. Shipping, tax, or bundle terms can change the real total, so the final price matters more than the headline percentage alone.",
+      },
+    ],
+  }],
+  ["tip-calculator", {
+    longDescription: "Tip Calculator makes it easier to settle a meal or service bill without doing mental math at the table. Use it to work out the tip, final total, and a fair split when several people are paying together.",
+    faq: [
+      {
+        question: "Should I calculate tip before or after tax?",
+        answer: "That depends on local custom and personal preference. Many people tip from the pre-tax amount, while others use the full total for a quick estimate.",
+      },
+      {
+        question: "Can I still use this if people are paying different amounts?",
+        answer: "Yes. Many people use the total as a starting point and then adjust each share based on what each person ordered or agreed to cover.",
+      },
+    ],
+  }],
+  ["profit-margin-calculator", {
+    longDescription: "Profit Margin Calculator helps when you know your cost and selling price but want the business numbers explained clearly. It shows how much money is left after the sale and helps you compare margin and markup before setting prices for products or services.",
+    faq: [
+      {
+        question: "Why do margin and markup show different percentages?",
+        answer: "They use different starting points. Margin is based on selling price, while markup is based on cost, so the percentages are related but not the same.",
+      },
+      {
+        question: "Can I use a profit margin calculator for services as well as products?",
+        answer: "Yes. It is useful for any offer where you can estimate cost and price, including freelance work, consulting packages, or physical goods.",
+      },
+    ],
+  }],
+  ["vat-calculator", {
+    longDescription: "VAT Calculator is useful when you need to add tax to a net amount or work backward from a total that already includes VAT. That makes it handy for invoices, quotes, receipts, freelance work, and quick checks before sending a price to a customer.",
+    faq: [
+      {
+        question: "How do I know whether a listed price already includes VAT?",
+        answer: "Check the invoice, quote, or store note carefully. If the wording is unclear, it is safer to confirm before assuming the total is net or VAT-inclusive.",
+      },
+      {
+        question: "Can I use custom VAT rates in the calculator?",
+        answer: "Yes. That is helpful when you work across regions or need to check a specific rate for a product, service, or example calculation.",
+      },
+    ],
+  }],
+  ["gif-maker", {
+    longDescription: "GIF Maker is useful when several images tell a short story better than one still frame. You can turn screenshots, product steps, design progress shots, or simple photo sequences into a looping GIF for messages, tutorials, or social posts.",
+    faq: [
+      {
+        question: "What kinds of images make a smoother GIF?",
+        answer: "Images with similar size, framing, and lighting usually make the cleanest animation. Big jumps between frames can make the GIF feel choppy.",
+      },
+      {
+        question: "Should I resize large images before making a GIF?",
+        answer: "Usually yes. Smaller images often create lighter GIF files that load faster and are easier to share on websites, chats, or social posts.",
+      },
+    ],
+  }],
+  ["image-border-generator", {
+    longDescription: "Image Border Generator helps when a photo or graphic feels unfinished against a plain background. Adding a simple border can make product images, quote cards, profile pictures, and printables look more intentional without opening a full design app.",
+    faq: [
+      {
+        question: "When does a border improve an image?",
+        answer: "A border can help when the image blends into the page background or needs a stronger frame for sharing, printing, or presentation slides.",
+      },
+      {
+        question: "Can a border change the final image size?",
+        answer: "Yes. Adding a border can increase the overall dimensions unless the border is drawn inward, so it is worth checking size requirements before export.",
+      },
+    ],
+  }],
+  ["meta-tag-generator", {
+    longDescription: "Meta Tag Generator is for site owners and marketers who want the basic head tags for a page without writing them from scratch every time. It is helpful when you need a title, description, canonical link, and social preview fields laid out in one clean block before adding them to a site or CMS.",
+    faq: [
+      {
+        question: "Which meta tags matter most on a simple page?",
+        answer: "The title tag, meta description, and canonical link are usually the first ones to get right. Social tags are also useful when you care about how the page looks when shared.",
+      },
+      {
+        question: "Should every page use the same meta description template?",
+        answer: "No. A shared structure is fine, but each page should still describe its own topic clearly so the result does not feel repetitive or generic.",
+      },
+    ],
+  }],
+  ["sitemap-generator", {
+    longDescription: "Sitemap Generator helps you turn a list of important page URLs into a clean XML file that search engines can read. It is useful when you are launching a small site, adding new sections, or checking a hand-built sitemap before uploading it.",
+    faq: [
+      {
+        question: "Which pages should I leave out of a sitemap?",
+        answer: "Leave out duplicate, redirected, blocked, or noindex pages. A sitemap works best when it highlights the pages you actually want search engines to crawl and keep.",
+      },
+      {
+        question: "Do I need a last modified date for every URL?",
+        answer: "No. It can help when the date is accurate, but a clean sitemap is still useful even if you only include the core required fields.",
+      },
+    ],
+  }],
+  ["uuid-validator", {
+    longDescription: "UUID Validator gives you a quick yes-or-no check when an ID looks suspicious or was copied from logs, JSON, or a form. It helps confirm whether the value follows a valid UUID pattern before you pass it into another tool, query, or workflow.",
+    faq: [
+      {
+        question: "Can a random-looking ID still fail UUID validation?",
+        answer: "Yes. A value can look close to a UUID and still fail because of the wrong length, missing hyphens, or invalid characters in one part of the string.",
+      },
+      {
+        question: "Does UUID validation prove the ID exists in a system?",
+        answer: "No. Validation only checks whether the format looks valid. It does not confirm that the identifier belongs to a real record.",
+      },
+    ],
+  }],
+  ["cron-expression-generator", {
+    longDescription: "Cron Expression Generator helps when you know the schedule you want but do not want to remember cron syntax from memory. It is useful for common tasks like running a job every hour, every weekday morning, or on a specific day each month.",
+    faq: [
+      {
+        question: "What is a safe way to double-check a cron schedule?",
+        answer: "Read the final expression in plain language and compare it with the exact days and times you expect. A quick review helps catch small mistakes before a job goes live.",
+      },
+      {
+        question: "Do all systems read cron expressions the same way?",
+        answer: "Not always. Some schedulers support different fields or special syntax, so it is smart to confirm the format expected by the system you use.",
+      },
+    ],
+  }],
+  ["cron-expression-parser", {
+    longDescription: "Cron Expression Parser is helpful when a schedule string already exists and you need to understand it quickly. Instead of decoding stars, numbers, and slashes by hand, you can translate the expression into plain language and confirm what it will run.",
+    faq: [
+      {
+        question: "Why can a cron string be hard to read at a glance?",
+        answer: "Cron syntax compresses a lot of timing rules into a short pattern, so even a valid schedule can be easy to misread when you are in a hurry.",
+      },
+      {
+        question: "Should I still verify the timezone after parsing a cron expression?",
+        answer: "Yes. A correctly parsed schedule can still run at the wrong real-world time if the server or app timezone is different from what you expected.",
+      },
+    ],
+  }],
+  ["color-contrast-checker", {
+    longDescription: "Color Contrast Checker helps you test whether text will stay readable against its background before you publish a page, button, banner, or graphic. It is especially useful when brand colors look good together but may not provide enough contrast for comfortable reading.",
+    faq: [
+      {
+        question: "Why can two colors look fine together but still fail contrast checks?",
+        answer: "Visual taste and readability are not the same thing. Two colors can feel on-brand and still be too close in brightness for comfortable text reading.",
+      },
+      {
+        question: "Should I test large text and normal text separately?",
+        answer: "Yes. Larger text can pass at lower contrast levels than smaller body text, so it helps to check the result against the size you plan to publish.",
+      },
+    ],
+  }],
+  ["sentence-counter", {
+    longDescription: "Sentence Counter is useful when you want a quick sense of how dense or readable a block of writing feels. Writers, students, and editors often use it to compare drafts, break up long passages, or estimate how much content sits inside a paragraph.",
+    faq: [
+      {
+        question: "Why might a sentence count be lower than expected?",
+        answer: "Abbreviations, missing punctuation, or unusual formatting can affect how sentence boundaries are recognized. That is why some results are best treated as estimates.",
+      },
+      {
+        question: "Can sentence count help with readability checks?",
+        answer: "Yes. It gives a quick sense of whether a draft is packed into a few long sentences or broken into shorter parts that may feel easier to read.",
+      },
+    ],
+  }],
+  ["reading-time-calculator", {
+    longDescription: "Reading Time Calculator helps you estimate how long a post, email, lesson, or article may take to finish before you publish or send it. It is useful for blog labels, newsletter planning, study material, and any page where pacing matters.",
+    faq: [
+      {
+        question: "Should I use one average reading speed for every audience?",
+        answer: "Not always. Technical writing, young readers, and dense study material often take longer than light general content, so the best estimate depends on the audience.",
+      },
+      {
+        question: "Why can reading time feel longer than the word count suggests?",
+        answer: "Images, code, tables, difficult wording, and pauses for thinking can all slow readers down even when the total word count looks moderate.",
+      },
+    ],
+  }],
+  ["file-hash-checker", {
+    longDescription: "File Hash Checker is useful when you download a file and want to confirm it matches the checksum provided by the source. Instead of relying on guesswork, you can generate the hash for the file you have and compare it with the value you expect.",
+    faq: [
+      {
+        question: "Why does a matching filename not prove a file is unchanged?",
+        answer: "A file can keep the same name while its contents change. Hash checking is useful because it verifies the actual file data instead of the label attached to it.",
+      },
+      {
+        question: "Which hash should I compare if a download page lists several?",
+        answer: "Use the same algorithm named by the source, such as SHA-256 or MD5. The comparison only works when both values were created with the same method.",
+      },
+    ],
+  }],
+]);
+
 const relatedToolSlugOverrides = new Map<string, string[]>([
   ["image-compressor", ["image-resizer", "image-to-webp-converter", "crop-image", "jpg-to-png-converter"]],
   ["image-resizer", ["image-compressor", "crop-image", "image-rotator", "image-to-webp-converter"]],
@@ -704,7 +967,8 @@ function enrichHowToUse(tool: ToolDraft, implementationStatus: ImplementationSta
 function enrichFaq(tool: ToolDraft, implementationStatus: ImplementationStatus) {
   const faq = [...tool.faq];
   const categoryName = getCategoryName(tool.category);
-  const extraFaq: FaqItem[] = [buildToolPurposeFaq(tool), ...buildCategorySpecificFaqs(tool)];
+  const overrideFaq = weakToolContentOverrides.get(tool.slug)?.faq ?? [];
+  const extraFaq: FaqItem[] = [...overrideFaq, buildToolPurposeFaq(tool), ...buildCategorySpecificFaqs(tool)];
 
   if (isExpandedSeoTool(tool)) {
     extraFaq.unshift(
@@ -788,6 +1052,7 @@ function enrichSeoDescription(tool: ToolDraft, implementationStatus: Implementat
 
 function enrichLongDescription(tool: ToolDraft, implementationStatus: ImplementationStatus) {
   const categoryName = getCategoryName(tool.category);
+  const longDescription = weakToolContentOverrides.get(tool.slug)?.longDescription ?? tool.longDescription;
   const scopeSentence =
     implementationStatus === "coming-soon"
       ? ` This page helps you find the tool and check back when it is ready.`
@@ -797,11 +1062,11 @@ function enrichLongDescription(tool: ToolDraft, implementationStatus: Implementa
           ? ` The page includes practical guidance, related tools, and helpful links so visitors can quickly move to the next step without starting over.`
           : ` The page includes practical guidance, related tools, and helpful links so visitors can complete nearby tasks without starting over.`;
 
-  if (tool.longDescription.length > 240) {
-    return normalizePublicCopy(`${tool.longDescription}${scopeSentence}${isExpandedSeoTool(tool) ? ` The page also links to related ${categoryName.toLowerCase()} tasks.` : ""}`);
+  if (longDescription.length > 240) {
+    return normalizePublicCopy(`${longDescription}${scopeSentence}${isExpandedSeoTool(tool) ? ` The page also links to related ${categoryName.toLowerCase()} tasks.` : ""}`);
   }
 
-  return normalizePublicCopy(`${tool.longDescription} ${tool.name} belongs to the ${categoryName.toLowerCase()} section, which helps users discover similar workflows, related conversions, and alternative tools in the same area.${scopeSentence}`);
+  return normalizePublicCopy(`${longDescription} ${tool.name} belongs to the ${categoryName.toLowerCase()} section, which helps users discover similar workflows, related conversions, and alternative tools in the same area.${scopeSentence}`);
 }
 
 function enrichKeywords(tool: ToolDraft) {
@@ -1078,6 +1343,10 @@ const noindexWeakToolSlugs = new Set<string>([
   "random-color-palette-generator",
   "age-difference-calculator",
   "meeting-time-finder",
+  "random-quote-generator",
+  "pdf-metadata-editor",
+  "url-slug-generator",
+  "file-checksum-generator",
 ]);
 
 export function getCanonicalToolSlug(slug: string) {

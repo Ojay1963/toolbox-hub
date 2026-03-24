@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ContactForm } from "@/components/content/contact-form";
 import { buildMetadata, getPublicContactEmail } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -28,13 +29,23 @@ export default function ContactPage() {
         </p>
         <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Contact Toolbox Hub</h1>
         <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
-          Use this page to contact Toolbox Hub about tool issues, accessibility questions, privacy requests,
+          Use the form below to send a message about tool issues, accessibility questions, privacy requests,
           business inquiries, or legal notices. Including the tool name, page URL, browser, and a short
           description of the issue helps us review the message more quickly.
         </p>
       </section>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8">
+          <h2 className="text-2xl font-black tracking-tight">Send a message</h2>
+          <p className="mt-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
+            This form sends your message directly to the site contact inbox.
+          </p>
+          <div className="mt-6">
+            <ContactForm />
+          </div>
+        </section>
+
         <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8">
           <h2 className="text-2xl font-black tracking-tight">What to contact the site about</h2>
           <ul className="mt-5 space-y-3 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
@@ -49,10 +60,6 @@ export default function ContactPage() {
             and a short explanation of what happened. That makes it easier to review the issue and respond
             with the right next step.
           </p>
-        </section>
-
-        <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8">
-          <h2 className="text-2xl font-black tracking-tight">Contact details</h2>
           <div className="mt-4 space-y-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
             <p>
               Email:{" "}

@@ -8,12 +8,13 @@ import { categories, type ToolCategorySlug, type ToolDefinition } from "@/lib/to
 export function SearchBox({
   tools,
   title = "Find a tool from the registry",
-  description = "Search by tool name, keyword, category, or use case. New tools show up here as soon as they are added to the central registry.",
+  description = "Search by tool name, keyword, category, or use case to reach the right page faster.",
   maxResults = 8,
   suggestedTools = [],
   sectionId,
   showCategoryFilter = false,
   compact = false,
+  placeholder = "Search by tool name or keyword",
 }: {
   tools: ToolDefinition[];
   title?: string;
@@ -23,6 +24,7 @@ export function SearchBox({
   sectionId?: string;
   showCategoryFilter?: boolean;
   compact?: boolean;
+  placeholder?: string;
 }) {
   const [query, setQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<"all" | ToolCategorySlug>("all");
@@ -76,20 +78,6 @@ export function SearchBox({
       .map((entry) => entry.tool);
   }, [categoryFilter, deferredQuery, filteredTools, maxResults]);
 
-  const totalMatches = useMemo(() => {
-    const normalized = deferredQuery.trim().toLowerCase();
-    if (!normalized) {
-      return 0;
-    }
-
-    return filteredTools.filter((tool) =>
-      [tool.name, tool.shortDescription, tool.longDescription, tool.category, ...tool.keywords]
-        .join(" ")
-        .toLowerCase()
-        .includes(normalized),
-    ).length;
-  }, [deferredQuery, filteredTools]);
-
   const visibleSuggestions = suggestionList
     .filter((tool) => (categoryFilter === "all" ? true : tool.category === categoryFilter))
     .slice(0, 6);
@@ -117,9 +105,9 @@ export function SearchBox({
         type="search"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        placeholder="Search by tool name or keyword"
+        placeholder={placeholder}
         aria-describedby={`${inputId}-hint`}
-        className="mt-5 w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]"
+        className="mt-5 w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm"
       />
       <div id={`${inputId}-hint`} className="sr-only">
         Search for tools by name, category, or keyword.
@@ -197,7 +185,7 @@ export function SearchBox({
         ) : matches.length ? (
           <div className="space-y-4">
             <p className="text-sm text-[color:var(--muted)]">
-              Showing {matches.length} of {totalMatches} result{totalMatches === 1 ? "" : "s"}
+              Search results
               {categoryFilter === "all" ? "" : ` in ${categories.find((category) => category.slug === categoryFilter)?.name ?? "this category"}`}.
             </p>
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

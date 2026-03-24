@@ -50,9 +50,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <AnalyticsHook />
-        <div className="relative">
+        <div className="relative min-h-screen">
           <Header />
-          <main id="main-content">{children}</main>
+          <main id="main-content" className="pb-10">{children}</main>
           <Footer />
         </div>
       </body>

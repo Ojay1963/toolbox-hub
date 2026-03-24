@@ -4,12 +4,12 @@ import { useState } from "react";
 
 export const panelClass = "rounded-3xl border border-[color:var(--border)] bg-white p-6 shadow-sm";
 export const inputClass =
-  "w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]";
-export const textareaClass = `${inputClass} min-h-40`;
+  "w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm";
+export const textareaClass = `${inputClass} min-h-44`;
 export const buttonClass =
-  "rounded-2xl bg-[color:var(--primary)] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[color:var(--primary-dark)] disabled:cursor-not-allowed disabled:opacity-60";
+  "rounded-2xl bg-[color:var(--primary)] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[color:var(--primary-dark)] disabled:cursor-not-allowed disabled:opacity-60";
 export const secondaryButtonClass =
-  "rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]";
+  "rounded-2xl border border-[color:var(--border)] bg-white px-5 py-3.5 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]";
 
 export function Field({
   label,
