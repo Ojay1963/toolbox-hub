@@ -3,6 +3,7 @@ import "./globals.css";
 import { AnalyticsHook } from "@/components/monitoring/analytics-hook";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
+import { NumberInputEnhancer } from "@/components/ui/number-input-enhancer";
 import { buildWebsiteJsonLd, siteMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -50,6 +51,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <AnalyticsHook />
+        <NumberInputEnhancer />
         <div className="relative min-h-screen">
           <Header />
           <main id="main-content" className="pb-10">{children}</main>
