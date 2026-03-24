@@ -1,10 +1,12 @@
-"use client";
+﻿"use client";
 import { useMemo, useState } from "react";
 import {
   buttonClass,
   EmptyState,
   Field,
   inputClass,
+  NumberInput,
+  parseNumberInput,
   Notice,
   OutputBlock,
   secondaryButtonClass,
@@ -2769,7 +2771,7 @@ export function BCryptGeneratorTool() {
         <textarea className={textareaClass} value={input} onChange={(event) => setInput(event.target.value)} placeholder="Enter the value to hash." />
       </Field>
       <Field label="Cost factor" hint="Higher cost is slower but harder to brute force.">
-        <input className={inputClass} type="number" min="4" max="14" value={rounds} onChange={(event) => setRounds(Number(event.target.value))} />
+        <NumberInput className={inputClass} type="number" min="4" max="14" value={rounds} onChange={(event) => setRounds(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleGenerate} disabled={isWorking}>
         {isWorking ? "Generating bcrypt..." : "Generate bcrypt hash"}
@@ -2889,7 +2891,7 @@ export function RandomTokenGeneratorTool() {
           </select>
         </Field>
         <Field label="Length">
-          <input className={inputClass} type="number" min="8" max="128" value={length} onChange={(event) => setLength(Number(event.target.value))} />
+          <NumberInput className={inputClass} type="number" min="8" max="128" value={length} onChange={(event) => setLength(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleGenerate}>Generate token</button>
@@ -2974,7 +2976,7 @@ export function SecretKeyGeneratorTool() {
           </select>
         </Field>
         <Field label="Length">
-          <input className={inputClass} type="number" min="16" max="128" value={length} onChange={(event) => setLength(Number(event.target.value))} />
+          <NumberInput className={inputClass} type="number" min="16" max="128" value={length} onChange={(event) => setLength(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleGenerate}>Generate secret key</button>
@@ -3527,7 +3529,7 @@ export function RandomApiKeyGeneratorTool() {
           <input className={inputClass} value={prefix} onChange={(event) => setPrefix(event.target.value)} placeholder="sk_live" />
         </Field>
         <Field label="Random body length">
-          <input className={inputClass} type="number" min="16" max="96" value={length} onChange={(event) => setLength(Number(event.target.value))} />
+          <NumberInput className={inputClass} type="number" min="16" max="96" value={length} onChange={(event) => setLength(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleGenerate}>Generate API key</button>
@@ -3578,7 +3580,7 @@ export function SecureTokenGeneratorTool() {
           </select>
         </Field>
         <Field label="Token length">
-          <input className={inputClass} type="number" min="16" max="128" value={length} onChange={(event) => setLength(Number(event.target.value))} />
+          <NumberInput className={inputClass} type="number" min="16" max="128" value={length} onChange={(event) => setLength(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleGenerate}>Generate token</button>
@@ -3852,27 +3854,27 @@ export function CronExpressionGeneratorTool() {
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {mode === "every-minute" ? (
           <Field label="Minute interval">
-            <input className={inputClass} type="number" min="1" max="59" value={interval} onChange={(event) => setInterval(Number(event.target.value))} />
+            <NumberInput className={inputClass} type="number" min="1" max="59" value={interval} onChange={(event) => setInterval(parseNumberInput(event.target.value))} />
           </Field>
         ) : null}
         {mode !== "every-minute" ? (
           <>
             <Field label="Hour">
-              <input className={inputClass} type="number" min="0" max="23" value={hour} onChange={(event) => setHour(Number(event.target.value))} />
+              <NumberInput className={inputClass} type="number" min="0" max="23" value={hour} onChange={(event) => setHour(parseNumberInput(event.target.value))} />
             </Field>
             <Field label="Minute">
-              <input className={inputClass} type="number" min="0" max="59" value={minute} onChange={(event) => setMinute(Number(event.target.value))} />
+              <NumberInput className={inputClass} type="number" min="0" max="59" value={minute} onChange={(event) => setMinute(parseNumberInput(event.target.value))} />
             </Field>
           </>
         ) : null}
         {mode === "weekly" ? (
           <Field label="Weekday" hint="0 = Sunday, 6 = Saturday">
-            <input className={inputClass} type="number" min="0" max="6" value={weekday} onChange={(event) => setWeekday(Number(event.target.value))} />
+            <NumberInput className={inputClass} type="number" min="0" max="6" value={weekday} onChange={(event) => setWeekday(parseNumberInput(event.target.value))} />
           </Field>
         ) : null}
         {mode === "monthly" ? (
           <Field label="Day of month">
-            <input className={inputClass} type="number" min="1" max="31" value={dayOfMonth} onChange={(event) => setDayOfMonth(Number(event.target.value))} />
+            <NumberInput className={inputClass} type="number" min="1" max="31" value={dayOfMonth} onChange={(event) => setDayOfMonth(parseNumberInput(event.target.value))} />
           </Field>
         ) : null}
       </div>
@@ -4220,7 +4222,7 @@ export function KeywordSuggestionGeneratorTool() {
       <Field label="Seed keyword or phrase" hint="Example: email marketing">
         <input className={inputClass} value={seed} onChange={(event) => setSeed(event.target.value)} placeholder="email marketing" />
       </Field>
-      <Notice>Example ideas include modifiers like “tips,” “guide,” “online,” and question-style variations.</Notice>
+      <Notice>Example ideas include modifiers like â€œtips,â€ â€œguide,â€ â€œonline,â€ and question-style variations.</Notice>
       <button type="button" className={buttonClass} onClick={handleGenerate}>Generate keyword ideas</button>
       {error ? <Notice tone="error">{error}</Notice> : null}
       {!output && !error ? (
@@ -4361,3 +4363,6 @@ export function DescriptionGeneratorTool() {
     </ToolShell>
   );
 }
+
+
+

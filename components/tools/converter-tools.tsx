@@ -1,10 +1,12 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import {
   buttonClass,
   EmptyState,
   Field,
+  NumberInput,
+  parseNumberInput,
   Notice,
   OutputBlock,
   secondaryButtonClass,
@@ -265,7 +267,7 @@ function UnitConverter({
     <ToolShell title={title} description={description}>
       <div className="grid gap-4 md:grid-cols-3">
         <Field label="Value">
-          <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={amount} onChange={(event) => setAmount(Number(event.target.value))} />
+          <NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={amount} onChange={(event) => setAmount(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="From">
           <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={from} onChange={(event) => setFrom(event.target.value)}>
@@ -309,7 +311,7 @@ export function TemperatureConverterTool() {
     <ToolShell title="Temperature Converter" description="Convert temperatures between Celsius, Fahrenheit, and Kelvin with local formulas.">
       <div className="grid gap-4 md:grid-cols-3">
         <Field label="Value">
-          <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={amount} onChange={(event) => setAmount(Number(event.target.value))} />
+          <NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={amount} onChange={(event) => setAmount(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="From">
           <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={from} onChange={(event) => setFrom(event.target.value)}>
@@ -377,7 +379,7 @@ export function FileSizeConverterTool() {
           <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" inputMode="decimal" value={value} onChange={(event) => setValue(event.target.value)} placeholder="1024" />
         </Field>
         <Field label="Input unit">
-          <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={String(unitIndex)} onChange={(event) => setUnitIndex(Number(event.target.value))}>
+          <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={String(unitIndex)} onChange={(event) => setUnitIndex(parseNumberInput(event.target.value))}>
             {fileSizeSystems[system].labels.map((label, index) => (
               <option key={label} value={index}>{label}</option>
             ))}
@@ -639,7 +641,7 @@ export function CurrencyConverterTool() {
       </Notice>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Field label="Amount">
-          <input
+          <NumberInput
             className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]"
             type="number"
             min="0"
@@ -1051,3 +1053,6 @@ export function BinaryToTextConverterTool() {
     />
   );
 }
+
+
+

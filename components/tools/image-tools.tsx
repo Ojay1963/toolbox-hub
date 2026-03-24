@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 /* eslint-disable @next/next/no-img-element */
 
 import type { MouseEvent } from "react";
@@ -8,6 +8,8 @@ import {
   EmptyState,
   Field,
   formatFileSize,
+  NumberInput,
+  parseNumberInput,
   Notice,
   OutputBlock,
   secondaryButtonClass,
@@ -186,7 +188,7 @@ function ImageDownloadPanel({
       <button type="button" className={buttonClass} onClick={() => downloadProcessedImage(processed.url, filename)}>
         Download output
       </button>
-      <OutputBlock title="Output size" value={`${processed.width} x ${processed.height} • ${formatFileSize(processed.blob.size)}`} multiline={false} />
+      <OutputBlock title="Output size" value={`${processed.width} x ${processed.height} â€¢ ${formatFileSize(processed.blob.size)}`} multiline={false} />
     </div>
   );
 }
@@ -748,7 +750,7 @@ export function ImageCompressorTool() {
         <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
       <Field label={`Compression quality (${Math.round(quality * 100)}%)`}>
-        <input className="w-full" type="range" min="0.2" max="1" step="0.05" value={quality} onChange={(event) => setQuality(Number(event.target.value))} />
+        <input className="w-full" type="range" min="0.2" max="1" step="0.05" value={quality} onChange={(event) => setQuality(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleCompress} disabled={!file}>
         Compress image
@@ -827,13 +829,13 @@ export function ImageResizerTool() {
       </Field>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Width (px)">
-          <input
+          <NumberInput
             className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]"
             type="number"
             min="1"
             value={width || ""}
             onChange={(event) => {
-              const nextWidth = Number(event.target.value);
+              const nextWidth = parseNumberInput(event.target.value);
               setWidth(nextWidth);
               if (lockRatio && file && width > 0 && height > 0) {
                 setHeight(Math.max(1, Math.round((nextWidth / width) * height)));
@@ -842,13 +844,13 @@ export function ImageResizerTool() {
           />
         </Field>
         <Field label="Height (px)">
-          <input
+          <NumberInput
             className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]"
             type="number"
             min="1"
             value={height || ""}
             onChange={(event) => {
-              const nextHeight = Number(event.target.value);
+              const nextHeight = parseNumberInput(event.target.value);
               setHeight(nextHeight);
               if (lockRatio && file && width > 0 && height > 0) {
                 setWidth(Math.max(1, Math.round((nextHeight / height) * width)));
@@ -934,10 +936,10 @@ export function CropImageTool() {
         <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
       <div className="grid gap-4 md:grid-cols-2">
-        <Field label="X position"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="0" value={cropX} onChange={(event) => setCropX(Number(event.target.value))} /></Field>
-        <Field label="Y position"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="0" value={cropY} onChange={(event) => setCropY(Number(event.target.value))} /></Field>
-        <Field label="Crop width"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" value={cropWidth} onChange={(event) => setCropWidth(Number(event.target.value))} /></Field>
-        <Field label="Crop height"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" value={cropHeight} onChange={(event) => setCropHeight(Number(event.target.value))} /></Field>
+        <Field label="X position"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="0" value={cropX} onChange={(event) => setCropX(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Y position"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="0" value={cropY} onChange={(event) => setCropY(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Crop width"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" value={cropWidth} onChange={(event) => setCropWidth(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Crop height"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" value={cropHeight} onChange={(event) => setCropHeight(parseNumberInput(event.target.value))} /></Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleCrop} disabled={!file}>
         Crop image
@@ -1107,7 +1109,7 @@ export function ImageRotatorTool() {
         <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
       <Field label="Rotation angle">
-        <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={angle} onChange={(event) => setAngle(Number(event.target.value))}>
+        <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={angle} onChange={(event) => setAngle(parseNumberInput(event.target.value))}>
           <option value={90}>90 degrees</option>
           <option value={180}>180 degrees</option>
           <option value={270}>270 degrees</option>
@@ -1204,10 +1206,10 @@ export function ImageWatermarkTool() {
           </select>
         </Field>
         <Field label={`Font size (${fontSize}px)`}>
-          <input className="w-full" type="range" min="16" max="96" step="2" value={fontSize} onChange={(event) => setFontSize(Number(event.target.value))} />
+          <input className="w-full" type="range" min="16" max="96" step="2" value={fontSize} onChange={(event) => setFontSize(parseNumberInput(event.target.value))} />
         </Field>
         <Field label={`Opacity (${Math.round(opacity * 100)}%)`}>
-          <input className="w-full" type="range" min="0.15" max="1" step="0.05" value={opacity} onChange={(event) => setOpacity(Number(event.target.value))} />
+          <input className="w-full" type="range" min="0.15" max="1" step="0.05" value={opacity} onChange={(event) => setOpacity(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleWatermark} disabled={!file}>
@@ -1350,7 +1352,7 @@ export function BackgroundRemoverTool() {
         {!file ? (
           <EmptyState
             title="Upload an image to remove its background"
-            description="You’ll get a transparent PNG when the result is ready."
+            description="Youâ€™ll get a transparent PNG when the result is ready."
           />
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
@@ -1683,7 +1685,7 @@ function FilterImageTool({
         <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
       <Field label={filterLabel}>
-        <input className="w-full" type="range" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} />
+        <input className="w-full" type="range" min={min} max={max} step={step} value={value} onChange={(event) => onChange(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleApply} disabled={!file}>
         Apply effect
@@ -1859,10 +1861,10 @@ export function ImageCropperProTool() {
         </select>
       </Field>
       <div className="grid gap-4 md:grid-cols-2">
-        <Field label="X position"><input className={imageInputClass()} type="number" min="0" value={cropX} onChange={(event) => setCropX(Number(event.target.value))} /></Field>
-        <Field label="Y position"><input className={imageInputClass()} type="number" min="0" value={cropY} onChange={(event) => setCropY(Number(event.target.value))} /></Field>
-        <Field label="Crop width"><input className={imageInputClass()} type="number" min="1" value={cropWidth} onChange={(event) => setCropWidth(Number(event.target.value))} /></Field>
-        <Field label="Crop height"><input className={imageInputClass()} type="number" min="1" value={cropHeight} onChange={(event) => setCropHeight(Number(event.target.value))} /></Field>
+        <Field label="X position"><NumberInput className={imageInputClass()} type="number" min="0" value={cropX} onChange={(event) => setCropX(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Y position"><NumberInput className={imageInputClass()} type="number" min="0" value={cropY} onChange={(event) => setCropY(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Crop width"><NumberInput className={imageInputClass()} type="number" min="1" value={cropWidth} onChange={(event) => setCropWidth(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Crop height"><NumberInput className={imageInputClass()} type="number" min="1" value={cropHeight} onChange={(event) => setCropHeight(parseNumberInput(event.target.value))} /></Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleCrop} disabled={!file}>Crop image</button>
       {error ? <Notice tone="error">{error}</Notice> : null}
@@ -1931,7 +1933,7 @@ export function GifMakerTool() {
         <input type="file" accept={supportedTypes} multiple onChange={(event) => setFiles(Array.from(event.target.files ?? []))} />
       </Field>
       <Field label={`Frame delay (${frameDelay} ms)`}>
-        <input className="w-full" type="range" min="100" max="1500" step="50" value={frameDelay} onChange={(event) => setFrameDelay(Number(event.target.value))} />
+        <input className="w-full" type="range" min="100" max="1500" step="50" value={frameDelay} onChange={(event) => setFrameDelay(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleGenerate} disabled={files.length < 2}>Generate GIF</button>
       {error ? <Notice tone="error">{error}</Notice> : null}
@@ -2033,10 +2035,10 @@ export function VideoToGifConverterTool() {
         <input type="file" accept="video/mp4,video/webm" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Field label="Start time (s)"><input className={imageInputClass()} type="number" min="0" step="0.1" value={startTime} onChange={(event) => setStartTime(Number(event.target.value))} /></Field>
-        <Field label="Clip length (s)"><input className={imageInputClass()} type="number" min="0.5" max="8" step="0.5" value={duration} onChange={(event) => setDuration(Number(event.target.value))} /></Field>
-        <Field label="Frames"><input className={imageInputClass()} type="number" min="2" max="12" value={frameCount} onChange={(event) => setFrameCount(Number(event.target.value))} /></Field>
-        <Field label="Frame delay (ms)"><input className={imageInputClass()} type="number" min="80" max="500" step="10" value={frameDelay} onChange={(event) => setFrameDelay(Number(event.target.value))} /></Field>
+        <Field label="Start time (s)"><NumberInput className={imageInputClass()} type="number" min="0" step="0.1" value={startTime} onChange={(event) => setStartTime(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Clip length (s)"><NumberInput className={imageInputClass()} type="number" min="0.5" max="8" step="0.5" value={duration} onChange={(event) => setDuration(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Frames"><NumberInput className={imageInputClass()} type="number" min="2" max="12" value={frameCount} onChange={(event) => setFrameCount(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Frame delay (ms)"><NumberInput className={imageInputClass()} type="number" min="80" max="500" step="10" value={frameDelay} onChange={(event) => setFrameDelay(parseNumberInput(event.target.value))} /></Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleGenerate} disabled={!file}>Convert to GIF</button>
       <Notice>Short clips usually convert faster and produce smaller GIF files.</Notice>
@@ -2272,7 +2274,7 @@ export function ImageBorderGeneratorTool() {
       </Field>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label={`Border size (${borderSize}px)`}>
-          <input className="w-full" type="range" min="2" max="80" step="2" value={borderSize} onChange={(event) => setBorderSize(Number(event.target.value))} />
+          <input className="w-full" type="range" min="2" max="80" step="2" value={borderSize} onChange={(event) => setBorderSize(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Border color">
           <input className={imageInputClass()} type="color" value={borderColor} onChange={(event) => setBorderColor(event.target.value)} />
@@ -2509,7 +2511,7 @@ export function ImageNoiseReducerTool() {
         <input type="file" accept={supportedTypes} onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
       <Field label={`Noise reduction strength (${strength})`}>
-        <input className="w-full" type="range" min="1" max="3" step="1" value={strength} onChange={(event) => setStrength(Number(event.target.value))} />
+        <input className="w-full" type="range" min="1" max="3" step="1" value={strength} onChange={(event) => setStrength(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleReduce} disabled={!file}>Reduce noise</button>
       {error ? <Notice tone="error">{error}</Notice> : null}
@@ -2691,7 +2693,7 @@ export function VideoFrameExtractorTool() {
         <input type="file" accept="video/mp4,video/webm" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
       <Field label="Capture time (seconds)">
-        <input className={imageInputClass()} type="number" min="0" step="0.1" value={timeInSeconds} onChange={(event) => setTimeInSeconds(Number(event.target.value))} />
+        <NumberInput className={imageInputClass()} type="number" min="0" step="0.1" value={timeInSeconds} onChange={(event) => setTimeInSeconds(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleExtract} disabled={!file}>Extract frame</button>
       {error ? <Notice tone="error">{error}</Notice> : null}
@@ -3054,3 +3056,6 @@ export function ColorContrastCheckerTool() {
     </ToolShell>
   );
 }
+
+
+

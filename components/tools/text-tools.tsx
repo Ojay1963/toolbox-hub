@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import {
@@ -6,6 +6,8 @@ import {
   EmptyState,
   Field,
   inputClass,
+  NumberInput,
+  parseNumberInput,
   Notice,
   OutputBlock,
   secondaryButtonClass,
@@ -379,7 +381,7 @@ export function RandomSentenceGeneratorTool() {
   return (
     <ToolShell title="Random Sentence Generator" description="Generate sample sentences from a bundled local sentence set.">
       <Field label="Number of sentences">
-        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="10" value={count} onChange={(event) => setCount(Number(event.target.value))} />
+        <NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="10" value={count} onChange={(event) => setCount(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleGenerate}>
         Generate sentences
@@ -435,7 +437,7 @@ export function LoremIpsumGeneratorTool() {
           </select>
         </Field>
         <Field label={`Number of ${mode}`}>
-          <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="10" value={count} onChange={(event) => setCount(Number(event.target.value))} />
+          <NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="10" value={count} onChange={(event) => setCount(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleGenerate}>
@@ -698,10 +700,10 @@ export function WordFrequencyCounterTool() {
       </Field>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Minimum word length">
-          <input className={inputClass} type="number" min="1" max="12" value={minLength} onChange={(event) => setMinLength(Number(event.target.value))} />
+          <NumberInput className={inputClass} type="number" min="1" max="12" value={minLength} onChange={(event) => setMinLength(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Top results to show">
-          <input className={inputClass} type="number" min="3" max="25" value={limit} onChange={(event) => setLimit(Number(event.target.value))} />
+          <NumberInput className={inputClass} type="number" min="3" max="25" value={limit} onChange={(event) => setLimit(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleAnalyze}>Analyze frequency</button>
@@ -885,7 +887,7 @@ export function ReadingTimeCalculatorTool() {
         <textarea className={textareaClass} value={text} onChange={(event) => setText(event.target.value)} placeholder="Paste the article, email, or page copy you want to measure." />
       </Field>
       <Field label="Reading speed (words per minute)">
-        <input className={inputClass} type="number" min="80" max="500" value={wordsPerMinute} onChange={(event) => setWordsPerMinute(Number(event.target.value))} />
+        <NumberInput className={inputClass} type="number" min="80" max="500" value={wordsPerMinute} onChange={(event) => setWordsPerMinute(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleEstimate}>Estimate reading time</button>
       {error ? <Notice tone="error">{error}</Notice> : null}
@@ -908,3 +910,6 @@ export function ReadingTimeCalculatorTool() {
     </ToolShell>
   );
 }
+
+
+

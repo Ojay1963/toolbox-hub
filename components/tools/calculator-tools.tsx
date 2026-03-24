@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
@@ -7,6 +7,8 @@ import {
   EmptyState,
   Field,
   formatNumber,
+  NumberInput,
+  parseNumberInput,
   Notice,
   OutputBlock,
   ToolShell,
@@ -208,8 +210,8 @@ export function BmiCalculatorTool() {
         Use metric units
       </label>
       <div className="grid gap-4 md:grid-cols-2">
-        <Field label={metric ? "Height (cm)" : "Height (in)"}><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={height} onChange={(event) => setHeight(Number(event.target.value))} /></Field>
-        <Field label={metric ? "Weight (kg)" : "Weight (lb)"}><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={weight} onChange={(event) => setWeight(Number(event.target.value))} /></Field>
+        <Field label={metric ? "Height (cm)" : "Height (in)"}><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={height} onChange={(event) => setHeight(parseNumberInput(event.target.value))} /></Field>
+        <Field label={metric ? "Weight (kg)" : "Weight (lb)"}><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={weight} onChange={(event) => setWeight(parseNumberInput(event.target.value))} /></Field>
       </div>
       {result ? <OutputBlock title="BMI result" value={result} multiline={false} /> : <EmptyState title="Enter valid height and weight" description="Both values must be greater than zero to calculate BMI." />}
       <Notice>BMI is a screening metric only and not medical advice.</Notice>
@@ -238,9 +240,9 @@ export function LoanCalculatorTool() {
   return (
     <ToolShell title="Loan Calculator" description="Estimate monthly repayment, total paid, and total interest using standard amortization math.">
       <div className="grid gap-4 md:grid-cols-3">
-        <Field label="Loan amount"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={principal} onChange={(event) => setPrincipal(Number(event.target.value))} /></Field>
-        <Field label="Annual rate (%)"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={annualRate} onChange={(event) => setAnnualRate(Number(event.target.value))} /></Field>
-        <Field label="Term (years)"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={years} onChange={(event) => setYears(Number(event.target.value))} /></Field>
+        <Field label="Loan amount"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={principal} onChange={(event) => setPrincipal(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Annual rate (%)"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={annualRate} onChange={(event) => setAnnualRate(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Term (years)"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={years} onChange={(event) => setYears(parseNumberInput(event.target.value))} /></Field>
       </div>
       {summary ? <OutputBlock title="Loan summary" value={summary} /> : <EmptyState title="Enter valid loan inputs" description="Loan amount and term must be greater than zero." />}
     </ToolShell>
@@ -263,10 +265,10 @@ export function PercentageCalculatorTool() {
   return (
     <ToolShell title="Percentage Calculator" description="Handle common percentage formulas like percent of a value, percentage share, and percentage change.">
       <div className="grid gap-4 md:grid-cols-2">
-        <Field label="Percent / first value"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={percent} onChange={(event) => setPercent(Number(event.target.value))} /></Field>
-        <Field label="Base / second value"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={baseValue} onChange={(event) => setBaseValue(Number(event.target.value))} /></Field>
-        <Field label="Old value"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={oldValue} onChange={(event) => setOldValue(Number(event.target.value))} /></Field>
-        <Field label="New value"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={newValue} onChange={(event) => setNewValue(Number(event.target.value))} /></Field>
+        <Field label="Percent / first value"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={percent} onChange={(event) => setPercent(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Base / second value"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={baseValue} onChange={(event) => setBaseValue(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Old value"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={oldValue} onChange={(event) => setOldValue(parseNumberInput(event.target.value))} /></Field>
+        <Field label="New value"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={newValue} onChange={(event) => setNewValue(parseNumberInput(event.target.value))} /></Field>
       </div>
       <OutputBlock title="Percentage results" value={result} />
     </ToolShell>
@@ -321,14 +323,14 @@ export function DiscountCalculatorTool() {
     <ToolShell title="Discount Calculator" description="Calculate savings and final price instantly from an original amount and discount percentage.">
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Original price">
-          <input className={numberInputClass()} type="number" inputMode="decimal" value={originalPrice} onChange={(event) => setOriginalPrice(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" value={originalPrice} onChange={(event) => setOriginalPrice(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Discount (%)">
-          <input className={numberInputClass()} type="number" inputMode="decimal" min="0" max="100" value={discountRate} onChange={(event) => setDiscountRate(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" max="100" value={discountRate} onChange={(event) => setDiscountRate(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="Discount result" value={summary} />}
-      <CalculatorExplanation>The calculator uses: savings = original price × discount rate, then final price = original price − savings.</CalculatorExplanation>
+      <CalculatorExplanation>The calculator uses: savings = original price Ã— discount rate, then final price = original price âˆ’ savings.</CalculatorExplanation>
     </ToolShell>
   );
 }
@@ -363,17 +365,17 @@ export function TipCalculatorTool() {
     <ToolShell title="Tip Calculator" description="Calculate tip amount, total bill, and optional split per person in real time.">
       <div className="grid gap-4 md:grid-cols-3">
         <Field label="Bill amount">
-          <input className={numberInputClass()} type="number" inputMode="decimal" value={billAmount} onChange={(event) => setBillAmount(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" value={billAmount} onChange={(event) => setBillAmount(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Tip (%)">
-          <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={tipRate} onChange={(event) => setTipRate(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={tipRate} onChange={(event) => setTipRate(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="People">
-          <input className={numberInputClass()} type="number" inputMode="numeric" min="1" value={peopleCount} onChange={(event) => setPeopleCount(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="numeric" min="1" value={peopleCount} onChange={(event) => setPeopleCount(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="Tip result" value={summary} />}
-      <CalculatorExplanation>Tip amount = bill × tip rate. Total bill = bill + tip. Split per person = total bill ÷ number of people.</CalculatorExplanation>
+      <CalculatorExplanation>Tip amount = bill Ã— tip rate. Total bill = bill + tip. Split per person = total bill Ã· number of people.</CalculatorExplanation>
     </ToolShell>
   );
 }
@@ -407,14 +409,14 @@ export function ProfitMarginCalculatorTool() {
     <ToolShell title="Profit Margin Calculator" description="Calculate profit, margin, and markup from cost and selling price with instant results.">
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Cost">
-          <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={cost} onChange={(event) => setCost(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={cost} onChange={(event) => setCost(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Selling price">
-          <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={sellingPrice} onChange={(event) => setSellingPrice(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={sellingPrice} onChange={(event) => setSellingPrice(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="Profit result" value={summary} />}
-      <CalculatorExplanation>Profit = selling price − cost. Margin uses selling price as the base, while markup uses cost as the base.</CalculatorExplanation>
+      <CalculatorExplanation>Profit = selling price âˆ’ cost. Margin uses selling price as the base, while markup uses cost as the base.</CalculatorExplanation>
     </ToolShell>
   );
 }
@@ -453,10 +455,10 @@ export function VatCalculatorTool() {
     <ToolShell title="VAT Calculator" description="Add VAT to a base amount or remove VAT from a tax-inclusive total instantly.">
       <div className="grid gap-4 md:grid-cols-3">
         <Field label="Amount">
-          <input className={numberInputClass()} type="number" inputMode="decimal" value={amount} onChange={(event) => setAmount(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" value={amount} onChange={(event) => setAmount(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="VAT rate (%)">
-          <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={vatRate} onChange={(event) => setVatRate(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={vatRate} onChange={(event) => setVatRate(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Mode">
           <select className={numberInputClass()} value={mode} onChange={(event) => setMode(event.target.value as "add" | "remove")}>
@@ -466,7 +468,7 @@ export function VatCalculatorTool() {
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="VAT result" value={summary} />}
-      <CalculatorExplanation>Adding VAT uses amount × rate. Removing VAT works backwards from a tax-inclusive total to find the net amount and VAT portion.</CalculatorExplanation>
+      <CalculatorExplanation>Adding VAT uses amount Ã— rate. Removing VAT works backwards from a tax-inclusive total to find the net amount and VAT portion.</CalculatorExplanation>
     </ToolShell>
   );
 }
@@ -496,14 +498,14 @@ export function SalesTaxCalculatorTool() {
     <ToolShell title="Sales Tax Calculator" description="Calculate sales tax and final total from a base amount and tax rate in real time.">
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Price before tax">
-          <input className={numberInputClass()} type="number" inputMode="decimal" value={priceBeforeTax} onChange={(event) => setPriceBeforeTax(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" value={priceBeforeTax} onChange={(event) => setPriceBeforeTax(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Sales tax (%)">
-          <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={taxRate} onChange={(event) => setTaxRate(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={taxRate} onChange={(event) => setTaxRate(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="Sales tax result" value={summary} />}
-      <CalculatorExplanation>Sales tax amount = price before tax × tax rate. Final total = price before tax + sales tax.</CalculatorExplanation>
+      <CalculatorExplanation>Sales tax amount = price before tax Ã— tax rate. Final total = price before tax + sales tax.</CalculatorExplanation>
     </ToolShell>
   );
 }
@@ -537,17 +539,17 @@ export function SimpleInterestCalculatorTool() {
     <ToolShell title="Simple Interest Calculator" description="Calculate interest and final amount using the standard simple interest formula.">
       <div className="grid gap-4 md:grid-cols-3">
         <Field label="Principal">
-          <input className={numberInputClass()} type="number" inputMode="decimal" value={principal} onChange={(event) => setPrincipal(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" value={principal} onChange={(event) => setPrincipal(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Annual rate (%)">
-          <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={annualRate} onChange={(event) => setAnnualRate(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={annualRate} onChange={(event) => setAnnualRate(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Time (years)">
-          <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={years} onChange={(event) => setYears(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={years} onChange={(event) => setYears(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="Simple interest result" value={summary} />}
-      <CalculatorExplanation>Simple interest uses I = P × R × T, where P is principal, R is annual rate, and T is time in years.</CalculatorExplanation>
+      <CalculatorExplanation>Simple interest uses I = P Ã— R Ã— T, where P is principal, R is annual rate, and T is time in years.</CalculatorExplanation>
     </ToolShell>
   );
 }
@@ -587,16 +589,16 @@ export function CompoundInterestCalculatorTool() {
     <ToolShell title="Compound Interest Calculator" description="Estimate growth with compound interest using principal, rate, time, and compounding frequency.">
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Field label="Principal">
-          <input className={numberInputClass()} type="number" inputMode="decimal" value={principal} onChange={(event) => setPrincipal(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" value={principal} onChange={(event) => setPrincipal(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Annual rate (%)">
-          <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={annualRate} onChange={(event) => setAnnualRate(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={annualRate} onChange={(event) => setAnnualRate(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Time (years)">
-          <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={years} onChange={(event) => setYears(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={years} onChange={(event) => setYears(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Compounds per year">
-          <input className={numberInputClass()} type="number" inputMode="numeric" min="1" value={compoundingsPerYear} onChange={(event) => setCompoundingsPerYear(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" inputMode="numeric" min="1" value={compoundingsPerYear} onChange={(event) => setCompoundingsPerYear(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="Compound interest result" value={summary} />}
@@ -640,18 +642,18 @@ export function UnitPriceCalculatorTool() {
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-4">
           <Field label="First item price">
-            <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={price} onChange={(event) => setPrice(Number(event.target.value))} />
+            <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={price} onChange={(event) => setPrice(parseNumberInput(event.target.value))} />
           </Field>
           <Field label="First item quantity">
-            <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} />
+            <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={quantity} onChange={(event) => setQuantity(parseNumberInput(event.target.value))} />
           </Field>
         </div>
         <div className="space-y-4">
           <Field label="Second item price">
-            <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={comparisonPrice} onChange={(event) => setComparisonPrice(Number(event.target.value))} />
+            <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={comparisonPrice} onChange={(event) => setComparisonPrice(parseNumberInput(event.target.value))} />
           </Field>
           <Field label="Second item quantity">
-            <input className={numberInputClass()} type="number" inputMode="decimal" min="0" value={comparisonQuantity} onChange={(event) => setComparisonQuantity(Number(event.target.value))} />
+            <NumberInput className={numberInputClass()} type="number" inputMode="decimal" min="0" value={comparisonQuantity} onChange={(event) => setComparisonQuantity(parseNumberInput(event.target.value))} />
           </Field>
         </div>
       </div>
@@ -765,7 +767,7 @@ export function WorkHoursCalculatorTool() {
           <input className={numberInputClass()} type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} />
         </Field>
         <Field label="Break (minutes)">
-          <input className={numberInputClass()} type="number" min="0" value={breakMinutes} onChange={(event) => setBreakMinutes(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" min="0" value={breakMinutes} onChange={(event) => setBreakMinutes(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <label className="flex items-center gap-2 text-sm text-[color:var(--foreground)]">
@@ -979,7 +981,7 @@ export function MeetingTimeFinderTool() {
           <input className={numberInputClass()} type="date" value={searchDate} onChange={(event) => setSearchDate(event.target.value)} />
         </Field>
         <Field label="Meeting duration (minutes)" hint="Example: 30, 45, or 60 minutes.">
-          <input className={numberInputClass()} type="number" min="1" max="480" value={durationMinutes} onChange={(event) => setDurationMinutes(Number(event.target.value))} />
+          <NumberInput className={numberInputClass()} type="number" min="1" max="480" value={durationMinutes} onChange={(event) => setDurationMinutes(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <div className="space-y-4">
@@ -997,10 +999,10 @@ export function MeetingTimeFinderTool() {
                 </select>
               </Field>
               <Field label="Workday starts">
-                <input className={numberInputClass()} type="number" min="0" max="23" value={participant.startHour} onChange={(event) => updateParticipant(index, { startHour: Number(event.target.value) })} />
+                <NumberInput className={numberInputClass()} type="number" min="0" max="23" value={participant.startHour} onChange={(event) => updateParticipant(index, { startHour: parseNumberInput(event.target.value) })} />
               </Field>
               <Field label="Workday ends">
-                <input className={numberInputClass()} type="number" min="1" max="24" value={participant.endHour} onChange={(event) => updateParticipant(index, { endHour: Number(event.target.value) })} />
+                <NumberInput className={numberInputClass()} type="number" min="1" max="24" value={participant.endHour} onChange={(event) => updateParticipant(index, { endHour: parseNumberInput(event.target.value) })} />
               </Field>
             </div>
             {index === 2 ? (
@@ -1027,3 +1029,6 @@ export function MeetingTimeFinderTool() {
     </ToolShell>
   );
 }
+
+
+

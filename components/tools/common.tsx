@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import type { ChangeEvent, InputHTMLAttributes } from "react";
+import { useEffect, useState } from "react";
 
 export const panelClass = "rounded-3xl border border-[color:var(--border)] bg-white p-6 shadow-sm";
 export const inputClass =
@@ -27,6 +28,72 @@ export function Field({
       {hint ? <span className="block text-xs text-[color:var(--muted)]">{hint}</span> : null}
     </label>
   );
+}
+
+type NumberInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "value"> & {
+  value: number | string;
+};
+
+function getNumberInputDisplayValue(value: number | string) {
+  return typeof value === "number" && Number.isNaN(value) ? "" : String(value);
+}
+
+export function NumberInput({
+  value,
+  onChange,
+  onBlur,
+  onFocus,
+  ...props
+}: NumberInputProps) {
+  const [draftValue, setDraftValue] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (draftValue === null) {
+      return;
+    }
+
+    if (draftValue === getNumberInputDisplayValue(value)) {
+      setDraftValue(null);
+    }
+  }, [draftValue, value]);
+
+  return (
+    <input
+      {...props}
+      type="number"
+      value={draftValue ?? getNumberInputDisplayValue(value)}
+      onChange={(event) => {
+        const nextValue = event.target.value;
+        setDraftValue(nextValue);
+
+        if (nextValue.trim() === "") {
+          const emptyEvent = {
+            ...event,
+            target: { ...event.target, value: "NaN" },
+            currentTarget: { ...event.currentTarget, value: "NaN" },
+          } as ChangeEvent<HTMLInputElement>;
+          onChange?.(emptyEvent);
+          return;
+        }
+
+        if (!Number.isNaN(Number(nextValue))) {
+          onChange?.(event);
+        }
+      }}
+      onFocus={(event) => {
+        event.currentTarget.select();
+        onFocus?.(event);
+      }}
+      onBlur={(event) => {
+        onBlur?.(event);
+      }}
+    />
+  );
+}
+
+export function parseNumberInput(value: string) {
+  const trimmedValue = value.trim();
+  return trimmedValue === "" ? Number.NaN : Number(trimmedValue);
 }
 
 export function EmptyState({

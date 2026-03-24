@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useMemo, useState } from "react";
@@ -7,6 +7,8 @@ import {
   EmptyState,
   Field,
   inputClass,
+  NumberInput,
+  parseNumberInput,
   Notice,
   OutputBlock,
   secondaryButtonClass,
@@ -347,7 +349,7 @@ export function PasswordGeneratorTool() {
     <ToolShell title="Password Generator" description="Create strong random passwords using browser-side secure randomness.">
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Password length">
-          <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="6" max="64" value={length} onChange={(event) => setLength(Number(event.target.value))} />
+          <NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="6" max="64" value={length} onChange={(event) => setLength(parseNumberInput(event.target.value))} />
         </Field>
         <div className="space-y-2 text-sm text-[color:var(--foreground)]">
           <label className="flex items-center gap-2"><input type="checkbox" checked={includeUppercase} onChange={(event) => setIncludeUppercase(event.target.checked)} /> Include uppercase</label>
@@ -473,10 +475,10 @@ export function BarcodeGeneratorTool() {
           <input className={inputClass} value={value} onChange={(event) => setValue(event.target.value)} placeholder="TOOLS-2026" />
         </Field>
         <Field label="Module width">
-          <input className={inputClass} type="number" min="2" max="6" value={moduleWidth} onChange={(event) => setModuleWidth(Number(event.target.value))} />
+          <NumberInput className={inputClass} type="number" min="2" max="6" value={moduleWidth} onChange={(event) => setModuleWidth(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Bar height">
-          <input className={inputClass} type="number" min="60" max="220" value={barHeight} onChange={(event) => setBarHeight(Number(event.target.value))} />
+          <NumberInput className={inputClass} type="number" min="60" max="220" value={barHeight} onChange={(event) => setBarHeight(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <label className="flex items-center gap-2 text-sm text-[color:var(--foreground)]">
@@ -521,7 +523,7 @@ export function UuidGeneratorTool() {
   return (
     <ToolShell title="UUID Generator" description="Generate one or more UUIDs locally using browser-supported random UUID generation.">
       <Field label="How many UUIDs?">
-        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="50" value={count} onChange={(event) => setCount(Number(event.target.value))} />
+        <NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="50" value={count} onChange={(event) => setCount(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleGenerate}>
         Generate UUIDs
@@ -561,7 +563,7 @@ export function RandomNameGeneratorTool() {
   return (
     <ToolShell title="Random Name Generator" description="Generate sample names from a bundled local list without using live APIs or a database.">
       <Field label="How many names?">
-        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="20" value={count} onChange={(event) => setCount(Number(event.target.value))} />
+        <NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="20" value={count} onChange={(event) => setCount(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleGenerate}>
         Generate names
@@ -617,7 +619,7 @@ export function FakeAddressGeneratorTool() {
           </select>
         </Field>
         <Field label="How many addresses?">
-          <input className={inputClass} type="number" min="1" max="20" value={count} onChange={(event) => setCount(Number(event.target.value))} />
+          <NumberInput className={inputClass} type="number" min="1" max="20" value={count} onChange={(event) => setCount(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <Notice>These are fake sample addresses for UI testing and mock content only. They are not verified delivery addresses.</Notice>
@@ -691,9 +693,9 @@ export function RandomNumberGeneratorTool() {
   return (
     <ToolShell title="Random Number Generator" description="Generate random integers in a chosen range with optional duplicate control.">
       <div className="grid gap-4 md:grid-cols-3">
-        <Field label="Minimum"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={min} onChange={(event) => setMin(Number(event.target.value))} /></Field>
-        <Field label="Maximum"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={max} onChange={(event) => setMax(Number(event.target.value))} /></Field>
-        <Field label="Count"><input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="100" value={count} onChange={(event) => setCount(Number(event.target.value))} /></Field>
+        <Field label="Minimum"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={min} onChange={(event) => setMin(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Maximum"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={max} onChange={(event) => setMax(parseNumberInput(event.target.value))} /></Field>
+        <Field label="Count"><NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="100" value={count} onChange={(event) => setCount(parseNumberInput(event.target.value))} /></Field>
       </div>
       <label className="flex items-center gap-2 text-sm text-[color:var(--foreground)]">
         <input type="checkbox" checked={allowDuplicates} onChange={(event) => setAllowDuplicates(event.target.checked)} />
@@ -738,7 +740,7 @@ export function UsernameGeneratorTool() {
   return (
     <ToolShell title="Username Generator" description="Generate simple username ideas from bundled local patterns and random suffixes.">
       <Field label="How many usernames?">
-        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="20" value={count} onChange={(event) => setCount(Number(event.target.value))} />
+        <NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="20" value={count} onChange={(event) => setCount(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleGenerate}>
         Generate usernames
@@ -779,7 +781,7 @@ export function RandomUsernameGeneratorTool() {
           <input className={inputClass} value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="phoenix, design, atlas" maxLength={24} />
         </Field>
         <Field label="Suggestions to generate" hint="At least 10 suggestions are generated each time.">
-          <input className={inputClass} type="number" min="10" max="24" value={count} onChange={(event) => setCount(Number(event.target.value) || 10)} />
+          <NumberInput className={inputClass} type="number" min="10" max="24" value={count} onChange={(event) => setCount(parseNumberInput(event.target.value) || 10)} />
         </Field>
       </div>
 
@@ -832,7 +834,7 @@ export function NicknameGeneratorTool() {
   return (
     <ToolShell title="Nickname Generator" description="Generate nickname ideas from a bundled local word list.">
       <Field label="How many nicknames?">
-        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="20" value={count} onChange={(event) => setCount(Number(event.target.value))} />
+        <NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="1" max="20" value={count} onChange={(event) => setCount(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleGenerate}>
         Generate nicknames
@@ -941,7 +943,7 @@ export function RandomColorPaletteGeneratorTool() {
   return (
     <ToolShell title="Random Color Palette Generator" description="Generate a downloadable multi-color palette locally and preview the swatches instantly without any external dependency.">
       <Field label="Number of colors">
-        <input className={inputClass} type="number" min="3" max="8" value={count} onChange={(event) => setCount(Number(event.target.value))} />
+        <NumberInput className={inputClass} type="number" min="3" max="8" value={count} onChange={(event) => setCount(parseNumberInput(event.target.value))} />
       </Field>
       <div className="flex flex-wrap gap-3">
         <button type="button" className={buttonClass} onClick={handleGenerate}>Generate palette</button>
@@ -979,7 +981,7 @@ export function RandomPasswordPhraseGeneratorTool() {
   return (
     <ToolShell title="Random Password Phrase Generator" description="Generate simple passphrase-style passwords from bundled local words and browser randomness.">
       <Field label="Words per passphrase">
-        <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="3" max="8" value={wordCount} onChange={(event) => setWordCount(Number(event.target.value))} />
+        <NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" min="3" max="8" value={wordCount} onChange={(event) => setWordCount(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleGenerate}>
         Generate passphrase
@@ -1049,7 +1051,7 @@ export function BlogTitleGeneratorTool() {
           <input className={inputClass} value={topic} onChange={(event) => setTopic(event.target.value)} placeholder="email marketing" />
         </Field>
         <Field label="Ideas to generate">
-          <input className={inputClass} type="number" min="3" max="10" value={count} onChange={(event) => setCount(Number(event.target.value))} />
+          <NumberInput className={inputClass} type="number" min="3" max="10" value={count} onChange={(event) => setCount(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleGenerate}>Generate blog titles</button>
@@ -1300,7 +1302,7 @@ export function RandomTeamGeneratorTool() {
         <textarea className={textareaClass} value={namesInput} onChange={(event) => setNamesInput(event.target.value)} placeholder={"Alex\nJordan\nTaylor\nMorgan"} />
       </Field>
       <Field label="Number of teams">
-        <input className={inputClass} type="number" min="2" max="10" value={teamCount} onChange={(event) => setTeamCount(Number(event.target.value))} />
+        <NumberInput className={inputClass} type="number" min="2" max="10" value={teamCount} onChange={(event) => setTeamCount(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleGenerate}>Generate teams</button>
       {error ? <Notice tone="error">{error}</Notice> : null}
@@ -1348,10 +1350,10 @@ export function DiceRollerTool() {
     <ToolShell title="Dice Roller" description="Roll one or more virtual dice locally with adjustable dice count and side count.">
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="How many dice?">
-          <input className={inputClass} type="number" min="1" max="10" value={diceCount} onChange={(event) => setDiceCount(Number(event.target.value))} />
+          <NumberInput className={inputClass} type="number" min="1" max="10" value={diceCount} onChange={(event) => setDiceCount(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Sides per die">
-          <input className={inputClass} type="number" min="2" max="100" value={sides} onChange={(event) => setSides(Number(event.target.value))} />
+          <NumberInput className={inputClass} type="number" min="2" max="100" value={sides} onChange={(event) => setSides(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleRoll}>Roll dice</button>
@@ -1382,7 +1384,7 @@ export function CoinFlipGeneratorTool() {
   return (
     <ToolShell title="Coin Flip Generator" description="Flip one or more virtual coins locally and review the result summary instantly.">
       <Field label="How many flips?">
-        <input className={inputClass} type="number" min="1" max="25" value={flipCount} onChange={(event) => setFlipCount(Number(event.target.value))} />
+        <NumberInput className={inputClass} type="number" min="1" max="25" value={flipCount} onChange={(event) => setFlipCount(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleFlip}>Flip coin</button>
       {!results.length ? <EmptyState title="No coin flip yet" description="Choose how many flips you want and generate the result locally." /> : <>
@@ -1501,3 +1503,6 @@ export function CountdownTimerGeneratorTool() {
     </ToolShell>
   );
 }
+
+
+

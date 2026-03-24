@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useState } from "react";
@@ -7,6 +7,8 @@ import {
   EmptyState,
   Field,
   formatFileSize,
+  NumberInput,
+  parseNumberInput,
   Notice,
   OutputBlock,
   secondaryButtonClass,
@@ -497,7 +499,7 @@ export function PdfToJpgTool() {
         <input type="file" accept="application/pdf" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
       </Field>
       <Field label={`Render quality scale (${scale.toFixed(1)}x)`}>
-        <input className="w-full" type="range" min="1" max="2.5" step="0.25" value={scale} onChange={(event) => setScale(Number(event.target.value))} />
+        <input className="w-full" type="range" min="1" max="2.5" step="0.25" value={scale} onChange={(event) => setScale(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleConvert} disabled={!file}>
         Convert PDF to JPG
@@ -692,7 +694,7 @@ export function ImageToPdfConverterTool() {
                 <img src={item.previewUrl} alt={`Preview of ${item.file.name}`} className="h-40 w-full rounded-xl border border-[color:var(--border)] object-contain bg-stone-50" />
                 <div className="mt-3 space-y-1">
                   <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">{index + 1}. {item.file.name}</p>
-                  <p className="text-xs text-[color:var(--muted)]">{formatFileSize(item.file.size)} · {(item.file.type || "image").replace("image/", "").toUpperCase()}</p>
+                  <p className="text-xs text-[color:var(--muted)]">{formatFileSize(item.file.size)} Â· {(item.file.type || "image").replace("image/", "").toUpperCase()}</p>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button type="button" className={secondaryButtonClass} onClick={() => moveItem(index, -1)} disabled={index === 0}>
@@ -768,7 +770,7 @@ export function PdfPageRotatorTool() {
           <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={pageInput} onChange={(event) => setPageInput(event.target.value)} />
         </Field>
         <Field label="Rotation angle">
-          <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={angle} onChange={(event) => setAngle(Number(event.target.value))}>
+          <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={angle} onChange={(event) => setAngle(parseNumberInput(event.target.value))}>
             <option value={90}>90 degrees</option>
             <option value={180}>180 degrees</option>
             <option value={270}>270 degrees</option>
@@ -835,7 +837,7 @@ export function PdfPageNumberAdderTool() {
       </Field>
       <div className="grid gap-4 md:grid-cols-2">
         <Field label="Starting page number">
-          <input className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={startNumber} onChange={(event) => setStartNumber(Number(event.target.value))} />
+          <NumberInput className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" type="number" value={startNumber} onChange={(event) => setStartNumber(parseNumberInput(event.target.value))} />
         </Field>
         <Field label="Position">
           <select className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]" value={position} onChange={(event) => setPosition(event.target.value as "top-center" | "bottom-center")}>
@@ -994,7 +996,7 @@ export function PdfWatermarkTool() {
           </select>
         </Field>
         <Field label={`Opacity (${Math.round(opacity * 100)}%)`}>
-          <input className="w-full" type="range" min="0.1" max="0.8" step="0.05" value={opacity} onChange={(event) => setOpacity(Number(event.target.value))} />
+          <input className="w-full" type="range" min="0.1" max="0.8" step="0.05" value={opacity} onChange={(event) => setOpacity(parseNumberInput(event.target.value))} />
         </Field>
       </div>
       <button type="button" className={buttonClass} onClick={handleWatermark} disabled={!file}>
@@ -1685,3 +1687,6 @@ export function PdfPageCounterTool() {
     </ToolShell>
   );
 }
+
+
+
