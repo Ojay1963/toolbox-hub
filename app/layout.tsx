@@ -13,6 +13,14 @@ export const metadata: Metadata = {
     template: `%s | ${siteMetadata.name}`,
   },
   description: siteMetadata.description,
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png" },
+      { url: "/apple-icon.png", type: "image/png", sizes: "180x180" },
+    ],
+    apple: [{ url: "/apple-icon.png", type: "image/png", sizes: "180x180" }],
+    shortcut: ["/icon.png"],
+  },
   alternates: {
     canonical: "/",
   },

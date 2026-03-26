@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import siteMark from "@/components/images/Tools-hub-favicorn.png";
 
 export function Header() {
   return (
@@ -6,9 +8,12 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-4 lg:grid-cols-[1fr_auto_1fr]">
           <Link href="/" className="flex min-w-0 items-center gap-3" aria-label="Go to Toolbox Hub homepage">
-            <div className="rounded-2xl bg-[color:var(--primary)] px-3 py-2 text-sm font-bold text-white">
-              TH
-            </div>
+            <Image
+              src={siteMark}
+              alt="Toolbox Hub logo"
+              className="h-24 w-24 shrink-0 object-contain"
+              priority
+            />
             <div className="min-w-0">
               <p className="truncate text-lg font-bold tracking-tight">Toolbox Hub</p>
               <p className="truncate text-sm text-[color:var(--muted)]">Free online tools</p>

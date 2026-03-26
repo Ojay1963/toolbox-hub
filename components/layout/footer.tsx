@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import siteMark from "@/components/images/Tools-hub-favicorn.png";
 import { getPublicContactEmail } from "@/lib/seo";
 import { categories, getPopularTools } from "@/lib/tools";
 
@@ -19,7 +21,14 @@ export function Footer() {
     <footer className="border-t border-[color:var(--border)] bg-white/70">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr] lg:px-8">
         <div>
-          <h2 className="text-xl font-bold tracking-tight">Toolbox Hub</h2>
+          <div className="flex items-center gap-3">
+            <Image
+              src={siteMark}
+              alt="Toolbox Hub logo"
+              className="h-16 w-16 shrink-0 object-contain"
+            />
+            <h2 className="text-xl font-bold tracking-tight">Toolbox Hub</h2>
+          </div>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
             Toolbox Hub is a public website for free online tools, practical guides, and clear help pages for everyday digital tasks.
           </p>
