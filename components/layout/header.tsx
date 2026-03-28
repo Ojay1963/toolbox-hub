@@ -48,7 +48,7 @@ export function Header() {
             </Link>
           </div>
         </div>
-        <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:hidden">
+        <nav aria-label="Mobile primary" className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:hidden">
           <Link
             href="/"
             className="site-action-link rounded-full border border-[color:var(--border)] bg-white px-4 py-2.5 text-center text-sm font-semibold text-[color:var(--foreground)]"
@@ -73,52 +73,19 @@ export function Header() {
           >
             Contact
           </Link>
-        </div>
-        <div className="mt-4 lg:hidden">
-          <details className="rounded-2xl border border-[color:var(--border)] bg-white/80 p-4">
-            <summary className="cursor-pointer list-none text-sm font-semibold text-[color:var(--foreground)]">
-              Menu
-            </summary>
-            <nav aria-label="Mobile" className="mt-4 grid gap-2 text-sm text-[color:var(--muted)] sm:grid-cols-2">
-              <Link
-                href="/"
-                className="rounded-2xl border border-[color:var(--border)] px-4 py-3 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
-              >
-                Home
-              </Link>
-              <Link
-                href="/tools"
-                className="rounded-2xl border border-[color:var(--border)] px-4 py-3 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
-              >
-                Tools
-              </Link>
-              <Link
-                href="/tools#browse-categories"
-                className="rounded-2xl border border-[color:var(--border)] px-4 py-3 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
-              >
-                Browse categories
-              </Link>
-              <Link
-                href="/about"
-                className="rounded-2xl border border-[color:var(--border)] px-4 py-3 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
-              >
-                About
-              </Link>
-              <Link
-                href="/blog"
-                className="rounded-2xl border border-[color:var(--border)] px-4 py-3 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
-              >
-                Guides
-              </Link>
-              <Link
-                href="/contact"
-                className="rounded-2xl border border-[color:var(--border)] px-4 py-3 transition hover:border-[color:var(--primary)] hover:text-[color:var(--primary)]"
-              >
-                Contact
-              </Link>
-            </nav>
-          </details>
-        </div>
+          <Link
+            href="/about"
+            className="site-action-link rounded-full border border-[color:var(--border)] bg-white px-4 py-2.5 text-center text-sm font-semibold text-[color:var(--foreground)]"
+          >
+            About
+          </Link>
+          <Link
+            href="/blog"
+            className="site-action-link rounded-full border border-[color:var(--border)] bg-white px-4 py-2.5 text-center text-sm font-semibold text-[color:var(--foreground)]"
+          >
+            Guides
+          </Link>
+        </nav>
       </div>
     </header>
   );

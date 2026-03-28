@@ -22,12 +22,12 @@ export default function ContactPage() {
   const contactEmail = getPublicContactEmail();
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-      <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10">
+    <div className="site-shell mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+      <section className="site-hero rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10">
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[color:var(--primary-dark)]">
           Contact
         </p>
-        <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Contact Toolbox Hub</h1>
+        <h1 className="site-hero-title mt-4 text-4xl font-black tracking-tight sm:text-5xl">Contact Toolbox Hub</h1>
         <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
           Use the form below to send a message about tool issues, accessibility questions, privacy requests,
           business inquiries, or legal notices. Including the tool name, page URL, browser, and a short
@@ -36,8 +36,8 @@ export default function ContactPage() {
       </section>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8">
-          <h2 className="text-2xl font-black tracking-tight">Send a message</h2>
+        <section className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8">
+          <h2 className="site-section-title text-2xl font-black tracking-tight">Send a message</h2>
           <p className="mt-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
             This form sends your message directly to the site contact inbox.
           </p>
@@ -46,8 +46,8 @@ export default function ContactPage() {
           </div>
         </section>
 
-        <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8">
-          <h2 className="text-2xl font-black tracking-tight">What to contact the site about</h2>
+        <section className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8">
+          <h2 className="site-section-title text-2xl font-black tracking-tight">What to contact the site about</h2>
           <ul className="mt-5 space-y-3 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
             {contactTopics.map((topic) => (
               <li key={topic} className="rounded-2xl bg-stone-50 px-4 py-3">

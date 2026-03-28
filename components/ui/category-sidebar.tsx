@@ -14,7 +14,7 @@ export function CategorySidebar({
 
   return (
     <>
-      <section className="mobile-category-sidebar rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-5 shadow-sm lg:hidden">
+      <section className="mobile-category-sidebar min-w-0 w-full max-w-full overflow-hidden rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-5 shadow-sm lg:hidden">
         <div className="mobile-category-sidebar-header flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-[color:var(--foreground)]">
@@ -29,7 +29,7 @@ export function CategorySidebar({
             View tools
           </Link>
         </div>
-        <nav aria-label="Category sidebar mobile" className="mobile-chip-row mt-4 flex gap-2 overflow-x-auto pb-1">
+        <nav aria-label="Category sidebar mobile" className="mobile-wrap-chip-row mt-4 flex w-full max-w-full gap-2 pb-1">
           {categories.map((category) => {
             const isActive = category.slug === activeCategory;
             return (
@@ -37,7 +37,7 @@ export function CategorySidebar({
                 key={category.slug}
                 href={`/category/${category.slug}#tools-list`}
                 aria-current={isActive ? "page" : undefined}
-                className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition ${
+                className={`mobile-category-chip flex min-w-0 flex-1 basis-[calc(50%-0.25rem)] items-center justify-center rounded-full px-4 py-2.5 text-center text-sm font-medium transition sm:basis-[calc(33.333%-0.35rem)] ${
                   isActive
                     ? "bg-[color:var(--primary)] text-white"
                     : "border border-[color:var(--border)] bg-stone-50 text-[color:var(--foreground)] hover:border-[color:var(--primary)]"

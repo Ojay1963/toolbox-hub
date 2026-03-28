@@ -12,7 +12,7 @@ export function RelatedTools({ tools }: { tools: ToolDefinition[] }) {
     <div className="space-y-4">
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
         <ToolCard tool={featuredTool} />
-        <div className="rounded-3xl border border-[color:var(--border)] bg-white/88 p-5 shadow-sm">
+        <div className="min-w-0 rounded-3xl border border-[color:var(--border)] bg-white/88 p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--primary-dark)]">
             Also try
           </p>

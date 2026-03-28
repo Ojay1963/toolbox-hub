@@ -3,14 +3,14 @@
 import type { ChangeEvent, InputHTMLAttributes } from "react";
 import { useEffect, useState } from "react";
 
-export const panelClass = "rounded-3xl border border-[color:var(--border)] bg-white p-6 shadow-sm";
+export const panelClass = "max-w-full overflow-hidden rounded-3xl border border-[color:var(--border)] bg-white p-6 shadow-sm";
 export const inputClass =
-  "w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm";
+  "w-full min-w-0 max-w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm";
 export const textareaClass = `${inputClass} min-h-44`;
 export const buttonClass =
-  "rounded-2xl bg-[color:var(--primary)] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[color:var(--primary-dark)] disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex max-w-full items-center justify-center rounded-2xl bg-[color:var(--primary)] px-5 py-3.5 text-center text-sm font-semibold text-white transition hover:bg-[color:var(--primary-dark)] disabled:cursor-not-allowed disabled:opacity-60";
 export const secondaryButtonClass =
-  "rounded-2xl border border-[color:var(--border)] bg-white px-5 py-3.5 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]";
+  "inline-flex max-w-full items-center justify-center rounded-2xl border border-[color:var(--border)] bg-white px-5 py-3.5 text-center text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]";
 
 export function Field({
   label,
@@ -138,12 +138,12 @@ export function OutputBlock({
   multiline?: boolean;
 }) {
   return (
-    <div className="rounded-2xl bg-stone-50 p-4">
+    <div className="max-w-full rounded-2xl bg-stone-50 p-4">
       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
         {title}
       </p>
       {multiline ? (
-        <pre className="mt-2 overflow-x-auto whitespace-pre-wrap break-words text-sm text-slate-700">
+        <pre className="mt-2 max-w-full overflow-x-auto whitespace-pre-wrap break-words text-sm text-slate-700">
           {value}
         </pre>
       ) : (
@@ -166,7 +166,7 @@ export function ToolShell({
     <section className={panelClass}>
       <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
       <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">{description}</p>
-      <div className="mt-6 space-y-5">{children}</div>
+      <div className="mt-6 max-w-full space-y-5">{children}</div>
     </section>
   );
 }

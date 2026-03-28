@@ -81,6 +81,7 @@ export function SearchBox({
   const visibleSuggestions = suggestionList
     .filter((tool) => (categoryFilter === "all" ? true : tool.category === categoryFilter))
     .slice(0, 6);
+  const categoryPreviewTools = filteredTools.slice(0, 6);
 
   const quickQueries = ["PDF", "image", "text", "JSON", "hash", "calculator"];
 
@@ -113,7 +114,7 @@ export function SearchBox({
         Search for tools by name, category, or keyword.
       </div>
       {showCategoryFilter ? (
-        <div className="mobile-chip-row mt-4 flex flex-wrap gap-2">
+        <div className="mobile-wrap-chip-row mt-4 flex flex-wrap gap-2">
           <button
             type="button"
             aria-pressed={categoryFilter === "all"}
@@ -151,7 +152,7 @@ export function SearchBox({
             <p className="text-sm text-[color:var(--muted)]">
               Start with a quick search so the directory feels smaller and more focused from the first click.
             </p>
-            <div className="mobile-chip-row flex flex-wrap gap-2">
+            <div className="mobile-wrap-chip-row flex flex-wrap gap-2">
               {quickQueries.map((quickQuery) => (
                 <button
                   key={quickQuery}
@@ -168,7 +169,7 @@ export function SearchBox({
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">
                   Suggested tools
                 </p>
-                <div className="mobile-chip-row mt-3 flex flex-wrap gap-2">
+                <div className="mobile-wrap-chip-row mt-3 flex flex-wrap gap-2">
                   {visibleSuggestions.map((tool) => (
                     <Link
                       key={tool.slug}
@@ -177,6 +178,18 @@ export function SearchBox({
                     >
                       {tool.name}
                     </Link>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+            {categoryFilter !== "all" && categoryPreviewTools.length ? (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">
+                  {categories.find((category) => category.slug === categoryFilter)?.name ?? "Filtered"} tools
+                </p>
+                <div className="mobile-tool-grid mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {categoryPreviewTools.map((tool) => (
+                    <ToolCard key={tool.slug} tool={tool} compact />
                   ))}
                 </div>
               </div>

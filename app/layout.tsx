@@ -38,6 +38,11 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -60,9 +65,9 @@ export default function RootLayout({
         />
         <AnalyticsHook />
         <NumberInputEnhancer />
-        <div className="relative min-h-screen">
+        <div className="relative min-h-screen max-w-full overflow-x-clip">
           <Header />
-          <main id="main-content" className="pb-10">{children}</main>
+          <main id="main-content" className="max-w-full overflow-x-clip pb-10">{children}</main>
           <Footer />
         </div>
       </body>
