@@ -10,7 +10,7 @@ export function CategoryCard({
 }) {
   return (
     <Link
-      href={`/category/${category.slug}`}
+      href={`/category/${category.slug}#tools-list`}
       className="group rounded-3xl border border-[color:var(--border)] bg-white/84 p-6 shadow-sm transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
     >
       <div className="flex items-center justify-between gap-4">

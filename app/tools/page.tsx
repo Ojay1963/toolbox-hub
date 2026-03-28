@@ -33,7 +33,7 @@ export default function ToolsPage() {
   });
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+    <div className="site-shell mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
@@ -43,11 +43,11 @@ export default function ToolsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(toolsCollectionJsonLd) }}
       />
 
-      <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10">
+      <section className="site-hero rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10">
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[color:var(--primary-dark)]">
           Tools
         </p>
-        <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl">Browse free online tools</h1>
+        <h1 className="site-hero-title mt-4 text-4xl font-black tracking-tight sm:text-5xl">Browse free online tools</h1>
         <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
           Find tools for images, PDFs, text, developer workflows, generators, calculators, converters, and more.
         </p>
@@ -71,7 +71,7 @@ export default function ToolsPage() {
             <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
               Popular Tools
             </p>
-            <h2 className="mt-2 text-3xl font-black tracking-tight">Start with popular tools</h2>
+            <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Start with popular tools</h2>
           </div>
           <Link href="/" className="text-sm font-semibold text-[color:var(--primary)]">
             Back to homepage
@@ -84,11 +84,11 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <section className="mt-10">
+      <section id="browse-categories" className="mt-10 scroll-mt-28">
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
           Categories
         </p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight">Browse by category</h2>
+        <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Browse by category</h2>
         <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {categories.map((category) => (
             <CategoryCard key={category.slug} category={category} count={0} />
@@ -100,7 +100,7 @@ export default function ToolsPage() {
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
           Recent Tools
         </p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight">Recently added tools</h2>
+        <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Recently added tools</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {recentTools.map((tool) => (
             <ToolCard key={tool.slug} tool={tool} compact />

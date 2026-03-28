@@ -19,13 +19,13 @@ export function Footer() {
 
   return (
     <footer className="border-t border-[color:var(--border)] bg-white/70">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr] lg:px-8">
+      <div className="site-footer-grid mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr] lg:px-8">
         <div>
-          <div className="flex items-center gap-3">
+          <div className="site-header-brand flex items-center gap-3">
             <Image
               src={siteMark}
               alt="Toolbox Hub logo"
-              className="h-16 w-16 shrink-0 object-contain"
+              className="site-header-logo h-16 w-16 shrink-0 object-contain"
             />
             <h2 className="text-xl font-bold tracking-tight">Toolbox Hub</h2>
           </div>
@@ -96,7 +96,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-[color:var(--border)]/80">
-        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-sm text-[color:var(--muted)] sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+        <div className="site-footer-bottom mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-sm text-[color:var(--muted)] sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <p>{currentYear} Toolbox Hub. Free online tools with clear help and public site pages.</p>
           <div className="flex flex-wrap gap-4">
             <Link href="/contact" className="transition hover:text-[color:var(--primary)]">

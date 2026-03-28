@@ -93,7 +93,7 @@ export function SearchBox({
       <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
         Search Tools
       </p>
-      <h2 className="mt-2 text-3xl font-black tracking-tight">{title}</h2>
+      <h2 className="mobile-search-title mt-2 text-3xl font-black tracking-tight">{title}</h2>
       <p className="mt-3 max-w-2xl text-sm leading-7 text-[color:var(--muted)]">
         {description}
       </p>
@@ -107,13 +107,13 @@ export function SearchBox({
         onChange={(event) => setQuery(event.target.value)}
         placeholder={placeholder}
         aria-describedby={`${inputId}-hint`}
-        className="mt-5 w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm"
+        className="mobile-search-input mt-5 w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm"
       />
       <div id={`${inputId}-hint`} className="sr-only">
         Search for tools by name, category, or keyword.
       </div>
       {showCategoryFilter ? (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mobile-chip-row mt-4 flex flex-wrap gap-2">
           <button
             type="button"
             aria-pressed={categoryFilter === "all"}
@@ -151,7 +151,7 @@ export function SearchBox({
             <p className="text-sm text-[color:var(--muted)]">
               Start with a quick search so the directory feels smaller and more focused from the first click.
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="mobile-chip-row flex flex-wrap gap-2">
               {quickQueries.map((quickQuery) => (
                 <button
                   key={quickQuery}
@@ -168,7 +168,7 @@ export function SearchBox({
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">
                   Suggested tools
                 </p>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mobile-chip-row mt-3 flex flex-wrap gap-2">
                   {visibleSuggestions.map((tool) => (
                     <Link
                       key={tool.slug}
@@ -188,7 +188,7 @@ export function SearchBox({
               Search results
               {categoryFilter === "all" ? "" : ` in ${categories.find((category) => category.slug === categoryFilter)?.name ?? "this category"}`}.
             </p>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="mobile-tool-grid grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {matches.map((tool) => (
                 <ToolCard key={tool.slug} tool={tool} />
               ))}

@@ -14,35 +14,40 @@ export function CategorySidebar({
 
   return (
     <>
-      <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-5 shadow-sm lg:hidden">
-        <details>
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-[color:var(--foreground)]">
-            <span className="min-w-0 truncate">{currentCategory?.name ?? "Browse Categories"}</span>
-            <span className="rounded-full border border-[color:var(--border)] px-3 py-1 text-xs text-[color:var(--muted)]">
-              Open menu
-            </span>
-          </summary>
-          <p className="mt-4 text-sm leading-7 text-[color:var(--muted)]">{description}</p>
-          <nav aria-label="Category sidebar mobile" className="mt-4 grid gap-2">
-            {categories.map((category) => {
-              const isActive = category.slug === activeCategory;
-              return (
-                <Link
-                  key={category.slug}
-                  href={`/category/${category.slug}`}
-                  aria-current={isActive ? "page" : undefined}
-                  className={`rounded-2xl px-4 py-3 text-sm font-medium transition ${
-                    isActive
-                      ? "bg-[color:var(--primary)] text-white"
-                      : "border border-[color:var(--border)] bg-stone-50 text-[color:var(--foreground)] hover:border-[color:var(--primary)]"
-                  }`}
-                >
-                  {category.name}
-                </Link>
-              );
-            })}
-          </nav>
-        </details>
+      <section className="mobile-category-sidebar rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-5 shadow-sm lg:hidden">
+        <div className="mobile-category-sidebar-header flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-[color:var(--foreground)]">
+              {currentCategory?.name ?? "Browse Categories"}
+            </p>
+            <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">{description}</p>
+          </div>
+          <Link
+            href="#tools-list"
+            className="mobile-sidebar-cta rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-semibold text-[color:var(--foreground)]"
+          >
+            View tools
+          </Link>
+        </div>
+        <nav aria-label="Category sidebar mobile" className="mobile-chip-row mt-4 flex gap-2 overflow-x-auto pb-1">
+          {categories.map((category) => {
+            const isActive = category.slug === activeCategory;
+            return (
+              <Link
+                key={category.slug}
+                href={`/category/${category.slug}#tools-list`}
+                aria-current={isActive ? "page" : undefined}
+                className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-[color:var(--primary)] text-white"
+                    : "border border-[color:var(--border)] bg-stone-50 text-[color:var(--foreground)] hover:border-[color:var(--primary)]"
+                }`}
+              >
+                {category.name}
+              </Link>
+            );
+          })}
+        </nav>
       </section>
 
       <aside className="hidden lg:block">
@@ -57,7 +62,7 @@ export function CategorySidebar({
               return (
                 <Link
                   key={category.slug}
-                  href={`/category/${category.slug}`}
+                  href={`/category/${category.slug}#tools-list`}
                   aria-current={isActive ? "page" : undefined}
                   className={`block rounded-2xl px-4 py-3 text-sm font-medium transition ${
                     isActive

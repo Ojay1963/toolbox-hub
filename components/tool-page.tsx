@@ -25,7 +25,7 @@ export function ToolPage({
     (item) => !item.href || shouldIndexTool(item.href.replace("/tools/", "")),
   );
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+    <div className="site-shell mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
         <CategorySidebar
           activeCategory={tool.category}
@@ -34,7 +34,7 @@ export function ToolPage({
         />
         <div className="min-w-0 grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0 space-y-8">
-            <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-sm sm:p-8">
+            <section className="site-hero rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-sm sm:p-8">
           <nav
             aria-label="Breadcrumb"
             className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--muted)]"
@@ -55,7 +55,7 @@ export function ToolPage({
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
             {tool.name}
           </p>
-          <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">{tool.name}</h1>
+          <h1 className="site-hero-title mt-3 text-4xl font-black tracking-tight sm:text-5xl">{tool.name}</h1>
           <p className="mt-4 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
             {isPubliclyActive ? tool.longDescription : tool.shortDescription}
           </p>
@@ -128,7 +128,7 @@ export function ToolPage({
                   <Link
                     key={`alternative-${item.slug}`}
                     href={`/tools/${item.slug}`}
-                    className="rounded-2xl border border-[color:var(--border)] bg-stone-50 px-4 py-4 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
+                  className="site-feature-card rounded-2xl border border-[color:var(--border)] bg-stone-50 px-4 py-4 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
                   >
                     <span className="block font-semibold text-[color:var(--foreground)]">{item.name}</span>
                     <span className="mt-1 block leading-6">{item.shortDescription}</span>
@@ -187,7 +187,7 @@ export function ToolPage({
               <Link
                 key={`category-popular-${item.slug}`}
                 href={`/tools/${item.slug}`}
-                className="rounded-2xl border border-[color:var(--border)] bg-stone-50 px-4 py-4 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
+                className="site-feature-card rounded-2xl border border-[color:var(--border)] bg-stone-50 px-4 py-4 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
               >
                 <span className="block font-semibold text-[color:var(--foreground)]">{item.name}</span>
                 <span className="mt-1 block leading-6">{item.shortDescription}</span>
@@ -203,14 +203,14 @@ export function ToolPage({
           label="Advertisement"
           format="sidebar"
         />
-        <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-          <h2 className="text-lg font-bold tracking-tight">Quick notes</h2>
+        <section className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
+          <h2 className="site-section-title text-lg font-bold tracking-tight">Quick notes</h2>
           <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
             {isPubliclyActive ? tool.shortDescription : "This page is not being promoted right now. Use the links below to open similar tools that are ready to use."}
           </p>
         </section>
-        <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-          <h2 className="text-lg font-bold tracking-tight">Explore more</h2>
+        <section className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
+          <h2 className="site-section-title text-lg font-bold tracking-tight">Explore more</h2>
           <div className="mt-4 space-y-5 text-sm text-[color:var(--muted)]">
             <div className="space-y-3">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
@@ -276,8 +276,8 @@ export function ToolPage({
           </div>
         </section>
         {isPubliclyActive ? (
-          <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-            <h2 className="text-lg font-bold tracking-tight">Keywords covered</h2>
+          <section className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
+            <h2 className="site-section-title text-lg font-bold tracking-tight">Keywords covered</h2>
             <div className="mt-4 flex flex-wrap gap-2">
               {tool.keywords.slice(0, 8).map((keyword) => (
                 <span

@@ -37,7 +37,7 @@ export function CategoryDirectory({
   const visibleTools = filteredTools.slice(0, visibleCount);
   const hasMore = visibleCount < filteredTools.length;
   return (
-    <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-6 shadow-sm">
+    <section className="mobile-directory-shell rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-6 shadow-sm">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
@@ -65,7 +65,7 @@ export function CategoryDirectory({
           }}
           placeholder="Filter this category by name or keyword"
           aria-describedby={`${inputId}-hint`}
-          className="w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm"
+          className="mobile-search-input w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm"
         />
         <div id={`${inputId}-hint`} className="sr-only">
           Use this field to narrow the tools shown in the category directory.
@@ -78,7 +78,7 @@ export function CategoryDirectory({
         </div>
       ) : (
         <>
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-live="polite">
+          <div className="mobile-tool-grid mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3" aria-live="polite">
             {visibleTools.map((tool) => (
               <ToolCard key={tool.slug} tool={tool} compact />
             ))}
@@ -88,7 +88,7 @@ export function CategoryDirectory({
               <button
                 type="button"
                 onClick={() => setVisibleCount((current) => current + 12)}
-                className="rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                className="mobile-show-more-button rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
               >
                 Show more tools
               </button>

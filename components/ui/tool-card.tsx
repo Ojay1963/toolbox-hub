@@ -12,7 +12,7 @@ export function ToolCard({
     return (
       <Link
         href={`/tools/${tool.slug}`}
-        className="group block rounded-2xl border border-[color:var(--border)] bg-stone-50 px-4 py-3 transition hover:border-[color:var(--primary)]"
+        className="mobile-compact-tool-card group block rounded-2xl border border-[color:var(--border)] bg-stone-50 px-4 py-3 transition hover:border-[color:var(--primary)]"
       >
         <p className="text-sm font-semibold text-[color:var(--foreground)] transition group-hover:text-[color:var(--primary)]">
           {tool.name}
@@ -27,7 +27,7 @@ export function ToolCard({
   return (
     <Link
       href={`/tools/${tool.slug}`}
-      className="group rounded-3xl border border-[color:var(--border)] bg-white/88 p-5 shadow-sm transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
+      className="mobile-tool-card group rounded-3xl border border-[color:var(--border)] bg-white/88 p-5 shadow-sm transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
     >
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full bg-[color:var(--soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">

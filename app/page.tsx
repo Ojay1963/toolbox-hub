@@ -74,7 +74,7 @@ export default function HomePage() {
   const homepageFaqJsonLd = buildFaqJsonLd(homepageFaq);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+    <div className="site-shell mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
@@ -88,27 +88,27 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqJsonLd) }}
       />
 
-      <section className="rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10 lg:p-12">
+      <section className="site-hero rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10 lg:p-12">
         <div className="max-w-4xl">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[color:var(--primary-dark)]">
             Free online tools
           </p>
-          <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
+          <h1 className="site-hero-title mt-4 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
             Free Online Tools for Images, PDFs, Text & More
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
             Quickly compress images, merge PDFs, format JSON, and more - no sign-up required.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <div className="site-inline-links mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/#popular-tools"
-              className="rounded-full bg-[color:var(--primary)] px-6 py-3.5 text-center text-sm font-semibold text-white transition hover:bg-[color:var(--primary-dark)]"
+              className="site-action-link rounded-full bg-[color:var(--primary)] px-6 py-3.5 text-center text-sm font-semibold text-white transition hover:bg-[color:var(--primary-dark)]"
             >
               Start Using Tools
             </Link>
             <Link
               href="/#browse-categories"
-              className="rounded-full border border-[color:var(--border)] bg-white px-6 py-3.5 text-center text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+              className="site-action-link rounded-full border border-[color:var(--border)] bg-white px-6 py-3.5 text-center text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
             >
               Browse Categories
             </Link>
@@ -139,7 +139,7 @@ export default function HomePage() {
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
           Popular Tools
         </p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight">Popular Tools</h2>
+        <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Popular Tools</h2>
         <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
           Start with the most used tools.
         </p>
@@ -151,7 +151,7 @@ export default function HomePage() {
               <Link
                 key={tool.slug}
                 href={`/tools/${tool.slug}`}
-                className="group rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-5 shadow-sm transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
+                className="site-feature-card group rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-5 shadow-sm transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className={`rounded-2xl px-3 py-2 text-xs font-bold tracking-[0.18em] ${badge.tone}`}>
@@ -185,7 +185,7 @@ export default function HomePage() {
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
           Categories
         </p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight">Browse Categories</h2>
+        <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Browse Categories</h2>
         <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
           Pick the section that matches your task and get to a useful tool faster.
         </p>
@@ -196,8 +196,8 @@ export default function HomePage() {
             return (
               <Link
                 key={category.slug}
-                href={`/category/${category.slug}`}
-                className="group rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-5 shadow-sm transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
+                href={`/category/${category.slug}#tools-list`}
+                className="site-feature-card group rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-5 shadow-sm transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
               >
                 <div className={`inline-flex rounded-2xl px-3 py-2 text-xs font-bold tracking-[0.18em] ${badge.tone}`}>
                   {badge.short}
@@ -210,11 +210,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8">
+      <section className="site-card mt-10 rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
           Why use Toolbox Hub?
         </p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight">Why use Toolbox Hub?</h2>
+        <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Why use Toolbox Hub?</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           {[
             "Free to use",
@@ -233,7 +233,7 @@ export default function HomePage() {
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
           FAQ
         </p>
-        <h2 className="mt-2 text-3xl font-black tracking-tight">Common questions</h2>
+        <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Common questions</h2>
         <div className="mt-6">
           <FaqList items={homepageFaq} />
         </div>

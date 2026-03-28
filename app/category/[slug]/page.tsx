@@ -103,7 +103,7 @@ export default async function CategoryPage({
   const categoryFaqJsonLd = buildFaqJsonLd(categoryFaq);
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+    <div className="site-shell mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
@@ -123,32 +123,46 @@ export default async function CategoryPage({
           description="Move between sections without losing your place in the directory."
         />
         <div className="min-w-0 space-y-8">
-      <section className="min-w-0 rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10">
+      <section className="site-hero mobile-category-hero min-w-0 rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px]">
-          <div>
+          <div className="min-w-0">
             <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[color:var(--primary-dark)]">
               {category.name}
             </p>
-            <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">{category.title}</h1>
+            <h1 className="mobile-category-title mt-3 text-4xl font-black tracking-tight sm:text-5xl">
+              {category.title}
+            </h1>
             <p className="mt-4 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
               {category.hero}
             </p>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
               {category.description}
             </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mobile-category-actions mt-6 flex flex-wrap gap-3">
+              <Link
+                href="#tools-list"
+                className="mobile-category-action-link rounded-full bg-[color:var(--primary)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[color:var(--primary-dark)]"
+              >
+                View all tools
+              </Link>
+              <Link
+                href="#category-search"
+                className="mobile-category-action-link rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+              >
+                Search this category
+              </Link>
               {featuredLinks.map((tool) => (
                 <Link
                   key={tool.slug}
                   href={`/tools/${tool.slug}`}
-                  className="rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                  className="mobile-category-action-link rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
                 >
                   {tool.name}
                 </Link>
               ))}
             </div>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+          <div className="min-w-0 grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
             <div className="rounded-3xl bg-[color:var(--soft)] p-5">
               <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
                 Browse tools
@@ -169,7 +183,7 @@ export default async function CategoryPage({
         </div>
       </section>
 
-      <section className="mt-8">
+      <section id="category-search" className="mt-8 scroll-mt-28">
         <SearchBox
           tools={categoryTools}
           title={`Search inside ${category.name}`}
@@ -180,6 +194,32 @@ export default async function CategoryPage({
             (tool, index, collection) => collection.findIndex((candidate) => candidate.slug === tool.slug) === index,
           )}
         />
+      </section>
+
+      <section id="tools-list" className="site-card mobile-tools-list-section scroll-mt-28 rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-6 shadow-sm sm:p-7">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+              Tools list
+            </p>
+            <h2 className="site-section-title mt-2 text-2xl font-bold tracking-tight">
+              All {category.name.toLowerCase()} tools
+            </h2>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
+              Start here if you want the full list right away. Open any tool directly or filter the list to narrow it down.
+            </p>
+          </div>
+          <p className="text-sm font-semibold text-[color:var(--primary)]">
+            {categoryTools.length} tools in this category
+          </p>
+        </div>
+        <div className="mt-6">
+          <CategoryDirectory
+            tools={categoryTools}
+            title="Browse the full category"
+            description="Search inside this category and reveal more tools only when you need them."
+          />
+        </div>
       </section>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -202,13 +242,6 @@ export default async function CategoryPage({
               <ToolCard key={tool.slug} tool={tool} />
             ))}
           </div>
-          <div className="mt-8">
-            <CategoryDirectory
-              tools={categoryTools}
-              title="Browse the full category"
-              description="Search inside this category and reveal more tools only when you need them."
-            />
-          </div>
         </section>
         <div className="min-w-0 space-y-6">
           <AdPlaceholder
@@ -216,8 +249,8 @@ export default async function CategoryPage({
             label="Advertisement"
             format="sidebar"
           />
-          <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-            <h2 className="text-lg font-bold tracking-tight">Category overview</h2>
+          <section className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
+            <h2 className="site-section-title text-lg font-bold tracking-tight">Category overview</h2>
             <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
               {category.description}
             </p>
@@ -233,8 +266,8 @@ export default async function CategoryPage({
               ))}
             </div>
           </section>
-          <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-            <h2 className="text-lg font-bold tracking-tight">Explore more</h2>
+          <section className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
+            <h2 className="site-section-title text-lg font-bold tracking-tight">Explore more</h2>
             <div className="mt-4 space-y-3">
               {crossLinks.map((tool) => (
                 <Link
@@ -247,8 +280,8 @@ export default async function CategoryPage({
               ))}
             </div>
           </section>
-          <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-            <h2 className="text-lg font-bold tracking-tight">Trending in {category.name}</h2>
+          <section className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
+            <h2 className="site-section-title text-lg font-bold tracking-tight">Trending in {category.name}</h2>
             <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
               A few useful picks in this category.
             </p>
@@ -264,8 +297,8 @@ export default async function CategoryPage({
               ))}
             </div>
           </section>
-          <section className="rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-            <h2 className="text-lg font-bold tracking-tight">Recent additions</h2>
+          <section className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
+            <h2 className="site-section-title text-lg font-bold tracking-tight">Recent additions</h2>
             <div className="mt-4 space-y-3">
               {recentInCategory.map((tool) => (
                 <Link
@@ -290,17 +323,17 @@ export default async function CategoryPage({
       </section>
 
       <section className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm">
+        <div className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm">
           <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
             Category FAQ
           </p>
-          <h2 className="mt-2 text-3xl font-black tracking-tight">Questions about {category.name}</h2>
+          <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Questions about {category.name}</h2>
           <div className="mt-6">
             <FaqList items={categoryFaq} />
           </div>
         </div>
-        <div className="rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-6 shadow-sm">
-          <h2 className="text-lg font-bold tracking-tight">Explore nearby categories</h2>
+        <div className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-6 shadow-sm">
+          <h2 className="site-section-title text-lg font-bold tracking-tight">Explore nearby categories</h2>
           <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
             Move between related sections to find another tool without starting your search over.
           </p>
