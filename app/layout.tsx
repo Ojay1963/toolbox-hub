@@ -41,6 +41,8 @@ export const metadata: Metadata = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover" as const,
+  themeColor: "#f6f3ea",
 };
 
 export default function RootLayout({
@@ -65,9 +67,9 @@ export default function RootLayout({
         />
         <AnalyticsHook />
         <NumberInputEnhancer />
-        <div className="relative min-h-screen max-w-full overflow-x-clip">
+        <div className="app-shell relative min-h-screen max-w-full overflow-x-clip">
           <Header />
-          <main id="main-content" className="max-w-full overflow-x-clip pb-10">{children}</main>
+          <main id="main-content" className="app-main max-w-full overflow-x-clip pb-10">{children}</main>
           <Footer />
         </div>
       </body>
