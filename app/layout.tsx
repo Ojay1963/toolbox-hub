@@ -4,7 +4,7 @@ import { AnalyticsHook } from "@/components/monitoring/analytics-hook";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { NumberInputEnhancer } from "@/components/ui/number-input-enhancer";
-import { buildWebsiteJsonLd, siteMetadata } from "@/lib/seo";
+import { buildOrganizationJsonLd, buildWebsiteJsonLd, siteMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl),
@@ -51,6 +51,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const websiteJsonLd = buildWebsiteJsonLd();
+  const organizationJsonLd = buildOrganizationJsonLd();
 
   return (
     <html lang="en">
@@ -64,6 +65,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
         <AnalyticsHook />
         <NumberInputEnhancer />

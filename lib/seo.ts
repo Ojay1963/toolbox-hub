@@ -264,3 +264,14 @@ export function buildWebsiteJsonLd() {
     description: siteMetadata.description,
   };
 }
+
+export function buildOrganizationJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: siteMetadata.name,
+    url: siteMetadata.siteUrl,
+    description: siteMetadata.description,
+    ...(siteMetadata.contactEmail ? { email: siteMetadata.contactEmail } : {}),
+  };
+}

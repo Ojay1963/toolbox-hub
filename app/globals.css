@@ -525,7 +525,7 @@ input[type="file"]::-webkit-file-upload-button {
     bottom: calc(env(safe-area-inset-bottom, 0px) + 0.6rem);
     z-index: 50;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 0.45rem;
     padding: 0.5rem;
     border: 1px solid rgba(255, 255, 255, 0.72);
@@ -543,7 +543,7 @@ input[type="file"]::-webkit-file-upload-button {
     align-items: center;
     justify-content: center;
     gap: 0.3rem;
-    min-height: 4.1rem;
+    min-height: 4.25rem;
     border-radius: 1.25rem;
     color: var(--muted);
     font-size: 0.72rem;

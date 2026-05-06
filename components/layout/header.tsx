@@ -15,6 +15,7 @@ export function Header() {
   const mobileBottomNav = [
     { href: "/", label: "Home", icon: "home" },
     { href: "/tools", label: "Tools", icon: "grid" },
+    { href: "/#search-tools", label: "Search", icon: "search" },
     { href: "/blog", label: "Guides", icon: "spark" },
     { href: "/contact", label: "Contact", icon: "user" },
   ] as const;
@@ -147,10 +148,13 @@ export function Header() {
 
       <nav aria-label="Mobile app navigation" className="mobile-bottom-nav lg:hidden">
         {mobileBottomNav.map((item) => {
+          const baseHref = item.href.split("#")[0];
           const isActive =
             item.href === "/"
               ? pathname === "/"
-              : pathname === item.href || pathname.startsWith(`${item.href}/`);
+              : baseHref === "/"
+                ? false
+                : pathname === baseHref || pathname.startsWith(`${baseHref}/`);
 
           return (
             <Link
@@ -170,6 +174,11 @@ export function Header() {
                     <rect x="14" y="4" width="6" height="6" rx="1.25" />
                     <rect x="4" y="14" width="6" height="6" rx="1.25" />
                     <rect x="14" y="14" width="6" height="6" rx="1.25" />
+                  </svg>
+                ) : item.icon === "search" ? (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <circle cx="11" cy="11" r="5.5" />
+                    <path d="m16 16 4.25 4.25" />
                   </svg>
                 ) : item.icon === "spark" ? (
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">

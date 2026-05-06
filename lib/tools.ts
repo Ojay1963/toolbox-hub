@@ -241,6 +241,25 @@ const ctrPrioritySlugs = new Set<string>([
   "dns-lookup",
 ]);
 
+const expandedSeoPrioritySlugs = new Set<string>([
+  "image-compressor",
+  "image-resizer",
+  "pdf-merge",
+  "pdf-split",
+  "pdf-compressor",
+  "json-formatter",
+  "qr-code-generator",
+  "password-generator",
+  "loan-calculator",
+  "percentage-calculator",
+  "currency-converter",
+  "uuid-generator",
+  "jpg-to-png-converter",
+  "png-to-jpg-converter",
+  "image-to-pdf-converter",
+  "word-counter",
+]);
+
 const implementationStatusMeta: Record<ImplementationStatus, ImplementationStatusMeta> = {
   "working-local": {
     label: "Working",
@@ -437,6 +456,9 @@ function getToolOrderIndex(slug: string) {
 
 export function isExpandedSeoTool(toolOrSlug: Pick<ToolDefinition, "slug"> | string) {
   const slug = typeof toolOrSlug === "string" ? toolOrSlug : toolOrSlug.slug;
+  if (expandedSeoPrioritySlugs.has(slug)) {
+    return true;
+  }
   const order = getToolOrderIndex(slug);
   return order >= 150 && order < 200;
 }
@@ -548,6 +570,84 @@ function buildCategorySpecificFaqs(tool: ToolDraft): FaqItem[] {
 }
 
 const weakToolContentOverrides = new Map<string, { longDescription: string; faq: FaqItem[] }>([
+  ["image-compressor", {
+    longDescription: "Image Compressor is useful when a photo, screenshot, or product image looks fine but is too heavy for a website, upload form, marketplace listing, or email attachment. You can reduce file size without opening a large design app, compare the result, and keep working in the browser. This is especially practical for blog publishers trying to speed up page loads, sellers preparing product photos, students shrinking assignment screenshots, and small teams sharing visual assets quickly. In a common workflow, someone compresses a large JPG from a phone, checks whether the quality still looks good enough, then downloads the smaller file for publishing or sharing. If the image also needs different dimensions, Image Resizer and Crop Image are natural follow-up tools.",
+    faq: [
+      {
+        question: "How much can an image usually be compressed?",
+        answer: "That depends on the original file type, size, and level of detail. Photos often shrink well, while graphics with sharp edges may need lighter compression to avoid visible artifacts.",
+      },
+      {
+        question: "Should I compress images before uploading them to my website?",
+        answer: "In most cases, yes. Smaller images are easier to upload, faster to load, and often better for mobile visitors as long as the visual quality still fits the page.",
+      },
+    ],
+  }],
+  ["image-resizer", {
+    longDescription: "Image Resizer helps when the image itself is fine but the dimensions do not match the layout you need. It is a practical tool for changing hero graphics, profile photos, store images, screenshots, and document visuals without opening heavyweight editing software. A creator might resize a banner for a blog, a seller might adjust product images for a marketplace requirement, and a student might prepare a cleaner upload for a class portal. The main benefit is speed: upload the image, choose the width and height you need, keep the proportions if appropriate, and export a file that better fits the target layout. If the resized file is still too heavy, Image Compressor is a strong next step, while Crop Image helps when the framing needs work first.",
+    faq: [
+      {
+        question: "What is the difference between resizing and compressing an image?",
+        answer: "Resizing changes the pixel dimensions, while compression reduces file weight by changing how the image data is stored. Many people resize first for layout, then compress for faster sharing or loading.",
+      },
+      {
+        question: "Can I use an image resizer for social media or marketplace uploads?",
+        answer: "Yes. That is one of the most common reasons to resize an image, especially when a platform asks for a specific width, height, or aspect ratio.",
+      },
+    ],
+  }],
+  ["pdf-merge", {
+    longDescription: "PDF Merge is useful when several related PDF files need to become one clean document. It works well for combining invoices, reports, resumes, cover sheets, contracts, scans, class notes, or application packets that are easier to send and archive as a single file. Instead of juggling several attachments, you can upload the PDFs, put them in the right order, and download one finished document. A job seeker might merge a resume with certificates, a business owner might combine monthly invoices, and a student might join multiple scanned pages into one study file. If you only need selected pages first, PDF Split can help before merging, and PDF Compressor is useful when the final combined file needs to be smaller.",
+    faq: [
+      {
+        question: "Do I need more than one file to use PDF Merge?",
+        answer: "Yes. PDF Merge is meant for combining at least two files, so the clearest workflow is to upload all the documents you want in the final packet before you start arranging them.",
+      },
+      {
+        question: "What should I check before downloading the merged PDF?",
+        answer: "Check the file order, page readability, and whether any source files should be removed or split first. A quick review helps avoid downloading the wrong combined version.",
+      },
+    ],
+  }],
+  ["json-formatter", {
+    longDescription: "JSON Formatter is useful when raw JSON is difficult to read, debug, or share. You can paste a one-line API response, config block, export sample, or webhook payload and quickly turn it into readable structured output. That makes it easier to spot missing commas, invalid quotes, mismatched brackets, or fields that are simply in the wrong place. Developers, analysts, support teams, students, and technical writers all use this kind of workflow when they need to inspect or explain JSON without wasting time manually spacing it out. A typical use case is formatting an API response before debugging it or sharing it in documentation. If you need to keep transforming the same data afterward, JSON Schema Validator, JSON to CSV Converter, and CSV to JSON Converter are natural next steps.",
+    faq: [
+      {
+        question: "Can a JSON formatter help find syntax errors?",
+        answer: "Yes. Formatting and validation often make syntax problems easier to spot because the structure becomes clearer and broken sections stand out faster than they do in compact one-line JSON.",
+      },
+      {
+        question: "When should I use a JSON formatter instead of a code editor?",
+        answer: "A JSON formatter is useful when you want a quick browser-based check without opening a full editor or project. It is especially handy for copied payloads, examples, and one-off debugging tasks.",
+      },
+    ],
+  }],
+  ["qr-code-generator", {
+    longDescription: "QR Code Generator is useful when you want people to scan information instead of typing it. You can create a QR code for a website link, menu, contact card, signup page, event details, payment link, or short message, then download the result for print or digital sharing. This is a practical workflow for restaurants, flyers, classroom handouts, product packaging, posters, business cards, and quick in-person signups. A restaurant might share a menu, a business owner might link to a product page, and an event organizer might create a fast path to registration or directions. After generating the code, it is smart to test it once before publishing widely, especially if the destination is a live landing page or printed material.",
+    faq: [
+      {
+        question: "What kind of content works best inside a QR code?",
+        answer: "Short, clear content usually works best. Website links, contact details, event pages, and lightweight text are often easier to scan and more practical than very long blocks of content.",
+      },
+      {
+        question: "Should I test a QR code before printing it?",
+        answer: "Yes. A quick test helps confirm that the code scans correctly, opens the right destination, and still works well at the final size you plan to print or share.",
+      },
+    ],
+  }],
+  ["percentage-calculator", {
+    longDescription: "Percentage Calculator helps with the everyday percentage questions people run into while shopping, budgeting, studying, comparing results, or checking performance changes. It is useful for finding what percent one number is of another, working out increases and decreases, and understanding percentage-based comparisons without doing the math manually. This can help with discounts, score changes, sales reports, monthly spending checks, grade comparisons, and quick planning decisions. For example, someone might calculate a sale reduction, compare last month to this month, or work out how much of a target has already been reached. When the task is specifically about shopping discounts, Discount Calculator may be the better fit, but this page is broader and more flexible for general percent math.",
+    faq: [
+      {
+        question: "What kinds of percentage problems can this page help solve?",
+        answer: "It can help with percent-of calculations, increases, decreases, and quick comparisons between two values. That covers many everyday school, shopping, and budgeting tasks.",
+      },
+      {
+        question: "Is a percentage calculator useful for budgeting or reports?",
+        answer: "Yes. It is often used to compare performance, check how much a value changed, or understand what share of a total has already been used or achieved.",
+      },
+    ],
+  }],
   ["blur-image-tool", {
     longDescription: "Blur Image Tool helps when an image shows more detail than you want to share. You can soften faces, names, license plates, messy backgrounds, or screenshot sections before posting, sending, or saving the image. It is also useful for quick design effects when you want text or a subject to stand out against a softer background.",
     faq: [

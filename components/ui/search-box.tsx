@@ -86,6 +86,7 @@ export function SearchBox({
       .slice(0, maxResults)
       .map((entry) => entry.tool);
   }, [categoryFilter, deferredQuery, filteredTools, maxResults]);
+  const instantSuggestions = matches.slice(0, 4);
 
   const visibleSuggestions = suggestionList
     .map(normalizeEntry)
@@ -93,7 +94,7 @@ export function SearchBox({
     .slice(0, 6);
   const categoryPreviewTools = filteredTools.slice(0, 6);
 
-  const quickQueries = ["PDF", "image", "text", "JSON", "hash", "calculator"];
+  const quickQueries = ["PDF merge", "compress image", "JSON formatter", "QR code", "loan calculator", "word counter"];
 
   const shellClass = compact
     ? "app-panel rounded-[2rem] p-5 sm:p-6"
@@ -154,12 +155,39 @@ export function SearchBox({
             ))}
         </div>
       ) : null}
+      {query.trim() ? (
+        <div className="mt-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">
+            Instant suggestions
+          </p>
+          <div className="mobile-wrap-chip-row mt-3 flex flex-wrap gap-2">
+            {instantSuggestions.length ? instantSuggestions.map((tool) => (
+              <Link
+                key={`instant-${tool.id}`}
+                href={tool.href}
+                className="rounded-full border border-[color:var(--border)] bg-white/80 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+              >
+                {tool.name}
+              </Link>
+            )) : (
+              <span className="rounded-full border border-dashed border-[color:var(--border)] bg-white/60 px-3 py-2 text-sm text-[color:var(--muted)]">
+                Keep typing to narrow the directory
+              </span>
+            )}
+          </div>
+        </div>
+      ) : null}
       <div className="mt-5" aria-live="polite">
         {!query ? (
           <div className="space-y-4">
             <p className="text-sm text-[color:var(--muted)]">
               Start with a quick search so the directory feels smaller and more focused from the first click.
             </p>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">
+                Popular searches
+              </p>
+            </div>
             <div className="mobile-wrap-chip-row flex flex-wrap gap-2">
               {quickQueries.map((quickQuery) => (
                 <button
@@ -230,9 +258,23 @@ export function SearchBox({
             )}
           </div>
         ) : (
-          <p className="text-sm text-[color:var(--muted)]">
-            No tools match that search yet. Try a broader keyword or browse the categories below.
-          </p>
+          <div className="space-y-4">
+            <p className="text-sm text-[color:var(--muted)]">
+              No tools match that search yet. Try a broader keyword, switch categories, or use one of the popular searches below.
+            </p>
+            <div className="mobile-wrap-chip-row flex flex-wrap gap-2">
+              {quickQueries.map((quickQuery) => (
+                <button
+                  key={`empty-${quickQuery}`}
+                  type="button"
+                  onClick={() => setQuery(quickQuery)}
+                  className="rounded-full border border-[color:var(--border)] bg-white/70 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                >
+                  {quickQuery}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </section>

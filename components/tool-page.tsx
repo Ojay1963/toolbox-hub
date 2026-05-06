@@ -136,6 +136,24 @@ export function ToolPage({
                     ))}
                   </ol>
                 </Section>
+
+                <Section title="Privacy note">
+                  <p>
+                    Many Toolbox Hub workflows are designed to run directly in your browser. If a tool needs extra server
+                    support, the page explains that clearly so you can decide whether it fits your workflow before you continue.
+                  </p>
+                  <p>
+                    For more detail about how the site handles public pages and contact information, review the{" "}
+                    <Link href="/privacy-policy" className="font-semibold text-[color:var(--primary)]">
+                      Privacy Policy
+                    </Link>{" "}
+                    and{" "}
+                    <Link href="/terms-of-use" className="font-semibold text-[color:var(--primary)]">
+                      Terms of Use
+                    </Link>
+                    .
+                  </p>
+                </Section>
               </>
             ) : (
               <Section title="Try a working alternative">
