@@ -54,6 +54,7 @@ const resolvedSiteUrl = resolveSiteUrl();
 const siteUrlHostname = new URL(resolvedSiteUrl).hostname.toLowerCase();
 const isLocalSiteUrl = /^(localhost|127\.0\.0\.1)$/.test(siteUrlHostname);
 const isPreviewDeployment = process.env.VERCEL_ENV === "preview";
+const isProductionRuntime = process.env.NODE_ENV === "production";
 const resolvedContactEmail = normalizeEmail(process.env.NEXT_PUBLIC_CONTACT_EMAIL);
 
 if (typeof window === "undefined") {
@@ -85,7 +86,7 @@ export const siteMetadata = {
   siteUrl: resolvedSiteUrl,
   contactEmail: resolvedContactEmail,
   isLocalSiteUrl,
-  shouldAllowIndexing: !isLocalSiteUrl && !isPreviewDeployment,
+  shouldAllowIndexing: isProductionRuntime ? !isPreviewDeployment : !isLocalSiteUrl && !isPreviewDeployment,
 };
 
 export function getPublicContactEmail() {

@@ -36,10 +36,16 @@ export async function generateMetadata({
 
   const canonicalSlug = getCanonicalToolSlug(tool.slug);
   const shouldIndex = shouldIndexTool(tool);
+  const title = tool.seoTitle.trim().length >= 20
+    ? tool.seoTitle
+    : `${tool.name} Online Free | Toolbox Hub`;
+  const description = tool.seoDescription.trim().length >= 110
+    ? tool.seoDescription
+    : `${tool.shortDescription} Use ${tool.name.toLowerCase()} online with clear steps, related tools, FAQs, and a browser-first workflow on Toolbox Hub.`;
 
   return buildMetadata({
-    title: tool.seoTitle,
-    description: tool.seoDescription,
+    title,
+    description,
     pathname: `/tools/${tool.slug}`,
     canonicalPathname: `/tools/${canonicalSlug}`,
     index: shouldIndex,

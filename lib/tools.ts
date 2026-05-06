@@ -1457,27 +1457,6 @@ const deprioritizedToolSlugs = new Set<string>([
 ]);
 
 const noindexWeakToolSlugs = new Set<string>([
-  "barcode-scanner",
-  "qr-code-scanner",
-  "ip-address-lookup",
-  "http-status-code-checker",
-  "url-status-checker",
-  "url-redirect-checker",
-  "webpage-source-viewer",
-  "text-line-counter",
-  "random-sentence-generator",
-  "lorem-ipsum-generator",
-  "text-duplicate-remover",
-  "username-generator",
-  "nickname-generator",
-  "fake-address-generator",
-  "random-color-palette-generator",
-  "age-difference-calculator",
-  "meeting-time-finder",
-  "random-quote-generator",
-  "pdf-metadata-editor",
-  "url-slug-generator",
-  "file-checksum-generator",
 ]);
 
 export function getCanonicalToolSlug(slug: string) {

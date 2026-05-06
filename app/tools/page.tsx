@@ -13,10 +13,10 @@ const SearchBox = dynamic(() => import("@/components/ui/search-box").then((modul
 const CategoryDirectory = dynamic(() => import("@/components/ui/category-directory").then((module) => module.CategoryDirectory));
 
 export const metadata = buildMetadata({
-  title: "Tools",
-  description: "Browse free online tools for images, PDFs, text, developers, generators, calculators, and more.",
+  title: "Free Online Tools Directory",
+  description: "Browse a free online tools directory for images, PDFs, text, developer workflows, generators, calculators, converters, and more.",
   pathname: "/tools",
-  keywords: ["tools", "free online tools", "browse tools", "tool directory"],
+  keywords: ["free online tools directory", "tools directory", "browse free online tools", "online tools"],
 });
 
 export default function ToolsPage() {
