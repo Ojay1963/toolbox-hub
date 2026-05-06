@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f3ea;
-  --foreground: #1f2937;
+  --background: #f3ecdd;
+  --foreground: #1d3557;
   --surface: rgba(255, 255, 255, 0.78);
-  --surface-strong: rgba(255, 255, 255, 0.92);
-  --border: rgba(31, 41, 55, 0.12);
-  --primary: #0f766e;
-  --primary-dark: #115e59;
-  --accent: #f97316;
-  --muted: #6b7280;
-  --soft: #ecfdf5;
+  --surface-strong: rgba(255, 255, 255, 0.94);
+  --border: rgba(29, 53, 87, 0.12);
+  --primary: #147d73;
+  --primary-dark: #0f5f59;
+  --accent: #f2b56b;
+  --muted: #617088;
+  --soft: #dcefeb;
+  --surface-alt: #f7f1e4;
+  --shadow-soft: 0 18px 40px rgba(42, 56, 84, 0.08);
   --mobile-nav-height: 5.75rem;
 }
 
@@ -32,11 +34,11 @@ body {
   max-width: 100%;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(249, 115, 22, 0.18), transparent 24%),
-    radial-gradient(circle at top right, rgba(15, 118, 110, 0.2), transparent 28%),
-    linear-gradient(180deg, #faf7ef 0%, #f6f3ea 100%);
+    radial-gradient(circle at top left, rgba(242, 181, 107, 0.26), transparent 24%),
+    radial-gradient(circle at top right, rgba(20, 125, 115, 0.18), transparent 30%),
+    linear-gradient(180deg, #f8f2e7 0%, #f3ecdd 56%, #efe6d5 100%);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Aptos", "Trebuchet MS", "Segoe UI", sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -211,6 +213,65 @@ input[type="file"]::-webkit-file-upload-button {
   min-height: 100vh;
 }
 
+.app-panel {
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.82));
+  box-shadow: var(--shadow-soft);
+}
+
+.app-panel-muted {
+  border: 1px solid rgba(29, 53, 87, 0.08);
+  background: linear-gradient(180deg, rgba(251, 248, 241, 0.92), rgba(246, 239, 225, 0.84));
+  box-shadow: var(--shadow-soft);
+}
+
+.tool-app-shell input[type="file"] {
+  width: 100%;
+  min-height: 4.5rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 1.4rem;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.tool-app-shell input[type="file"]::file-selector-button {
+  margin-right: 0.85rem;
+  border: 0;
+  border-radius: 9999px;
+  background: var(--primary);
+  color: white;
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+}
+
+.tool-app-shell select,
+.tool-app-shell input[type="date"],
+.tool-app-shell input[type="datetime-local"],
+.tool-app-shell input[type="search"],
+.tool-app-shell input[type="text"],
+.tool-app-shell input[type="number"]:not(.unstyled-number-input) {
+  min-height: 3.35rem;
+}
+
+.tool-app-shell input[type="range"] {
+  width: 100%;
+  accent-color: var(--primary);
+}
+
+.tool-app-shell input[type="checkbox"],
+.tool-app-shell input[type="radio"] {
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: var(--primary);
+}
+
+.tool-app-shell video,
+.tool-app-shell img {
+  border-radius: 1.25rem;
+}
+
 @media (max-width: 639px) {
   .app-shell {
     padding-bottom: calc(var(--mobile-nav-height) + env(safe-area-inset-bottom, 0px));
@@ -221,8 +282,9 @@ input[type="file"]::-webkit-file-upload-button {
   }
 
   .site-shell {
-    padding-top: 1rem !important;
-    padding-bottom: 1.5rem !important;
+    max-width: 30rem;
+    padding-top: 0.85rem !important;
+    padding-bottom: 1.75rem !important;
   }
 
   * {
@@ -275,8 +337,9 @@ input[type="file"]::-webkit-file-upload-button {
   }
 
   .site-header-shell {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 0.6rem) !important;
-    padding-bottom: 0.75rem !important;
+    max-width: 30rem;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 0.55rem) !important;
+    padding-bottom: 0.7rem !important;
   }
 
   .site-header-brand {
@@ -391,7 +454,7 @@ input[type="file"]::-webkit-file-upload-button {
   }
 
   .mobile-app-header {
-    margin-top: 0.85rem;
+    margin-top: 0.65rem;
   }
 
   .mobile-app-status-bar {
@@ -399,11 +462,11 @@ input[type="file"]::-webkit-file-upload-button {
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    padding: 0.9rem 1rem;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    border-radius: 1.4rem;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.82));
-    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+    padding: 0.85rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.62);
+    border-radius: 1.55rem;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.84));
+    box-shadow: 0 16px 34px rgba(42, 56, 84, 0.08);
   }
 
   .mobile-app-search-button {
@@ -424,7 +487,7 @@ input[type="file"]::-webkit-file-upload-button {
     display: flex;
     gap: 0.6rem;
     overflow-x: auto;
-    padding: 0.85rem 0 0.15rem;
+    padding: 0.8rem 0 0.1rem;
     scrollbar-width: none;
     -ms-overflow-style: none;
   }
@@ -440,37 +503,38 @@ input[type="file"]::-webkit-file-upload-button {
     white-space: nowrap;
     min-height: 2.75rem;
     padding: 0 1rem;
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(29, 53, 87, 0.1);
     border-radius: 9999px;
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.78);
     color: var(--foreground);
     font-size: 0.9rem;
     font-weight: 600;
   }
 
   .mobile-app-shortcut-active {
-    background: rgba(15, 118, 110, 0.14);
-    border-color: rgba(15, 118, 110, 0.24);
+    background: rgba(20, 125, 115, 0.14);
+    border-color: rgba(20, 125, 115, 0.2);
     color: var(--primary-dark);
   }
 
   .mobile-bottom-nav {
     position: fixed;
-    left: 0.85rem;
-    right: 0.85rem;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 0.7rem);
+    left: 50%;
+    width: min(calc(100% - 1.2rem), 29rem);
+    transform: translateX(-50%);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 0.6rem);
     z-index: 50;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 0.45rem;
     padding: 0.5rem;
-    border: 1px solid rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.72);
     border-radius: 1.75rem;
-    background: rgba(255, 255, 255, 0.94);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(18px);
     box-shadow:
-      0 22px 48px rgba(15, 23, 42, 0.18),
-      0 6px 18px rgba(15, 23, 42, 0.08);
+      0 22px 48px rgba(42, 56, 84, 0.16),
+      0 6px 18px rgba(42, 56, 84, 0.08);
   }
 
   .mobile-bottom-nav-item {
@@ -488,7 +552,7 @@ input[type="file"]::-webkit-file-upload-button {
   }
 
   .mobile-bottom-nav-item-active {
-    background: linear-gradient(180deg, rgba(15, 118, 110, 0.16), rgba(15, 118, 110, 0.08));
+    background: linear-gradient(180deg, rgba(20, 125, 115, 0.16), rgba(20, 125, 115, 0.08));
     color: var(--primary-dark);
   }
 
@@ -505,6 +569,32 @@ input[type="file"]::-webkit-file-upload-button {
 
   body {
     overflow-x: hidden;
+  }
+
+  .mobile-only-app-frame {
+    position: relative;
+  }
+
+  .mobile-only-app-frame::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 22%),
+      radial-gradient(circle at bottom center, rgba(20, 125, 115, 0.1), transparent 30%);
+    z-index: 0;
+  }
+
+  .tool-app-shell input[type="file"] {
+    min-height: 4.9rem;
+    border-radius: 1.55rem;
+  }
+
+  .tool-app-shell input[type="file"]::file-selector-button {
+    display: block;
+    margin-right: 0;
+    margin-bottom: 0.7rem;
   }
 }
 

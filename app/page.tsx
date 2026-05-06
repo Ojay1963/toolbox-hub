@@ -1,8 +1,12 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { EducationToolCard } from "@/components/education/tool-card";
+import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { FaqList } from "@/components/ui/faq-list";
-import { buildBreadcrumbJsonLd, buildCollectionPageJsonLd, buildFaqJsonLd, buildMetadata, siteMetadata } from "@/lib/seo";
-import { categories, getIndexableTools, getPopularTools, getTool } from "@/lib/tools";
+import { getEducationHomepageSpotlight } from "@/lib/education-tools";
+import { buildBreadcrumbJsonLd, buildCollectionPageJsonLd, buildFaqJsonLd, buildMetadata } from "@/lib/seo";
+import { discoveryCategories, getDiscoveryEntries, getDiscoverySuggestedEntries } from "@/lib/tool-discovery";
+import { getTool, shouldIndexTool } from "@/lib/tools";
 
 const SearchBox = dynamic(() => import("@/components/ui/search-box").then((module) => module.SearchBox));
 
@@ -40,24 +44,27 @@ const categoryBadgeMap: Record<string, { short: string; tone: string }> = {
   "calculator-tools": { short: "CAL", tone: "bg-violet-100 text-violet-800" },
   "converter-tools": { short: "CNV", tone: "bg-orange-100 text-orange-800" },
   "internet-tools": { short: "WEB", tone: "bg-cyan-100 text-cyan-800" },
+  "education-tools": { short: "EDU", tone: "bg-lime-100 text-lime-800" },
 };
 
 export const metadata = buildMetadata({
   title: "Free Online Tools for Images, PDFs, Text, Developers, and More",
   description:
-    `Use ${siteMetadata.indexableToolCount} public tool pages for image editing, PDF tasks, text cleanup, generators, calculators, converters, and developer workflows.`,
+    "Use free online tools for image editing, PDF tasks, text cleanup, generators, calculators, converters, and developer workflows.",
   pathname: "/",
   keywords: ["free online tools", "browser tools", "seo-friendly tools"],
 });
 
 export default function HomePage() {
-  const publicTools = getIndexableTools();
-  const suggestedTools = getPopularTools(8);
+  const publicTools = getDiscoveryEntries();
+  const suggestedTools = getDiscoverySuggestedEntries(8);
+  const educationSpotlightTools = getEducationHomepageSpotlight(6);
   const popularTools = featuredToolSlugs
     .map((slug) => getTool(slug))
-    .filter((tool): tool is NonNullable<typeof tool> => Boolean(tool));
-  const simplifiedCategories = categories.filter((category) =>
-    ["image-tools", "pdf-tools", "text-tools", "developer-tools", "generator-tools", "calculator-tools"].includes(category.slug),
+    .filter((tool): tool is NonNullable<typeof tool> => Boolean(tool))
+    .filter((tool) => shouldIndexTool(tool));
+  const simplifiedCategories = discoveryCategories.filter((category) =>
+    ["education-tools", "image-tools", "pdf-tools", "text-tools", "developer-tools", "generator-tools", "calculator-tools"].includes(category.slug),
   );
 
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([{ name: "Home", pathname: "/" }]);
@@ -88,7 +95,7 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqJsonLd) }}
       />
 
-      <section className="site-hero rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10 lg:p-12">
+      <section className="site-hero app-panel rounded-[2rem] p-7 sm:p-10 lg:p-12">
         <div className="max-w-4xl">
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[color:var(--primary-dark)]">
             Free online tools
@@ -132,6 +139,22 @@ export default function HomePage() {
             </Link>
             .
           </p>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            {[
+              { label: "Fast actions", value: "Useful workflows" },
+              { label: "Works on phone", value: "Touch-friendly UI" },
+              { label: "No account", value: "Start instantly" },
+            ].map((item) => (
+              <div
+                key={item.label}
+                className="rounded-[1.5rem] border border-[color:var(--border)] bg-[color:var(--surface-alt)] px-4 py-4"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">{item.label}</p>
+                <p className="mt-2 text-base font-bold tracking-tight text-[color:var(--foreground)]">{item.value}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -151,7 +174,7 @@ export default function HomePage() {
               <Link
                 key={tool.slug}
                 href={`/tools/${tool.slug}`}
-                className="site-feature-card group rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-5 shadow-sm transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
+                className="site-feature-card app-panel group rounded-[2rem] p-5 transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className={`rounded-2xl px-3 py-2 text-xs font-bold tracking-[0.18em] ${badge.tone}`}>
@@ -166,6 +189,36 @@ export default function HomePage() {
               </Link>
             );
           })}
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <AdPlaceholder
+          slot="homepage-leaderboard-top"
+          label="Advertisement"
+          format="leaderboard"
+        />
+      </section>
+
+      <section className="mt-10">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+              Educational Tools
+            </p>
+            <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Popular tools for students and study workflows</h2>
+            <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+              Open free tools for grades, writing, revision, typing practice, and study planning.
+            </p>
+          </div>
+          <Link href="/tools/education" className="text-sm font-semibold text-[color:var(--primary)]">
+            Browse all educational tools
+          </Link>
+        </div>
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {educationSpotlightTools.map((tool) => (
+            <EducationToolCard key={tool.slug} tool={tool} />
+          ))}
         </div>
       </section>
 
@@ -196,8 +249,8 @@ export default function HomePage() {
             return (
               <Link
                 key={category.slug}
-                href={`/category/${category.slug}#tools-list`}
-                className="site-feature-card group rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-5 shadow-sm transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
+                href={category.href}
+                className="site-feature-card app-panel group rounded-[2rem] p-5 transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
               >
                 <div className={`inline-flex rounded-2xl px-3 py-2 text-xs font-bold tracking-[0.18em] ${badge.tone}`}>
                   {badge.short}
@@ -210,7 +263,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="site-card mt-10 rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8">
+      <section className="site-card app-panel mt-10 rounded-[2rem] p-7 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
           Why use Toolbox Hub?
         </p>
@@ -222,7 +275,7 @@ export default function HomePage() {
             "Works directly in your browser",
             "Fast and simple tools",
           ].map((item) => (
-            <div key={item} className="rounded-3xl bg-stone-50 px-5 py-4 text-sm font-semibold text-[color:var(--foreground)]">
+            <div key={item} className="rounded-3xl bg-[color:var(--surface-alt)] px-5 py-4 text-sm font-semibold text-[color:var(--foreground)]">
               {item}
             </div>
           ))}
@@ -230,6 +283,14 @@ export default function HomePage() {
       </section>
 
       <section className="mt-10">
+        <AdPlaceholder
+          slot="homepage-banner-bottom"
+          label="Advertisement"
+          format="banner"
+        />
+      </section>
+
+      <section className="site-card app-panel mt-10 rounded-[2rem] p-7 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
           FAQ
         </p>

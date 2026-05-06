@@ -4222,7 +4222,7 @@ export function KeywordSuggestionGeneratorTool() {
       <Field label="Seed keyword or phrase" hint="Example: email marketing">
         <input className={inputClass} value={seed} onChange={(event) => setSeed(event.target.value)} placeholder="email marketing" />
       </Field>
-      <Notice>Example ideas include modifiers like â€œtips,â€ â€œguide,â€ â€œonline,â€ and question-style variations.</Notice>
+      <Notice>Example ideas include modifiers like "tips," "guide," "online," and question-style variations.</Notice>
       <button type="button" className={buttonClass} onClick={handleGenerate}>Generate keyword ideas</button>
       {error ? <Notice tone="error">{error}</Notice> : null}
       {!output && !error ? (

@@ -5,12 +5,12 @@ import { useEffect, useState } from "react";
 
 export const panelClass = "max-w-full overflow-hidden rounded-3xl border border-[color:var(--border)] bg-white p-6 shadow-sm";
 export const inputClass =
-  "w-full min-w-0 max-w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm";
+  "w-full min-w-0 max-w-full rounded-[1.35rem] border border-[color:var(--border)] bg-white/95 px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm";
 export const textareaClass = `${inputClass} min-h-44`;
 export const buttonClass =
-  "inline-flex max-w-full items-center justify-center rounded-2xl bg-[color:var(--primary)] px-5 py-3.5 text-center text-sm font-semibold text-white transition hover:bg-[color:var(--primary-dark)] disabled:cursor-not-allowed disabled:opacity-60";
+  "inline-flex max-w-full items-center justify-center rounded-[1.35rem] bg-[color:var(--primary)] px-5 py-3.5 text-center text-sm font-semibold text-white shadow-[0_14px_30px_rgba(20,125,115,0.22)] transition hover:bg-[color:var(--primary-dark)] disabled:cursor-not-allowed disabled:opacity-60";
 export const secondaryButtonClass =
-  "inline-flex max-w-full items-center justify-center rounded-2xl border border-[color:var(--border)] bg-white px-5 py-3.5 text-center text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]";
+  "inline-flex max-w-full items-center justify-center rounded-[1.35rem] border border-[color:var(--border)] bg-white/92 px-5 py-3.5 text-center text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]";
 
 export function Field({
   label,
@@ -22,8 +22,8 @@ export function Field({
   children: React.ReactNode;
 }) {
   return (
-    <label className="block space-y-2">
-      <span className="text-sm font-semibold text-[color:var(--foreground)]">{label}</span>
+    <label className="block space-y-2.5">
+      <span className="text-sm font-semibold tracking-tight text-[color:var(--foreground)]">{label}</span>
       {children}
       {hint ? <span className="block text-xs text-[color:var(--muted)]">{hint}</span> : null}
     </label>
@@ -104,7 +104,7 @@ export function EmptyState({
   description: string;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-[color:var(--border)] bg-stone-50 p-4 text-sm text-[color:var(--muted)]">
+    <div className="app-panel-muted rounded-[1.5rem] border-dashed p-4 text-sm text-[color:var(--muted)]">
       <p className="font-semibold text-[color:var(--foreground)]">{title}</p>
       <p className="mt-2 leading-7">{description}</p>
     </div>
@@ -120,12 +120,12 @@ export function Notice({
 }) {
   const toneClass =
     tone === "error"
-      ? "border-rose-200 bg-rose-50 text-rose-800"
+      ? "border-rose-200 bg-rose-50/95 text-rose-800"
       : tone === "success"
-        ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-        : "border-stone-200 bg-stone-50 text-stone-700";
+        ? "border-emerald-200 bg-emerald-50/95 text-emerald-800"
+        : "border-[color:var(--border)] bg-[color:var(--surface-alt)] text-stone-700";
 
-  return <div className={`rounded-2xl border px-4 py-3 text-sm ${toneClass}`}>{children}</div>;
+  return <div className={`rounded-[1.35rem] border px-4 py-3 text-sm ${toneClass}`}>{children}</div>;
 }
 
 export function OutputBlock({
@@ -138,7 +138,7 @@ export function OutputBlock({
   multiline?: boolean;
 }) {
   return (
-    <div className="max-w-full rounded-2xl bg-stone-50 p-4">
+    <div className="app-panel-muted max-w-full rounded-[1.5rem] p-4">
       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
         {title}
       </p>
@@ -163,8 +163,16 @@ export function ToolShell({
   children: React.ReactNode;
 }) {
   return (
-    <section className={panelClass}>
-      <h2 className="text-2xl font-bold tracking-tight">{title}</h2>
+    <section className={`${panelClass} app-panel tool-app-shell`}>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-full bg-[color:var(--soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+          Tool panel
+        </span>
+        <span className="rounded-full bg-[color:var(--surface-alt)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
+          App-style UI
+        </span>
+      </div>
+      <h2 className="mt-4 text-2xl font-bold tracking-tight">{title}</h2>
       <p className="mt-3 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">{description}</p>
       <div className="mt-6 max-w-full space-y-5">{children}</div>
     </section>

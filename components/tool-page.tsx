@@ -34,67 +34,45 @@ export function ToolPage({
         />
         <div className="min-w-0 grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0 space-y-8">
-            <section className="site-hero rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-6 shadow-sm sm:p-8">
-          <nav
-            aria-label="Breadcrumb"
-            className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--muted)]"
-          >
-            <Link href="/" className="transition hover:text-[color:var(--primary)]">
-              Home
-            </Link>
-            <span>/</span>
-            <Link
-              href={`/category/${tool.category}`}
-              className="transition hover:text-[color:var(--primary)]"
-            >
-              {categoryLabel}
-            </Link>
-            <span>/</span>
-            <span className="text-[color:var(--foreground)]">{tool.name}</span>
-          </nav>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
-            {tool.name}
-          </p>
-          <h1 className="site-hero-title mt-3 text-4xl font-black tracking-tight sm:text-5xl">{tool.name}</h1>
-          <p className="mt-4 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
-            {isPubliclyActive ? tool.longDescription : tool.shortDescription}
-          </p>
-          {primaryRelatedTools.length ? (
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
-              Need a related workflow? Try{" "}
-              {primaryRelatedTools.map((item, index) => (
-                <span key={item.slug}>
-                  {index > 0 ? (index === primaryRelatedTools.length - 1 ? ", or " : ", ") : ""}
-                  <Link href={`/tools/${item.slug}`} className="font-semibold text-[color:var(--primary)]">
-                    {item.name}
-                  </Link>
-                </span>
-              ))}
-              .
-            </p>
-          ) : null}
-          <div className="mt-8">
-            <ToolRenderer tool={tool} />
-          </div>
-            </section>
-
-        {isPubliclyActive ? (
-          <>
-            <Section title={`About ${tool.name}`}>
-              <p>{tool.longDescription}</p>
-              <p>
-                You can also explore{" "}
-                <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
+            <section className="site-hero app-panel rounded-[2rem] p-6 sm:p-8">
+              <nav
+                aria-label="Breadcrumb"
+                className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--muted)]"
+              >
+                <Link href="/" className="transition hover:text-[color:var(--primary)]">
+                  Home
+                </Link>
+                <span>/</span>
+                <Link
+                  href={`/category/${tool.category}`}
+                  className="transition hover:text-[color:var(--primary)]"
+                >
                   {categoryLabel}
-                </Link>{" "}
-                for similar tools in the same category.
+                </Link>
+                <span>/</span>
+                <span className="text-[color:var(--foreground)]">{tool.name}</span>
+              </nav>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="rounded-full bg-[color:var(--soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+                  Tool workspace
+                </span>
+                <span className="rounded-full bg-[color:var(--surface-alt)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--muted)]">
+                  {categoryLabel}
+                </span>
+              </div>
+              <p className="mt-4 text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+                {tool.name}
               </p>
-              {relatedTools.length ? (
-                <p>
-                  If you need a slightly different result, try{" "}
-                  {relatedTools.map((item, index) => (
+              <h1 className="site-hero-title mt-3 text-4xl font-black tracking-tight sm:text-5xl">{tool.name}</h1>
+              <p className="mt-4 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
+                {isPubliclyActive ? tool.longDescription : tool.shortDescription}
+              </p>
+              {primaryRelatedTools.length ? (
+                <p className="mt-4 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
+                  Need a related workflow? Try{" "}
+                  {primaryRelatedTools.map((item, index) => (
                     <span key={item.slug}>
-                      {index > 0 ? (index === relatedTools.length - 1 ? ", and " : ", ") : ""}
+                      {index > 0 ? (index === primaryRelatedTools.length - 1 ? ", or " : ", ") : ""}
                       <Link href={`/tools/${item.slug}`} className="font-semibold text-[color:var(--primary)]">
                         {item.name}
                       </Link>
@@ -103,193 +81,239 @@ export function ToolPage({
                   .
                 </p>
               ) : null}
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-[1.5rem] bg-[color:var(--surface-alt)] px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">Use case</p>
+                  <p className="mt-2 text-sm font-bold text-[color:var(--foreground)]">{tool.shortDescription}</p>
+                </div>
+                <div className="rounded-[1.5rem] bg-[color:var(--surface-alt)] px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">Status</p>
+                  <p className="mt-2 text-sm font-bold text-[color:var(--foreground)]">
+                    {isPubliclyActive ? "Ready to use" : "Browse alternatives"}
+                  </p>
+                </div>
+                <div className="rounded-[1.5rem] bg-[color:var(--surface-alt)] px-4 py-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">Next step</p>
+                  <p className="mt-2 text-sm font-bold text-[color:var(--foreground)]">Open the tool below</p>
+                </div>
+              </div>
+              <div className="mt-8 rounded-[1.75rem] bg-[color:var(--surface-alt)]/70 p-3 sm:p-4">
+                <ToolRenderer tool={tool} />
+              </div>
+            </section>
+
+            {isPubliclyActive ? (
+              <>
+                <Section title={`About ${tool.name}`}>
+                  <p>{tool.longDescription}</p>
+                  <p>
+                    You can also explore{" "}
+                    <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
+                      {categoryLabel}
+                    </Link>{" "}
+                    for similar tools in the same category.
+                  </p>
+                  {relatedTools.length ? (
+                    <p>
+                      If you need a slightly different result, try{" "}
+                      {relatedTools.map((item, index) => (
+                        <span key={item.slug}>
+                          {index > 0 ? (index === relatedTools.length - 1 ? ", and " : ", ") : ""}
+                          <Link href={`/tools/${item.slug}`} className="font-semibold text-[color:var(--primary)]">
+                            {item.name}
+                          </Link>
+                        </span>
+                      ))}
+                      .
+                    </p>
+                  ) : null}
+                </Section>
+
+                <Section title={`How to use ${tool.name.toLowerCase()}`}>
+                  <ol className="space-y-3 pl-5">
+                    {tool.howToUse.map((step) => (
+                      <li key={step}>{step}</li>
+                    ))}
+                  </ol>
+                </Section>
+              </>
+            ) : (
+              <Section title="Try a working alternative">
+                <p>
+                  This page is not being promoted right now. You can still browse the{" "}
+                  <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
+                    {categoryLabel}
+                  </Link>{" "}
+                  section for tools that are ready to use today.
+                </p>
+                {relatedTools.length ? (
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {relatedTools.slice(0, 4).map((item) => (
+                      <Link
+                        key={`alternative-${item.slug}`}
+                        href={`/tools/${item.slug}`}
+                        className="app-panel-muted site-feature-card rounded-2xl px-4 py-4 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
+                      >
+                        <span className="block font-semibold text-[color:var(--foreground)]">{item.name}</span>
+                        <span className="mt-1 block leading-6">{item.shortDescription}</span>
+                      </Link>
+                    ))}
+                  </div>
+                ) : null}
+              </Section>
+            )}
+
+            {visiblePeopleAlsoSearchFor.length ? (
+              <Section title="People also search for">
+                <div className="flex flex-wrap gap-3">
+                  {visiblePeopleAlsoSearchFor.map((item) =>
+                    item.href ? (
+                      <Link
+                        key={`${item.phrase}-${item.href}`}
+                        href={item.href}
+                        className="rounded-full border border-[color:var(--border)] bg-[color:var(--surface-alt)] px-4 py-2 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
+                      >
+                        {item.phrase}
+                      </Link>
+                    ) : (
+                      <span
+                        key={item.phrase}
+                        className="rounded-full border border-[color:var(--border)] bg-[color:var(--surface-alt)] px-4 py-2 text-sm text-[color:var(--muted)]"
+                      >
+                        {item.phrase}
+                      </span>
+                    ),
+                  )}
+                </div>
+              </Section>
+            ) : null}
+
+            {isPubliclyActive ? (
+              <Section title={`${tool.name} FAQs`}>
+                <FaqList items={tool.faq} />
+              </Section>
+            ) : null}
+
+            <Section title={`Related ${categoryLabel}`}>
+              <RelatedTools tools={relatedTools} />
             </Section>
 
-            <Section title={`How to use ${tool.name.toLowerCase()}`}>
-              <ol className="space-y-3 pl-5">
-                {tool.howToUse.map((step) => (
-                  <li key={step}>{step}</li>
-                ))}
-              </ol>
-            </Section>
-          </>
-        ) : (
-          <Section title="Try a working alternative">
-            <p>
-              This page is not being promoted right now. You can still browse the{" "}
-              <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
-                {categoryLabel}
-              </Link>{" "}
-              section for tools that are ready to use today.
-            </p>
-            {relatedTools.length ? (
+            <Section title={`More ${categoryLabel}`}>
+              <p>
+                If you want a nearby workflow in the same topic cluster, browse more tools from the{" "}
+                <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
+                  {categoryLabel}
+                </Link>{" "}
+                category below.
+              </p>
               <div className="grid gap-4 md:grid-cols-2">
-                {relatedTools.slice(0, 4).map((item) => (
+                {categoryPopularTools.slice(0, 4).map((item) => (
                   <Link
-                    key={`alternative-${item.slug}`}
+                    key={`category-popular-${item.slug}`}
                     href={`/tools/${item.slug}`}
-                  className="site-feature-card rounded-2xl border border-[color:var(--border)] bg-stone-50 px-4 py-4 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
+                    className="app-panel-muted site-feature-card rounded-2xl px-4 py-4 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
                   >
                     <span className="block font-semibold text-[color:var(--foreground)]">{item.name}</span>
                     <span className="mt-1 block leading-6">{item.shortDescription}</span>
                   </Link>
                 ))}
               </div>
-            ) : null}
-          </Section>
-        )}
-
-        {visiblePeopleAlsoSearchFor.length ? (
-          <Section title="People also search for">
-            <div className="flex flex-wrap gap-3">
-              {visiblePeopleAlsoSearchFor.map((item) =>
-                item.href ? (
-                  <Link
-                    key={`${item.phrase}-${item.href}`}
-                    href={item.href}
-                    className="rounded-full border border-[color:var(--border)] bg-stone-50 px-4 py-2 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
-                  >
-                    {item.phrase}
-                  </Link>
-                ) : (
-                  <span
-                    key={item.phrase}
-                    className="rounded-full border border-[color:var(--border)] bg-stone-50 px-4 py-2 text-sm text-[color:var(--muted)]"
-                  >
-                    {item.phrase}
-                  </span>
-                ),
-              )}
-            </div>
-          </Section>
-        ) : null}
-
-        {isPubliclyActive ? (
-          <Section title={`${tool.name} FAQs`}>
-            <FaqList items={tool.faq} />
-          </Section>
-        ) : null}
-
-        <Section title={`Related ${categoryLabel}`}>
-          <RelatedTools tools={relatedTools} />
-        </Section>
-
-        <Section title={`More ${categoryLabel}`}>
-          <p>
-            If you want a nearby workflow in the same topic cluster, browse more tools from the{" "}
-            <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
-              {categoryLabel}
-            </Link>{" "}
-            category below.
-          </p>
-          <div className="grid gap-4 md:grid-cols-2">
-            {categoryPopularTools.slice(0, 4).map((item) => (
-              <Link
-                key={`category-popular-${item.slug}`}
-                href={`/tools/${item.slug}`}
-                className="site-feature-card rounded-2xl border border-[color:var(--border)] bg-stone-50 px-4 py-4 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
-              >
-                <span className="block font-semibold text-[color:var(--foreground)]">{item.name}</span>
-                <span className="mt-1 block leading-6">{item.shortDescription}</span>
-              </Link>
-            ))}
-          </div>
-        </Section>
+            </Section>
           </div>
 
           <div className="min-w-0 space-y-6">
-        <AdPlaceholder
-          slot={`tool-${tool.slug}-sidebar`}
-          label="Advertisement"
-          format="sidebar"
-        />
-        <section className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-          <h2 className="site-section-title text-lg font-bold tracking-tight">Quick notes</h2>
-          <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
-            {isPubliclyActive ? tool.shortDescription : "This page is not being promoted right now. Use the links below to open similar tools that are ready to use."}
-          </p>
-        </section>
-        <section className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-          <h2 className="site-section-title text-lg font-bold tracking-tight">Explore more</h2>
-          <div className="mt-4 space-y-5 text-sm text-[color:var(--muted)]">
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
-                Browse
+            <AdPlaceholder
+              slot={`tool-${tool.slug}-sidebar`}
+              label="Advertisement"
+              format="sidebar"
+            />
+            <section className="site-card app-panel rounded-[2rem] p-6">
+              <h2 className="site-section-title text-lg font-bold tracking-tight">Quick notes</h2>
+              <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">
+                {isPubliclyActive ? tool.shortDescription : "This page is not being promoted right now. Use the links below to open similar tools that are ready to use."}
               </p>
-              <Link href="/" className="block transition hover:text-[color:var(--primary)]">
-                Browse all tools
-              </Link>
-              <Link href="/#search-tools" className="block transition hover:text-[color:var(--primary)]">
-                Search all tools
-              </Link>
-              <Link
-                href={`/category/${tool.category}`}
-                className="block transition hover:text-[color:var(--primary)]"
-              >
-                More {categoryLabel}
-              </Link>
-            </div>
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
-                Related tools
-              </p>
-              {relatedTools.length ? relatedTools.map((item) => (
-                <Link
-                  key={item.slug}
-                  href={`/tools/${item.slug}`}
-                  className="block transition hover:text-[color:var(--primary)]"
-                >
-                  {item.name}
-                </Link>
-              )) : (
-                <p className="leading-7">Browse the category for other working options.</p>
-              )}
-            </div>
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
-                Popular in {categoryLabel}
-              </p>
-              {categoryPopularTools.map((item) => (
-                <Link
-                  key={`popular-${item.slug}`}
-                  href={`/tools/${item.slug}`}
-                  className="block transition hover:text-[color:var(--primary)]"
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-            <div className="space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
-                More in {categoryLabel}
-              </p>
-              {categoryRecentTools.map((item) => (
-                <Link
-                  key={`recent-${item.slug}`}
-                  href={`/tools/${item.slug}`}
-                  className="block transition hover:text-[color:var(--primary)]"
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-        {isPubliclyActive ? (
-          <section className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm">
-            <h2 className="site-section-title text-lg font-bold tracking-tight">Keywords covered</h2>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {tool.keywords.slice(0, 8).map((keyword) => (
-                <span
-                  key={keyword}
-                  className="rounded-full border border-[color:var(--border)] px-3 py-2 text-sm text-[color:var(--muted)]"
-                >
-                  {keyword}
-                </span>
-              ))}
-            </div>
-          </section>
-        ) : null}
+            </section>
+            <section className="site-card app-panel rounded-[2rem] p-6">
+              <h2 className="site-section-title text-lg font-bold tracking-tight">Explore more</h2>
+              <div className="mt-4 space-y-5 text-sm text-[color:var(--muted)]">
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+                    Browse
+                  </p>
+                  <Link href="/" className="block transition hover:text-[color:var(--primary)]">
+                    Browse all tools
+                  </Link>
+                  <Link href="/#search-tools" className="block transition hover:text-[color:var(--primary)]">
+                    Search all tools
+                  </Link>
+                  <Link
+                    href={`/category/${tool.category}`}
+                    className="block transition hover:text-[color:var(--primary)]"
+                  >
+                    More {categoryLabel}
+                  </Link>
+                </div>
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+                    Related tools
+                  </p>
+                  {relatedTools.length ? relatedTools.map((item) => (
+                    <Link
+                      key={item.slug}
+                      href={`/tools/${item.slug}`}
+                      className="block transition hover:text-[color:var(--primary)]"
+                    >
+                      {item.name}
+                    </Link>
+                  )) : (
+                    <p className="leading-7">Browse the category for other working options.</p>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+                    Popular in {categoryLabel}
+                  </p>
+                  {categoryPopularTools.map((item) => (
+                    <Link
+                      key={`popular-${item.slug}`}
+                      href={`/tools/${item.slug}`}
+                      className="block transition hover:text-[color:var(--primary)]"
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+                    More in {categoryLabel}
+                  </p>
+                  {categoryRecentTools.map((item) => (
+                    <Link
+                      key={`recent-${item.slug}`}
+                      href={`/tools/${item.slug}`}
+                      className="block transition hover:text-[color:var(--primary)]"
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </section>
+            {isPubliclyActive ? (
+              <section className="site-card app-panel rounded-[2rem] p-6">
+                <h2 className="site-section-title text-lg font-bold tracking-tight">Keywords covered</h2>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {tool.keywords.slice(0, 8).map((keyword) => (
+                    <span
+                      key={keyword}
+                      className="rounded-full border border-[color:var(--border)] bg-[color:var(--surface-alt)] px-3 py-2 text-sm text-[color:var(--muted)]"
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              </section>
+            ) : null}
           </div>
 
           <div className="xl:col-span-2">

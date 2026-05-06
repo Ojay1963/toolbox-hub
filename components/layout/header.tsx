@@ -33,16 +33,30 @@ export function Header() {
               ? "About"
               : "Home";
 
+  const isNavActive = (href: string) => {
+    const baseHref = href.split("#")[0];
+
+    if (href === "/") {
+      return pathname === "/";
+    }
+
+    if (href === "/tools#browse-categories") {
+      return pathname === "/tools" || pathname.startsWith("/category/") || pathname.startsWith("/tools/education");
+    }
+
+    return pathname === baseHref || pathname.startsWith(`${baseHref}/`);
+  };
+
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-[color:var(--border)] bg-[color:var(--surface-strong)]/95 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-[color:var(--border)] bg-[color:var(--surface-strong)]/88 backdrop-blur">
         <div className="site-header-shell mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-4 lg:grid-cols-[1fr_auto_1fr]">
             <Link href="/" className="site-header-brand flex min-w-0 items-center gap-3" aria-label="Go to Toolbox Hub homepage">
               <Image
                 src={siteMark}
                 alt="Toolbox Hub logo"
-                className="site-header-logo h-24 w-24 shrink-0 object-contain"
+                className="site-header-logo h-24 w-24 shrink-0 rounded-[1.35rem] border border-white/70 bg-white/90 object-contain p-2 shadow-[0_14px_30px_rgba(42,56,84,0.1)]"
                 priority
               />
               <div className="min-w-0">
@@ -54,26 +68,40 @@ export function Header() {
               aria-label="Primary"
               className="hidden items-center justify-center gap-6 text-sm text-[color:var(--muted)] lg:flex"
             >
-              <Link href="/" className="transition hover:text-[color:var(--primary)]">
-                Home
-              </Link>
-              <Link href="/tools" className="transition hover:text-[color:var(--primary)]">
-                Tools
-              </Link>
-              <Link href="/about" className="transition hover:text-[color:var(--primary)]">
-                About
-              </Link>
-              <Link href="/blog" className="transition hover:text-[color:var(--primary)]">
-                Guides
-              </Link>
-              <Link href="/contact" className="transition hover:text-[color:var(--primary)]">
-                Contact
-              </Link>
+              {[
+                { href: "/", label: "Home" },
+                { href: "/tools", label: "Tools" },
+                { href: "/about", label: "About" },
+                { href: "/blog", label: "Guides" },
+                { href: "/contact", label: "Contact" },
+              ].map((item) => {
+                const isActive = isNavActive(item.href);
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`transition ${
+                      isActive
+                        ? "font-semibold text-emerald-700"
+                        : "hover:text-[color:var(--primary)]"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
             </nav>
             <div className="hidden justify-end lg:flex">
               <Link
                 href="/tools#browse-categories"
-                className="rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                aria-current={isNavActive("/tools#browse-categories") ? "page" : undefined}
+                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                  isNavActive("/tools#browse-categories")
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-[color:var(--border)] bg-white text-[color:var(--foreground)] hover:border-[color:var(--primary)]"
+                }`}
               >
                 Browse categories
               </Link>
@@ -102,8 +130,9 @@ export function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={isNavActive(item.href) ? "page" : undefined}
                   className={`mobile-app-shortcut ${
-                    pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href.split("#")[0]))
+                    isNavActive(item.href)
                       ? "mobile-app-shortcut-active"
                       : ""
                   }`}

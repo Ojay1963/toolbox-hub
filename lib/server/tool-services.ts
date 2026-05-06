@@ -662,6 +662,15 @@ export async function lookupDnsRecords(hostname: string) {
     });
   }
 
+  const nodeResult = await lookupDnsRecordsWithNode(cleanHost);
+  if (hasDnsRecords(nodeResult)) {
+    return nodeResult;
+  }
+
+  return lookupDnsRecordsWithDoh(cleanHost);
+}
+
+async function lookupDnsRecordsWithNode(cleanHost: string) {
   const [a, aaaa, mx, ns, txt, cname, caa, srv, soa] = await Promise.allSettled([
     resolve4(cleanHost),
     resolve6(cleanHost),
@@ -691,11 +700,158 @@ export async function lookupDnsRecords(hostname: string) {
   };
 }
 
-export async function fetchPageSpeedReport(url: string) {
+type DohAnswer = {
+  data?: string;
+};
+
+type DohResponse = {
+  Answer?: DohAnswer[];
+};
+
+async function resolveDnsOverHttps(cleanHost: string, type: string) {
+  const query = new URLSearchParams({
+    name: cleanHost,
+    type,
+    cd: "false",
+    do: "false",
+  });
+
+  const response = await fetchWithTimeout(`https://dns.google/resolve?${query.toString()}`, {
+    headers: {
+      Accept: "application/dns-json",
+    },
+    cache: "no-store",
+    timeoutMs: 12_000,
+  });
+
+  if (!response.ok) {
+    throw new ToolServiceError("The DNS resolver is temporarily unavailable.", {
+      status: 502,
+      code: "UPSTREAM_UNAVAILABLE",
+    });
+  }
+
+  return (await response.json()) as DohResponse;
+}
+
+function parseMxRecord(value: string) {
+  const match = value.trim().match(/^(\d+)\s+(.+)$/);
+  if (!match) {
+    return { exchange: value.trim(), priority: 0 };
+  }
+
+  return {
+    priority: Number(match[1]),
+    exchange: match[2].replace(/\.$/, ""),
+  };
+}
+
+function parseSrvRecord(value: string) {
+  const match = value.trim().match(/^(\d+)\s+(\d+)\s+(\d+)\s+(.+)$/);
+  if (!match) {
+    return { priority: 0, weight: 0, port: 0, name: value.trim() };
+  }
+
+  return {
+    priority: Number(match[1]),
+    weight: Number(match[2]),
+    port: Number(match[3]),
+    name: match[4].replace(/\.$/, ""),
+  };
+}
+
+function parseCaaRecord(value: string) {
+  const match = value.trim().match(/^(\d+)\s+([A-Za-z0-9-]+)\s+"?(.*?)"?$/);
+  if (!match) {
+    return { critical: 0, issue: "", value: value.trim() };
+  }
+
+  return {
+    critical: Number(match[1]),
+    issue: match[2],
+    value: match[3],
+  };
+}
+
+function parseSoaRecord(value: string) {
+  const match = value.trim().match(/^(\S+)\s+(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)$/);
+  if (!match) {
+    return null;
+  }
+
+  return {
+    nsname: match[1].replace(/\.$/, ""),
+    hostmaster: match[2].replace(/\.$/, ""),
+    serial: Number(match[3]),
+    refresh: Number(match[4]),
+    retry: Number(match[5]),
+    expire: Number(match[6]),
+    minttl: Number(match[7]),
+  };
+}
+
+async function lookupDnsRecordsWithDoh(cleanHost: string) {
+  const [a, aaaa, mx, ns, txt, cname, caa, srv, soa] = await Promise.all([
+    resolveDnsOverHttps(cleanHost, "A"),
+    resolveDnsOverHttps(cleanHost, "AAAA"),
+    resolveDnsOverHttps(cleanHost, "MX"),
+    resolveDnsOverHttps(cleanHost, "NS"),
+    resolveDnsOverHttps(cleanHost, "TXT"),
+    resolveDnsOverHttps(cleanHost, "CNAME"),
+    resolveDnsOverHttps(cleanHost, "CAA"),
+    resolveDnsOverHttps(cleanHost, "SRV"),
+    resolveDnsOverHttps(cleanHost, "SOA"),
+  ]);
+
+  const readAnswers = (response: DohResponse) =>
+    response.Answer?.map((answer) => answer.data).filter((value): value is string => Boolean(value)) ?? [];
+
+  return {
+    hostname: cleanHost,
+    a: readAnswers(a),
+    aaaa: readAnswers(aaaa),
+    mx: readAnswers(mx).map(parseMxRecord),
+    ns: readAnswers(ns).map((value) => value.replace(/\.$/, "")),
+    txt: readAnswers(txt).map((value) => [value.replace(/^"|"$/g, "")]),
+    cname: readAnswers(cname).map((value) => value.replace(/\.$/, "")),
+    caa: readAnswers(caa).map(parseCaaRecord),
+    srv: readAnswers(srv).map(parseSrvRecord),
+    soa: parseSoaRecord(readAnswers(soa)[0] ?? ""),
+  };
+}
+
+function hasDnsRecords(result: {
+  a: string[];
+  aaaa: string[];
+  mx: Awaited<ReturnType<typeof resolveMx>>;
+  ns: string[];
+  txt: string[][];
+  cname: string[];
+  caa: Awaited<ReturnType<typeof resolveCaa>>;
+  srv: Awaited<ReturnType<typeof resolveSrv>>;
+  soa: Awaited<ReturnType<typeof resolveSoa>> | null;
+}) {
+  return Boolean(
+    result.a.length ||
+    result.aaaa.length ||
+    result.mx.length ||
+    result.ns.length ||
+    result.txt.length ||
+    result.cname.length ||
+    result.caa.length ||
+    result.srv.length ||
+    result.soa,
+  );
+}
+
+export async function fetchPageSpeedReport(
+  url: string,
+  options?: { unavailableMessage?: string },
+) {
   const normalizedUrl = await normalizePublicHttpUrl(url);
   const apiKey = requireEnvVar(
     "PAGESPEED_API_KEY",
-    "Website speed testing is not enabled on this deployment yet.",
+    options?.unavailableMessage ?? "Website speed testing is not enabled on this deployment yet.",
   );
   const query = new URLSearchParams();
   query.set("url", normalizedUrl.toString());
@@ -782,7 +938,9 @@ export async function fetchScreenshot(url: string) {
 export async function analyzeMobileFriendliness(url: string) {
   const normalizedUrl = await normalizePublicHttpUrl(url);
   const [pageSpeed, htmlResponse] = await Promise.all([
-    fetchPageSpeedReport(normalizedUrl.toString()),
+    fetchPageSpeedReport(normalizedUrl.toString(), {
+      unavailableMessage: "Mobile-friendly checking is not enabled on this deployment yet.",
+    }),
     fetchWithTimeout(normalizedUrl.toString(), { next: { revalidate: 1800 }, timeoutMs: 10_000 }),
   ]);
 

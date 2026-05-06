@@ -67,7 +67,7 @@ export default function RootLayout({
         />
         <AnalyticsHook />
         <NumberInputEnhancer />
-        <div className="app-shell relative min-h-screen max-w-full overflow-x-clip">
+        <div className="app-shell mobile-only-app-frame relative min-h-screen max-w-full overflow-x-clip">
           <Header />
           <main id="main-content" className="app-main max-w-full overflow-x-clip pb-10">{children}</main>
           <Footer />

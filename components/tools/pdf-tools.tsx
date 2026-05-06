@@ -85,7 +85,7 @@ function DownloadList({ items }: { items: DownloadItem[] }) {
         <button
           key={item.url}
           type="button"
-          className={`${secondaryButtonClass} w-full text-left`}
+          className={`${secondaryButtonClass} app-panel-muted w-full justify-between text-left`}
           onClick={() => downloadItem(item)}
         >
           Download {item.name}
@@ -694,7 +694,7 @@ export function ImageToPdfConverterTool() {
                 <img src={item.previewUrl} alt={`Preview of ${item.file.name}`} className="h-40 w-full rounded-xl border border-[color:var(--border)] object-contain bg-stone-50" />
                 <div className="mt-3 space-y-1">
                   <p className="truncate text-sm font-semibold text-[color:var(--foreground)]">{index + 1}. {item.file.name}</p>
-                  <p className="text-xs text-[color:var(--muted)]">{formatFileSize(item.file.size)} Â· {(item.file.type || "image").replace("image/", "").toUpperCase()}</p>
+                  <p className="text-xs text-[color:var(--muted)]">{formatFileSize(item.file.size)} - {(item.file.type || "image").replace("image/", "").toUpperCase()}</p>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button type="button" className={secondaryButtonClass} onClick={() => moveItem(index, -1)} disabled={index === 0}>

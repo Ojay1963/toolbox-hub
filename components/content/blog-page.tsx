@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { FaqList } from "@/components/ui/faq-list";
 import { RelatedTools } from "@/components/ui/related-tools";
 import type { BlogArticle } from "@/lib/blog";
@@ -19,6 +20,14 @@ export function BlogPage({
         </p>
         <h1 className="site-hero-title mt-4 text-4xl font-black tracking-tight sm:text-5xl">{article.h1}</h1>
         <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">{article.intro}</p>
+      </section>
+
+      <section className="mt-8">
+        <AdPlaceholder
+          slot={`blog-article-${article.slug}-leaderboard-top`}
+          label="Advertisement"
+          format="leaderboard"
+        />
       </section>
 
       <div className="mt-8 space-y-6">
@@ -54,6 +63,12 @@ export function BlogPage({
             <RelatedTools tools={relatedTools} />
           </div>
         </section>
+
+        <AdPlaceholder
+          slot={`blog-article-${article.slug}-banner-bottom`}
+          label="Advertisement"
+          format="banner"
+        />
       </div>
     </div>
   );

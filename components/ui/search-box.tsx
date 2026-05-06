@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useDeferredValue, useId, useMemo, useState } from "react";
-import { ToolCard } from "@/components/ui/tool-card";
-import { categories, type ToolCategorySlug, type ToolDefinition } from "@/lib/tools";
+import { categories, getCategory, type ToolDefinition } from "@/lib/tools";
 
 export function SearchBox({
   tools,
@@ -16,23 +15,33 @@ export function SearchBox({
   compact = false,
   placeholder = "Search by tool name or keyword",
 }: {
-  tools: ToolDefinition[];
+  tools: SearchBoxEntry[];
   title?: string;
   description?: string;
   maxResults?: number;
-  suggestedTools?: ToolDefinition[];
+  suggestedTools?: SearchBoxEntry[];
   sectionId?: string;
   showCategoryFilter?: boolean;
   compact?: boolean;
   placeholder?: string;
 }) {
   const [query, setQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<"all" | ToolCategorySlug>("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const deferredQuery = useDeferredValue(query);
   const inputId = useId().replace(/:/g, "");
   const suggestionList = suggestedTools.slice(0, 6);
-  const filteredTools = tools.filter((tool) => {
-    if (categoryFilter !== "all" && tool.category !== categoryFilter) {
+  const normalizedTools = useMemo(() => tools.map(normalizeEntry), [tools]);
+  const availableCategories = useMemo(() => {
+    const categoryMap = new Map<string, string>();
+
+    for (const tool of normalizedTools) {
+      categoryMap.set(tool.categoryKey, tool.categoryLabel);
+    }
+
+    return Array.from(categoryMap.entries()).map(([slug, name]) => ({ slug, name }));
+  }, [normalizedTools]);
+  const filteredTools = normalizedTools.filter((tool) => {
+    if (categoryFilter !== "all" && tool.categoryKey !== categoryFilter) {
       return false;
     }
     return true;
@@ -50,7 +59,7 @@ export function SearchBox({
           tool.name,
           tool.shortDescription,
           tool.longDescription,
-          tool.category,
+          tool.categoryLabel,
           ...tool.keywords,
         ]
           .join(" ")
@@ -66,28 +75,29 @@ export function SearchBox({
         if (name.startsWith(normalized)) score += 70;
         if (tool.keywords.some((keyword) => keyword.toLowerCase().includes(normalized))) score += 35;
         if (tool.shortDescription.toLowerCase().includes(normalized)) score += 20;
-        if (tool.implementationStatus === "working-local") score += 15;
-        if (tool.implementationStatus === "reduced-scope-local") score += 8;
-        if (tool.category === categoryFilter) score += 10;
+        if (tool.priority === "ready") score += 15;
+        if (tool.priority === "partial") score += 8;
+        if (tool.categoryKey === categoryFilter) score += 10;
 
         return { tool, score };
       })
-      .filter((entry): entry is { tool: ToolDefinition; score: number } => Boolean(entry))
+      .filter((entry): entry is { tool: NormalizedSearchBoxEntry; score: number } => Boolean(entry))
       .sort((left, right) => right.score - left.score || left.tool.name.localeCompare(right.tool.name))
       .slice(0, maxResults)
       .map((entry) => entry.tool);
   }, [categoryFilter, deferredQuery, filteredTools, maxResults]);
 
   const visibleSuggestions = suggestionList
-    .filter((tool) => (categoryFilter === "all" ? true : tool.category === categoryFilter))
+    .map(normalizeEntry)
+    .filter((tool) => (categoryFilter === "all" ? true : tool.categoryKey === categoryFilter))
     .slice(0, 6);
   const categoryPreviewTools = filteredTools.slice(0, 6);
 
   const quickQueries = ["PDF", "image", "text", "JSON", "hash", "calculator"];
 
   const shellClass = compact
-    ? "rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-5 shadow-sm sm:p-6"
-    : "rounded-[2rem] border border-[color:var(--border)] bg-white/85 p-6 shadow-sm sm:p-8";
+    ? "app-panel rounded-[2rem] p-5 sm:p-6"
+    : "app-panel rounded-[2rem] p-6 sm:p-8";
 
   return (
     <section id={sectionId} className={shellClass}>
@@ -108,7 +118,7 @@ export function SearchBox({
         onChange={(event) => setQuery(event.target.value)}
         placeholder={placeholder}
         aria-describedby={`${inputId}-hint`}
-        className="mobile-search-input mt-5 w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm"
+        className="mobile-search-input mt-5 w-full rounded-[1.4rem] border border-[color:var(--border)] bg-white/95 px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm"
       />
       <div id={`${inputId}-hint`} className="sr-only">
         Search for tools by name, category, or keyword.
@@ -127,9 +137,7 @@ export function SearchBox({
           >
             All tools
           </button>
-          {categories
-            .filter((category) => tools.some((tool) => tool.category === category.slug))
-            .map((category) => (
+          {availableCategories.map((category) => (
               <button
                 key={category.slug}
                 type="button"
@@ -158,7 +166,7 @@ export function SearchBox({
                   key={quickQuery}
                   type="button"
                   onClick={() => setQuery(quickQuery)}
-                  className="rounded-full border border-[color:var(--border)] px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                  className="rounded-full border border-[color:var(--border)] bg-white/70 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
                 >
                   {quickQuery}
                 </button>
@@ -172,9 +180,9 @@ export function SearchBox({
                 <div className="mobile-wrap-chip-row mt-3 flex flex-wrap gap-2">
                   {visibleSuggestions.map((tool) => (
                     <Link
-                      key={tool.slug}
-                      href={`/tools/${tool.slug}`}
-                      className="rounded-full border border-[color:var(--border)] px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                      key={tool.id}
+                      href={tool.href}
+                      className="rounded-full border border-[color:var(--border)] bg-white/70 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
                     >
                       {tool.name}
                     </Link>
@@ -185,11 +193,11 @@ export function SearchBox({
             {categoryFilter !== "all" && categoryPreviewTools.length ? (
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--muted)]">
-                  {categories.find((category) => category.slug === categoryFilter)?.name ?? "Filtered"} tools
+                  {availableCategories.find((category) => category.slug === categoryFilter)?.name ?? "Filtered"} tools
                 </p>
                 <div className="mobile-tool-grid mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                   {categoryPreviewTools.map((tool) => (
-                    <ToolCard key={tool.slug} tool={tool} compact />
+                    <SearchResultCard key={tool.id} tool={tool} compact />
                   ))}
                 </div>
               </div>
@@ -199,11 +207,11 @@ export function SearchBox({
           <div className="space-y-4">
             <p className="text-sm text-[color:var(--muted)]">
               Search results
-              {categoryFilter === "all" ? "" : ` in ${categories.find((category) => category.slug === categoryFilter)?.name ?? "this category"}`}.
+              {categoryFilter === "all" ? "" : ` in ${availableCategories.find((category) => category.slug === categoryFilter)?.name ?? "this category"}`}.
             </p>
             <div className="mobile-tool-grid grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {matches.map((tool) => (
-                <ToolCard key={tool.slug} tool={tool} />
+                <SearchResultCard key={tool.id} tool={tool} />
               ))}
             </div>
             {(categoryFilter !== "all" || query) && (
@@ -228,5 +236,111 @@ export function SearchBox({
         )}
       </div>
     </section>
+  );
+}
+
+type SearchBoxEntry =
+  | ToolDefinition
+  | {
+    id?: string;
+    slug?: string;
+    name: string;
+    shortDescription: string;
+    longDescription?: string;
+    keywords: string[];
+    href: string;
+    categoryKey: string;
+    categoryLabel: string;
+    badgeLabel?: string;
+    priority?: "ready" | "partial";
+  };
+
+type NormalizedSearchBoxEntry = {
+  id: string;
+  href: string;
+  name: string;
+  shortDescription: string;
+  longDescription: string;
+  keywords: string[];
+  categoryKey: string;
+  categoryLabel: string;
+  badgeLabel: string;
+  priority: "ready" | "partial";
+};
+
+function normalizeEntry(tool: SearchBoxEntry): NormalizedSearchBoxEntry {
+  if ("href" in tool && "categoryKey" in tool && "categoryLabel" in tool) {
+    return {
+      id: tool.id ?? `entry:${tool.href}`,
+      href: tool.href,
+      name: tool.name,
+      shortDescription: tool.shortDescription,
+      longDescription: tool.longDescription ?? tool.shortDescription,
+      keywords: tool.keywords,
+      categoryKey: tool.categoryKey,
+      categoryLabel: tool.categoryLabel,
+      badgeLabel: tool.badgeLabel ?? tool.categoryLabel,
+      priority: tool.priority ?? "ready",
+    };
+  }
+
+  const categoryLabel =
+    getCategory(tool.category)?.name ??
+    categories.find((category) => category.slug === tool.category)?.name ??
+    tool.category.replace(/-/g, " ");
+
+  return {
+    id: `tool:${tool.slug}`,
+    href: `/tools/${tool.slug}`,
+    name: tool.name,
+    shortDescription: tool.shortDescription,
+    longDescription: tool.longDescription,
+    keywords: tool.keywords,
+    categoryKey: tool.category,
+    categoryLabel,
+    badgeLabel: categoryLabel,
+    priority: tool.implementationStatus === "working-local" ? "ready" : "partial",
+  };
+}
+
+function SearchResultCard({
+  tool,
+  compact = false,
+}: {
+  tool: NormalizedSearchBoxEntry;
+  compact?: boolean;
+}) {
+  if (compact) {
+    return (
+      <Link
+        href={tool.href}
+        className="mobile-compact-tool-card app-panel-muted group block rounded-2xl px-4 py-3 transition hover:border-[color:var(--primary)]"
+      >
+        <p className="text-sm font-semibold text-[color:var(--foreground)] transition group-hover:text-[color:var(--primary)]">
+          {tool.name}
+        </p>
+        <p className="mt-1 text-xs leading-6 text-[color:var(--muted)]">
+          {tool.shortDescription}
+        </p>
+      </Link>
+    );
+  }
+
+  return (
+    <Link
+      href={tool.href}
+      className="mobile-tool-card app-panel group rounded-3xl p-5 transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-full bg-[color:var(--soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+          {tool.badgeLabel}
+        </span>
+      </div>
+      <h3 className="mt-4 text-lg font-bold tracking-tight">{tool.name}</h3>
+      <p className="mt-3 text-sm leading-7 text-[color:var(--muted)]">{tool.shortDescription}</p>
+      <p className="mt-4 text-sm font-semibold text-[color:var(--primary)] transition group-hover:text-[color:var(--primary-dark)]">
+        Open tool
+      </p>
+    </Link>
   );
 }

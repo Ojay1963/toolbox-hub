@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { getIndexableTools } from "@/lib/tools";
 
 function normalizeSiteUrl(value?: string) {
   const trimmed = value?.trim();
@@ -25,6 +24,23 @@ function normalizeEmail(value?: string) {
   return trimmed;
 }
 
+type SeoWarningState = {
+  warnedMissingSiteUrl?: boolean;
+  warnedMissingContactEmail?: boolean;
+};
+
+function getSeoWarningState() {
+  const globalState = globalThis as typeof globalThis & {
+    __toolsWebsiteSeoWarnings?: SeoWarningState;
+  };
+
+  if (!globalState.__toolsWebsiteSeoWarnings) {
+    globalState.__toolsWebsiteSeoWarnings = {};
+  }
+
+  return globalState.__toolsWebsiteSeoWarnings;
+}
+
 function resolveSiteUrl() {
   return (
     normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL) ||
@@ -38,15 +54,35 @@ const resolvedSiteUrl = resolveSiteUrl();
 const siteUrlHostname = new URL(resolvedSiteUrl).hostname.toLowerCase();
 const isLocalSiteUrl = /^(localhost|127\.0\.0\.1)$/.test(siteUrlHostname);
 const isPreviewDeployment = process.env.VERCEL_ENV === "preview";
-const indexableToolCount = getIndexableTools().length;
 const resolvedContactEmail = normalizeEmail(process.env.NEXT_PUBLIC_CONTACT_EMAIL);
+
+if (typeof window === "undefined") {
+  const warningState = getSeoWarningState();
+
+  if (process.env.NODE_ENV === "production" && isLocalSiteUrl) {
+    if (!warningState.warnedMissingSiteUrl) {
+      console.warn(
+        "[tools-website] Warning: NEXT_PUBLIC_SITE_URL is missing or invalid. SEO metadata is falling back to localhost until it is set.",
+      );
+      warningState.warnedMissingSiteUrl = true;
+    }
+  }
+
+  if (!resolvedContactEmail) {
+    if (!warningState.warnedMissingContactEmail) {
+      console.warn(
+        "[tools-website] Warning: NEXT_PUBLIC_CONTACT_EMAIL is missing or invalid. Public contact email will not appear on the contact page and footer until it is set.",
+      );
+      warningState.warnedMissingContactEmail = true;
+    }
+  }
+}
 
 export const siteMetadata = {
   name: "Toolbox Hub",
   description:
-    `A fast, SEO-friendly collection of ${indexableToolCount} public tool pages for images, PDFs, text, developers, generators, calculators, converters, and internet tasks.`,
+    "A fast, SEO-friendly collection of free online tools for images, PDFs, text, developers, generators, calculators, converters, and internet tasks.",
   siteUrl: resolvedSiteUrl,
-  indexableToolCount,
   contactEmail: resolvedContactEmail,
   isLocalSiteUrl,
   shouldAllowIndexing: !isLocalSiteUrl && !isPreviewDeployment,

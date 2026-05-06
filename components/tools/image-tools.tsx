@@ -8,6 +8,7 @@ import {
   EmptyState,
   Field,
   formatFileSize,
+  inputClass,
   NumberInput,
   parseNumberInput,
   Notice,
@@ -152,20 +153,20 @@ function ImageComparison({
 }) {
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <div className="rounded-2xl bg-stone-50 p-4">
+      <div className="app-panel-muted rounded-[1.5rem] p-4">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
           Original preview
         </p>
-        <img src={originalUrl} alt="Original uploaded preview" className="mt-3 max-h-80 w-full rounded-2xl object-contain" />
+        {originalUrl ? <img src={originalUrl} alt="Original uploaded preview" className="mt-3 max-h-80 w-full rounded-2xl object-contain" /> : null}
       </div>
-      <div className="rounded-2xl bg-stone-50 p-4">
+      <div className="app-panel-muted rounded-[1.5rem] p-4">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--muted)]">
           Output preview
         </p>
         {processed ? (
           <img src={processed.url} alt="Processed output preview" className="mt-3 max-h-80 w-full rounded-2xl object-contain" />
         ) : (
-          <div className="mt-3 rounded-2xl border border-dashed border-[color:var(--border)] p-6 text-sm text-[color:var(--muted)]">
+          <div className="app-panel mt-3 rounded-[1.35rem] border-dashed p-6 text-sm text-[color:var(--muted)]">
             Run the tool to generate an output preview.
           </div>
         )}
@@ -188,7 +189,7 @@ function ImageDownloadPanel({
       <button type="button" className={buttonClass} onClick={() => downloadProcessedImage(processed.url, filename)}>
         Download output
       </button>
-      <OutputBlock title="Output size" value={`${processed.width} x ${processed.height} â€¢ ${formatFileSize(processed.blob.size)}`} multiline={false} />
+      <OutputBlock title="Output size" value={`${processed.width} x ${processed.height} - ${formatFileSize(processed.blob.size)}`} multiline={false} />
     </div>
   );
 }
@@ -210,7 +211,7 @@ function useFilePreview(file: File | null) {
 }
 
 function imageInputClass() {
-  return "w-full rounded-2xl border border-[color:var(--border)] bg-white px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]";
+  return inputClass;
 }
 
 function getOutputExtension(type: string) {
@@ -677,7 +678,7 @@ function createHistogramChart({
   const canvas = document.createElement("canvas");
   canvas.width = 768;
   canvas.height = 320;
-  const context = canvas.getContext("2d");
+  const context = canvas.getContext("2d", { willReadFrequently: true });
   if (!context) {
     throw new Error("Canvas is not available in this browser.");
   }
@@ -1352,7 +1353,7 @@ export function BackgroundRemoverTool() {
         {!file ? (
           <EmptyState
             title="Upload an image to remove its background"
-            description="Youâ€™ll get a transparent PNG when the result is ready."
+            description="You'll get a transparent PNG when the result is ready."
           />
         ) : (
           <div className="grid gap-4 lg:grid-cols-2">
@@ -1902,7 +1903,7 @@ export function GifMakerTool() {
       const canvas = document.createElement("canvas");
       canvas.width = width;
       canvas.height = height;
-      const context = canvas.getContext("2d");
+      const context = canvas.getContext("2d", { willReadFrequently: true });
       if (!context) {
         throw new Error("Canvas is not available in this browser.");
       }
@@ -1936,6 +1937,7 @@ export function GifMakerTool() {
         <input className="w-full" type="range" min="100" max="1500" step="50" value={frameDelay} onChange={(event) => setFrameDelay(parseNumberInput(event.target.value))} />
       </Field>
       <button type="button" className={buttonClass} onClick={handleGenerate} disabled={files.length < 2}>Generate GIF</button>
+      {files.length > 0 && files.length < 2 ? <Notice tone="neutral">Upload at least two images to enable GIF generation.</Notice> : null}
       {error ? <Notice tone="error">{error}</Notice> : null}
       {!files.length ? (
         <EmptyState title="Upload image frames to create a GIF" description="Choose at least two images, set the frame delay, and export a real animated GIF locally." />
@@ -2000,7 +2002,7 @@ export function VideoToGifConverterTool() {
       const canvas = document.createElement("canvas");
       canvas.width = width;
       canvas.height = height;
-      const context = canvas.getContext("2d");
+      const context = canvas.getContext("2d", { willReadFrequently: true });
       if (!context) {
         throw new Error("Canvas is not available in this browser.");
       }
@@ -2085,7 +2087,7 @@ export function ImageColorPaletteGeneratorTool() {
       const height = Math.max(1, Math.round((width / image.width) * image.height));
       canvas.width = width;
       canvas.height = height;
-      const context = canvas.getContext("2d");
+      const context = canvas.getContext("2d", { willReadFrequently: true });
       if (!context) {
         throw new Error("Canvas is not available in this browser.");
       }
@@ -2543,7 +2545,7 @@ export function ImageHistogramAnalyzerTool() {
       const canvas = document.createElement("canvas");
       canvas.width = image.width;
       canvas.height = image.height;
-      const context = canvas.getContext("2d");
+      const context = canvas.getContext("2d", { willReadFrequently: true });
       if (!context) {
         throw new Error("Canvas is not available in this browser.");
       }

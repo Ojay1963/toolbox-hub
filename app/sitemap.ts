@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { blogArticles } from "@/lib/blog";
+import { educationTools } from "@/lib/education-tools";
 import { siteMetadata } from "@/lib/seo";
 import {
   categories,
@@ -38,10 +39,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
       )
       .map((tool) => tool.slug),
   );
-  const staticPages = ["/about", "/blog", "/contact", "/privacy-policy", "/terms-of-use", "/disclaimer", "/tools"];
+  const staticPages = ["/about", "/blog", "/contact", "/privacy-policy", "/terms-of-use", "/disclaimer", "/tools", "/tools/education"];
   const highValueCategorySlugs = new Set(["image-tools", "pdf-tools", "text-tools", "developer-tools"]);
 
-  return [
+  const entries: MetadataRoute.Sitemap = [
     {
       url: siteMetadata.siteUrl,
       lastModified,
@@ -87,5 +88,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
                   ? 0.76
                   : 0.72,
       })),
+    ...educationTools.map((tool) => ({
+      url: `${siteMetadata.siteUrl}/tools/education/${tool.slug}`,
+      lastModified,
+      changeFrequency: tool.popular ? ("weekly" as const) : ("monthly" as const),
+      priority: tool.popular ? 0.88 : tool.implementation === "full" ? 0.82 : 0.76,
+    })),
   ];
+
+  const deduped = new Map<string, MetadataRoute.Sitemap[number]>();
+  entries.forEach((entry) => {
+    deduped.set(entry.url, entry);
+  });
+
+  return [...deduped.values()];
 }

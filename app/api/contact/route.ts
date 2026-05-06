@@ -1,26 +1,10 @@
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
+import { enforceRateLimit, jsonError } from "@/lib/server/tool-services";
+
+export const runtime = "nodejs";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const rateLimitWindowMs = 10 * 60 * 1000;
-const rateLimitMaxRequests = 5;
-const requestLog = new Map<string, number[]>();
-
-function cleanupRequests(key: string, now: number) {
-  const timestamps = requestLog.get(key) ?? [];
-  const fresh = timestamps.filter((timestamp) => now - timestamp < rateLimitWindowMs);
-  requestLog.set(key, fresh);
-  return fresh;
-}
-
-function getClientKey(request: Request) {
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  if (forwardedFor) {
-    return forwardedFor.split(",")[0]?.trim() || "unknown";
-  }
-
-  return request.headers.get("x-real-ip")?.trim() || "unknown";
-}
 
 function normalizePort(value?: string) {
   if (!value) {
@@ -70,23 +54,37 @@ export async function POST(request: Request) {
     );
   }
 
-  const now = Date.now();
-  const clientKey = getClientKey(request);
-  const recentRequests = cleanupRequests(clientKey, now);
-
-  if (recentRequests.length >= rateLimitMaxRequests) {
-    return NextResponse.json(
-      { message: "Too many messages sent recently. Please wait a few minutes and try again." },
-      { status: 429 },
-    );
+  try {
+    await enforceRateLimit(request, {
+      key: "contact-form",
+      windowMs: 10 * 60 * 1000,
+      maxRequests: 5,
+      message: "Too many messages sent recently. Please wait a few minutes and try again.",
+    });
+  } catch (error) {
+    return jsonError(error, "Unable to verify the current request rate.", 429);
   }
 
-  const body = (await request.json()) as {
+  let body: {
     name?: string;
     email?: string;
     message?: string;
     company?: string;
   };
+
+  try {
+    body = (await request.json()) as {
+      name?: string;
+      email?: string;
+      message?: string;
+      company?: string;
+    };
+  } catch {
+    return NextResponse.json(
+      { message: "Please submit the contact form again." },
+      { status: 400 },
+    );
+  }
 
   const name = body.name?.trim() || "";
   const email = body.email?.trim() || "";
@@ -121,7 +119,6 @@ export async function POST(request: Request) {
       text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
     });
 
-    requestLog.set(clientKey, [...recentRequests, now]);
     return NextResponse.json({ message: "Message sent successfully" });
   } catch {
     return NextResponse.json(

@@ -2,11 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import siteMark from "@/components/images/Tools-hub-favicorn.png";
 import { getPublicContactEmail } from "@/lib/seo";
-import { categories, getPopularTools } from "@/lib/tools";
+import { discoveryCategories, getDiscoverySuggestedEntries } from "@/lib/tool-discovery";
 
 export function Footer() {
   const contactEmail = getPublicContactEmail();
-  const quickLinks = getPopularTools(6);
+  const quickLinks = getDiscoverySuggestedEntries(6);
   const currentYear = new Date().getFullYear();
   const siteLinks = [
     { href: "/about", label: "About" },
@@ -18,14 +18,14 @@ export function Footer() {
   ];
 
   return (
-    <footer className="border-t border-[color:var(--border)] bg-white/70">
+    <footer className="border-t border-[color:var(--border)] bg-white/35">
       <div className="site-footer-grid mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr] lg:px-8">
         <div>
           <div className="site-header-brand flex items-center gap-3">
             <Image
               src={siteMark}
               alt="Toolbox Hub logo"
-              className="site-header-logo h-16 w-16 shrink-0 object-contain"
+              className="site-header-logo h-16 w-16 shrink-0 rounded-[1.15rem] border border-white/70 bg-white/90 object-contain p-2 shadow-[0_14px_30px_rgba(42,56,84,0.1)]"
             />
             <h2 className="text-xl font-bold tracking-tight">Toolbox Hub</h2>
           </div>
@@ -46,15 +46,15 @@ export function Footer() {
             )}
           </p>
         </div>
-        <div>
+        <div className="app-panel-muted rounded-[1.6rem] p-5">
           <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--primary-dark)]">
             Categories
           </h3>
           <nav aria-label="Footer categories" className="mt-4 grid grid-cols-2 gap-3 text-sm text-[color:var(--muted)]">
-            {categories.map((category) => (
+            {discoveryCategories.map((category) => (
               <Link
                 key={category.slug}
-                href={`/category/${category.slug}`}
+                href={category.href}
                 className="transition hover:text-[color:var(--primary)]"
               >
                 {category.name}
@@ -62,7 +62,7 @@ export function Footer() {
             ))}
           </nav>
         </div>
-        <div>
+        <div className="app-panel-muted rounded-[1.6rem] p-5">
           <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--primary-dark)]">
             Site
           </h3>
@@ -78,15 +78,15 @@ export function Footer() {
             ))}
           </nav>
         </div>
-        <div>
+        <div className="app-panel-muted rounded-[1.6rem] p-5">
           <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-[color:var(--primary-dark)]">
             Popular tools
           </h3>
           <nav aria-label="Footer popular tools" className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
             {quickLinks.map((tool) => (
               <Link
-                key={tool.slug}
-                href={`/tools/${tool.slug}`}
+                key={tool.id}
+                href={tool.href}
                 className="block transition hover:text-[color:var(--primary)]"
               >
                 {tool.name}

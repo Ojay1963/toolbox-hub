@@ -1,11 +1,16 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { EducationToolCard } from "@/components/education/tool-card";
+import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { CategoryCard } from "@/components/ui/category-card";
 import { ToolCard } from "@/components/ui/tool-card";
+import { getEducationHomepageSpotlight } from "@/lib/education-tools";
 import { buildBreadcrumbJsonLd, buildCollectionPageJsonLd, buildMetadata } from "@/lib/seo";
-import { categories, getIndexableTools, getPopularTools, getRecentTools } from "@/lib/tools";
+import { discoveryCategories, getDiscoveryEntries, getDiscoverySuggestedEntries } from "@/lib/tool-discovery";
+import { getIndexableTools, getPopularTools, getRecentTools } from "@/lib/tools";
 
 const SearchBox = dynamic(() => import("@/components/ui/search-box").then((module) => module.SearchBox));
+const CategoryDirectory = dynamic(() => import("@/components/ui/category-directory").then((module) => module.CategoryDirectory));
 
 export const metadata = buildMetadata({
   title: "Tools",
@@ -15,9 +20,33 @@ export const metadata = buildMetadata({
 });
 
 export default function ToolsPage() {
-  const publicTools = getIndexableTools();
+  const publicTools = getDiscoveryEntries();
+  const suggestedTools = getDiscoverySuggestedEntries(8);
   const popularTools = getPopularTools(9);
   const recentTools = getRecentTools(6);
+  const educationSpotlightTools = getEducationHomepageSpotlight(4);
+  const imageSpotlightTools = getIndexableTools()
+    .filter((tool) =>
+      [
+        "background-remover",
+        "gif-maker",
+        "image-color-palette-generator",
+        "blur-image-tool",
+        "image-compressor",
+        "image-resizer",
+      ].includes(tool.slug),
+    )
+    .sort((left, right) => {
+      const order = [
+        "background-remover",
+        "gif-maker",
+        "image-color-palette-generator",
+        "blur-image-tool",
+        "image-compressor",
+        "image-resizer",
+      ];
+      return order.indexOf(left.slug) - order.indexOf(right.slug);
+    });
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Home", pathname: "/" },
     { name: "Tools", pathname: "/tools" },
@@ -26,9 +55,9 @@ export default function ToolsPage() {
     name: "Tools Directory",
     description: "Browse free online tools by category or search for the task you need.",
     pathname: "/tools",
-    items: popularTools.map((tool) => ({
+    items: suggestedTools.map((tool) => ({
       name: tool.name,
-      pathname: `/tools/${tool.slug}`,
+      pathname: tool.href,
     })),
   });
 
@@ -43,7 +72,12 @@ export default function ToolsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(toolsCollectionJsonLd) }}
       />
 
-      <section className="site-hero rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10">
+      <section className="site-hero app-panel rounded-[2rem] p-7 sm:p-10">
+        <div className="mb-4 flex flex-wrap gap-2">
+          <span className="rounded-full bg-[color:var(--soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
+            Tools hub
+          </span>
+        </div>
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[color:var(--primary-dark)]">
           Tools
         </p>
@@ -58,10 +92,105 @@ export default function ToolsPage() {
             description="Search by tool name, keyword, category, or task."
             placeholder="Search tools (e.g. compress image, merge pdf)"
             maxResults={8}
-            suggestedTools={popularTools}
+            suggestedTools={suggestedTools}
             showCategoryFilter
             compact
           />
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <AdPlaceholder
+          slot="tools-directory-leaderboard-top"
+          label="Advertisement"
+          format="leaderboard"
+        />
+      </section>
+
+      <section id="browse-categories" className="mt-10 scroll-mt-28">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+              Categories
+            </p>
+            <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Browse by category first</h2>
+          </div>
+          <Link href="#all-tools-directory" className="text-sm font-semibold text-[color:var(--primary)]">
+            Jump to full directory
+          </Link>
+        </div>
+        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {discoveryCategories.map((category) => (
+            <CategoryCard
+              key={category.slug}
+              category={category}
+              href={category.href}
+              badgeLabel="Browse tools"
+            />
+          ))}
+        </div>
+      </section>
+
+      <section id="all-tools-directory" className="mt-10 scroll-mt-28">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+              Full directory
+            </p>
+            <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Browse every public tool</h2>
+          </div>
+          <Link href="/tools/education" className="text-sm font-semibold text-[color:var(--primary)]">
+            Open educational tools
+          </Link>
+        </div>
+        <div className="mt-6">
+          <CategoryDirectory
+            tools={publicTools}
+            eyebrow="All tools"
+            title="Browse the full tools directory"
+            description="Open any tool immediately or filter the list by name, category, or keyword from the same page."
+            browseLabel="Explore every public tool from one place"
+            placeholder="Filter all tools by name, category, or keyword"
+            emptyMessage="No tools match that search yet. Try a broader keyword or open the education tools category above."
+          />
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+              Educational Tools
+            </p>
+            <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Student tools and study helpers</h2>
+          </div>
+          <Link href="/tools/education" className="text-sm font-semibold text-[color:var(--primary)]">
+            Open educational tools
+          </Link>
+        </div>
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {educationSpotlightTools.map((tool) => (
+            <EducationToolCard key={tool.slug} tool={tool} compact />
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
+              Image Favorites
+            </p>
+            <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Quick image tools people look for</h2>
+          </div>
+          <Link href="/category/image-tools" className="text-sm font-semibold text-[color:var(--primary)]">
+            Open image tools
+          </Link>
+        </div>
+        <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {imageSpotlightTools.map((tool) => (
+            <ToolCard key={tool.slug} tool={tool} compact />
+          ))}
         </div>
       </section>
 
@@ -84,18 +213,6 @@ export default function ToolsPage() {
         </div>
       </section>
 
-      <section id="browse-categories" className="mt-10 scroll-mt-28">
-        <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
-          Categories
-        </p>
-        <h2 className="site-section-title mt-2 text-3xl font-black tracking-tight">Browse by category</h2>
-        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {categories.map((category) => (
-            <CategoryCard key={category.slug} category={category} count={0} />
-          ))}
-        </div>
-      </section>
-
       <section className="mt-10">
         <p className="text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
           Recent Tools
@@ -106,6 +223,14 @@ export default function ToolsPage() {
             <ToolCard key={tool.slug} tool={tool} compact />
           ))}
         </div>
+      </section>
+
+      <section className="mt-10">
+        <AdPlaceholder
+          slot="tools-directory-banner-bottom"
+          label="Advertisement"
+          format="banner"
+        />
       </section>
     </div>
   );

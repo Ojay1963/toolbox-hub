@@ -773,7 +773,7 @@ export function WebsiteSpeedTestTool() {
   return (
     <ToolShell
       title="Website Speed Test"
-      description="Check a website’s performance, accessibility, best practices, and SEO."
+      description="Check a website's performance, accessibility, best practices, and SEO."
     >
       <Field
         label="Website URL"

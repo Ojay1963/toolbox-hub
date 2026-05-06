@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { buildCollectionPageJsonLd, buildMetadata } from "@/lib/seo";
 import { blogArticles } from "@/lib/blog";
 
@@ -38,6 +39,14 @@ export default function BlogIndexPage() {
           </p>
         </section>
 
+        <section className="mt-8">
+          <AdPlaceholder
+            slot="blog-index-leaderboard-top"
+            label="Advertisement"
+            format="leaderboard"
+          />
+        </section>
+
         <div className="mt-8 grid gap-5 md:grid-cols-2">
           {blogArticles.map((article) => (
             <Link
@@ -55,6 +64,14 @@ export default function BlogIndexPage() {
             </Link>
           ))}
         </div>
+
+        <section className="mt-8">
+          <AdPlaceholder
+            slot="blog-index-banner-bottom"
+            label="Advertisement"
+            format="banner"
+          />
+        </section>
       </div>
     </>
   );

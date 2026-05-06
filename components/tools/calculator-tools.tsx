@@ -330,7 +330,7 @@ export function DiscountCalculatorTool() {
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="Discount result" value={summary} />}
-      <CalculatorExplanation>The calculator uses: savings = original price Ã— discount rate, then final price = original price âˆ’ savings.</CalculatorExplanation>
+      <CalculatorExplanation>The calculator uses: savings = original price x discount rate, then final price = original price - savings.</CalculatorExplanation>
     </ToolShell>
   );
 }
@@ -375,7 +375,7 @@ export function TipCalculatorTool() {
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="Tip result" value={summary} />}
-      <CalculatorExplanation>Tip amount = bill Ã— tip rate. Total bill = bill + tip. Split per person = total bill Ã· number of people.</CalculatorExplanation>
+      <CalculatorExplanation>Tip amount = bill x tip rate. Total bill = bill + tip. Split per person = total bill / number of people.</CalculatorExplanation>
     </ToolShell>
   );
 }
@@ -416,7 +416,7 @@ export function ProfitMarginCalculatorTool() {
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="Profit result" value={summary} />}
-      <CalculatorExplanation>Profit = selling price âˆ’ cost. Margin uses selling price as the base, while markup uses cost as the base.</CalculatorExplanation>
+      <CalculatorExplanation>Profit = selling price - cost. Margin uses selling price as the base, while markup uses cost as the base.</CalculatorExplanation>
     </ToolShell>
   );
 }
@@ -468,7 +468,7 @@ export function VatCalculatorTool() {
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="VAT result" value={summary} />}
-      <CalculatorExplanation>Adding VAT uses amount Ã— rate. Removing VAT works backwards from a tax-inclusive total to find the net amount and VAT portion.</CalculatorExplanation>
+      <CalculatorExplanation>Adding VAT uses amount x rate. Removing VAT works backwards from a tax-inclusive total to find the net amount and VAT portion.</CalculatorExplanation>
     </ToolShell>
   );
 }
@@ -505,7 +505,7 @@ export function SalesTaxCalculatorTool() {
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="Sales tax result" value={summary} />}
-      <CalculatorExplanation>Sales tax amount = price before tax Ã— tax rate. Final total = price before tax + sales tax.</CalculatorExplanation>
+      <CalculatorExplanation>Sales tax amount = price before tax x tax rate. Final total = price before tax + sales tax.</CalculatorExplanation>
     </ToolShell>
   );
 }
@@ -549,7 +549,7 @@ export function SimpleInterestCalculatorTool() {
         </Field>
       </div>
       {error ? <Notice tone="error">{error}</Notice> : <OutputBlock title="Simple interest result" value={summary} />}
-      <CalculatorExplanation>Simple interest uses I = P Ã— R Ã— T, where P is principal, R is annual rate, and T is time in years.</CalculatorExplanation>
+      <CalculatorExplanation>Simple interest uses I = P x R x T, where P is principal, R is annual rate, and T is time in years.</CalculatorExplanation>
     </ToolShell>
   );
 }
