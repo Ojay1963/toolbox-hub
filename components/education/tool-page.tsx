@@ -1,10 +1,27 @@
 import Link from "next/link";
-import { EducationToolRenderer } from "@/components/education/tool-renderer";
+import dynamic from "next/dynamic";
 import { EducationToolCard } from "@/components/education/tool-card";
 import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { FaqList } from "@/components/ui/faq-list";
 import { Section } from "@/components/ui/section";
 import type { EducationFaqItem, EducationTool } from "@/lib/education-tools";
+
+const EducationToolRenderer = dynamic(
+  () => import("@/components/education/tool-renderer").then((module) => module.EducationToolRenderer),
+  {
+    // Keep the SEO copy server-rendered and load the interactive workspace only when needed.
+    loading: () => (
+      <div className="rounded-[1.5rem] border border-[color:var(--border)] bg-white/90 p-5">
+        <div className="h-5 w-28 rounded-full bg-stone-100" />
+        <div className="mt-4 h-10 w-56 rounded-xl bg-stone-100" />
+        <div className="mt-4 space-y-3">
+          <div className="h-4 w-full rounded bg-stone-100" />
+          <div className="h-4 w-10/12 rounded bg-stone-100" />
+        </div>
+      </div>
+    ),
+  },
+);
 
 export function EducationToolPage({
   tool,
@@ -31,11 +48,11 @@ export function EducationToolPage({
                 Home
               </Link>
               <span>/</span>
-              <Link href="/tools" className="transition hover:text-[color:var(--primary)]">
+              <Link href="/tools" prefetch={false} className="transition hover:text-[color:var(--primary)]">
                 Tools
               </Link>
               <span>/</span>
-              <Link href="/tools/education" className="transition hover:text-[color:var(--primary)]">
+              <Link href="/tools/education" prefetch={false} className="transition hover:text-[color:var(--primary)]">
                 Education
               </Link>
               <span>/</span>
@@ -112,10 +129,10 @@ export function EducationToolPage({
           <section className="site-card app-panel rounded-[2rem] p-6">
             <h2 className="site-section-title text-lg font-bold tracking-tight">Browse more</h2>
             <div className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
-              <Link href="/tools/education" className="block transition hover:text-[color:var(--primary)]">
+              <Link href="/tools/education" prefetch={false} className="block transition hover:text-[color:var(--primary)]">
                 All educational tools
               </Link>
-              <Link href="/tools" className="block transition hover:text-[color:var(--primary)]">
+              <Link href="/tools" prefetch={false} className="block transition hover:text-[color:var(--primary)]">
                 All tools
               </Link>
               <Link href="/" className="block transition hover:text-[color:var(--primary)]">
@@ -145,6 +162,7 @@ export function EducationToolPage({
                 <Link
                   key={item.slug}
                   href={`/tools/education/${item.slug}`}
+                  prefetch={false}
                   className="block rounded-2xl bg-[color:var(--surface-alt)] px-4 py-3 text-sm font-semibold text-[color:var(--foreground)] transition hover:text-[color:var(--primary)]"
                 >
                   {item.name}

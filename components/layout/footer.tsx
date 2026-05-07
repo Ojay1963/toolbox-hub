@@ -25,6 +25,7 @@ export function Footer() {
             <Image
               src={siteMark}
               alt="Toolbox Hub logo"
+              sizes="64px"
               className="site-header-logo h-16 w-16 shrink-0 rounded-[1.15rem] border border-white/70 bg-white/90 object-contain p-2 shadow-[0_14px_30px_rgba(42,56,84,0.1)]"
             />
             <h2 className="text-xl font-bold tracking-tight">Toolbox Hub</h2>
@@ -55,6 +56,7 @@ export function Footer() {
               <Link
                 key={category.slug}
                 href={category.href}
+                prefetch={false}
                 className="transition hover:text-[color:var(--primary)]"
               >
                 {category.name}
@@ -71,6 +73,7 @@ export function Footer() {
               <Link
                 key={link.href}
                 href={link.href}
+                prefetch={false}
                 className="block transition hover:text-[color:var(--primary)]"
               >
                 {link.label}
@@ -87,6 +90,7 @@ export function Footer() {
               <Link
                 key={tool.id}
                 href={tool.href}
+                prefetch={false}
                 className="block transition hover:text-[color:var(--primary)]"
               >
                 {tool.name}
@@ -99,13 +103,13 @@ export function Footer() {
         <div className="site-footer-bottom mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-sm text-[color:var(--muted)] sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
           <p>{currentYear} Toolbox Hub. Free online tools with clear help and public site pages.</p>
           <div className="flex flex-wrap gap-4">
-            <Link href="/contact" className="transition hover:text-[color:var(--primary)]">
+            <Link href="/contact" prefetch={false} className="transition hover:text-[color:var(--primary)]">
               Contact
             </Link>
-            <Link href="/privacy-policy" className="transition hover:text-[color:var(--primary)]">
+            <Link href="/privacy-policy" prefetch={false} className="transition hover:text-[color:var(--primary)]">
               Privacy
             </Link>
-            <Link href="/" className="transition hover:text-[color:var(--primary)]">
+            <Link href="/" prefetch={false} className="transition hover:text-[color:var(--primary)]">
               Back to homepage
             </Link>
           </div>

@@ -1,6 +1,20 @@
 import Link from "next/link";
-import { ContactForm } from "@/components/content/contact-form";
+import dynamic from "next/dynamic";
 import { buildMetadata, getPublicContactEmail } from "@/lib/seo";
+
+const ContactForm = dynamic(() => import("@/components/content/contact-form").then((module) => module.ContactForm), {
+  loading: () => (
+    <div className="space-y-5">
+      <div className="h-12 rounded-2xl bg-stone-100" />
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="h-12 rounded-2xl bg-stone-100" />
+        <div className="h-12 rounded-2xl bg-stone-100" />
+      </div>
+      <div className="h-40 rounded-2xl bg-stone-100" />
+      <div className="h-11 w-40 rounded-full bg-stone-100" />
+    </div>
+  ),
+});
 
 export const metadata = buildMetadata({
   title: "Contact",
@@ -85,16 +99,16 @@ export default function ContactPage() {
           <div className="mt-6 rounded-3xl bg-stone-50 p-5">
             <h3 className="text-lg font-bold tracking-tight">Useful links</h3>
             <div className="mt-4 space-y-3 text-sm text-[color:var(--muted)]">
-              <Link href="/about" className="block transition hover:text-[color:var(--primary)]">
+              <Link href="/about" prefetch={false} className="block transition hover:text-[color:var(--primary)]">
                 About Toolbox Hub
               </Link>
-              <Link href="/privacy-policy" className="block transition hover:text-[color:var(--primary)]">
+              <Link href="/privacy-policy" prefetch={false} className="block transition hover:text-[color:var(--primary)]">
                 Privacy Policy
               </Link>
-              <Link href="/terms-of-use" className="block transition hover:text-[color:var(--primary)]">
+              <Link href="/terms-of-use" prefetch={false} className="block transition hover:text-[color:var(--primary)]">
                 Terms of Use
               </Link>
-              <Link href="/disclaimer" className="block transition hover:text-[color:var(--primary)]">
+              <Link href="/disclaimer" prefetch={false} className="block transition hover:text-[color:var(--primary)]">
                 Disclaimer
               </Link>
             </div>

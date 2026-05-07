@@ -25,6 +25,7 @@ export function CategorySidebar({
           </div>
           <Link
             href="#tools-list"
+            prefetch={false}
             className="mobile-sidebar-cta rounded-full border border-[color:var(--border)] px-4 py-2 text-sm font-semibold text-[color:var(--foreground)]"
           >
             View tools
@@ -37,6 +38,7 @@ export function CategorySidebar({
               <Link
                 key={category.slug}
                 href={category.href}
+                prefetch={false}
                 aria-current={isActive ? "page" : undefined}
                 className={`mobile-category-chip flex min-w-0 flex-1 basis-[calc(50%-0.25rem)] items-center justify-center rounded-full px-4 py-2.5 text-center text-sm font-medium transition sm:basis-[calc(33.333%-0.35rem)] ${
                   isActive
@@ -64,6 +66,7 @@ export function CategorySidebar({
                 <Link
                   key={category.slug}
                   href={category.href}
+                  prefetch={false}
                   aria-current={isActive ? "page" : undefined}
                   className={`block rounded-2xl px-4 py-3 text-sm font-medium transition ${
                     isActive

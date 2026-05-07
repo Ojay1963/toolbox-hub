@@ -57,6 +57,7 @@ export function Header() {
               <Image
                 src={siteMark}
                 alt="Toolbox Hub logo"
+                sizes="(max-width: 640px) 46px, 96px"
                 className="site-header-logo h-24 w-24 shrink-0 rounded-[1.35rem] border border-white/70 bg-white/90 object-contain p-2 shadow-[0_14px_30px_rgba(42,56,84,0.1)]"
                 priority
               />
@@ -82,6 +83,7 @@ export function Header() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    prefetch={item.href === "/" || item.href === "/tools" ? undefined : false}
                     aria-current={isActive ? "page" : undefined}
                     className={`transition ${
                       isActive
@@ -97,6 +99,7 @@ export function Header() {
             <div className="hidden justify-end lg:flex">
               <Link
                 href="/tools#browse-categories"
+                prefetch={false}
                 aria-current={isNavActive("/tools#browse-categories") ? "page" : undefined}
                 className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                   isNavActive("/tools#browse-categories")
@@ -119,6 +122,7 @@ export function Header() {
               </div>
               <Link
                 href="/#search-tools"
+                prefetch={false}
                 className="mobile-app-search-button"
                 aria-label="Open tool search from the homepage"
               >
@@ -131,6 +135,7 @@ export function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={item.href === "/" || item.href === "/tools" ? undefined : false}
                   aria-current={isNavActive(item.href) ? "page" : undefined}
                   className={`mobile-app-shortcut ${
                     isNavActive(item.href)
@@ -160,6 +165,7 @@ export function Header() {
             <Link
               key={item.href}
               href={item.href}
+              prefetch={item.href === "/" || item.href === "/tools" ? undefined : false}
               className={`mobile-bottom-nav-item ${isActive ? "mobile-bottom-nav-item-active" : ""}`}
               aria-current={isActive ? "page" : undefined}
             >

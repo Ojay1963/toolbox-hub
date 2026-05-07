@@ -45,6 +45,7 @@ export function ToolPage({
                 <span>/</span>
                 <Link
                   href={`/category/${tool.category}`}
+                  prefetch={false}
                   className="transition hover:text-[color:var(--primary)]"
                 >
                   {categoryLabel}
@@ -73,7 +74,7 @@ export function ToolPage({
                   {primaryRelatedTools.map((item, index) => (
                     <span key={item.slug}>
                       {index > 0 ? (index === primaryRelatedTools.length - 1 ? ", or " : ", ") : ""}
-                      <Link href={`/tools/${item.slug}`} className="font-semibold text-[color:var(--primary)]">
+                      <Link href={`/tools/${item.slug}`} prefetch={false} className="font-semibold text-[color:var(--primary)]">
                         {item.name}
                       </Link>
                     </span>
@@ -108,7 +109,7 @@ export function ToolPage({
                   <p>{tool.longDescription}</p>
                   <p>
                     You can also explore{" "}
-                    <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
+                    <Link href={`/category/${tool.category}`} prefetch={false} className="font-semibold text-[color:var(--primary)]">
                       {categoryLabel}
                     </Link>{" "}
                     for similar tools in the same category.
@@ -119,7 +120,7 @@ export function ToolPage({
                       {relatedTools.map((item, index) => (
                         <span key={item.slug}>
                           {index > 0 ? (index === relatedTools.length - 1 ? ", and " : ", ") : ""}
-                          <Link href={`/tools/${item.slug}`} className="font-semibold text-[color:var(--primary)]">
+                          <Link href={`/tools/${item.slug}`} prefetch={false} className="font-semibold text-[color:var(--primary)]">
                             {item.name}
                           </Link>
                         </span>
@@ -144,11 +145,11 @@ export function ToolPage({
                   </p>
                   <p>
                     For more detail about how the site handles public pages and contact information, review the{" "}
-                    <Link href="/privacy-policy" className="font-semibold text-[color:var(--primary)]">
+                    <Link href="/privacy-policy" prefetch={false} className="font-semibold text-[color:var(--primary)]">
                       Privacy Policy
                     </Link>{" "}
                     and{" "}
-                    <Link href="/terms-of-use" className="font-semibold text-[color:var(--primary)]">
+                    <Link href="/terms-of-use" prefetch={false} className="font-semibold text-[color:var(--primary)]">
                       Terms of Use
                     </Link>
                     .
@@ -159,7 +160,7 @@ export function ToolPage({
               <Section title="Try a working alternative">
                 <p>
                   This page is not being promoted right now. You can still browse the{" "}
-                  <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
+                  <Link href={`/category/${tool.category}`} prefetch={false} className="font-semibold text-[color:var(--primary)]">
                     {categoryLabel}
                   </Link>{" "}
                   section for tools that are ready to use today.
@@ -170,6 +171,7 @@ export function ToolPage({
                       <Link
                         key={`alternative-${item.slug}`}
                         href={`/tools/${item.slug}`}
+                        prefetch={false}
                         className="app-panel-muted site-feature-card rounded-2xl px-4 py-4 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
                       >
                         <span className="block font-semibold text-[color:var(--foreground)]">{item.name}</span>
@@ -189,6 +191,7 @@ export function ToolPage({
                       <Link
                         key={`${item.phrase}-${item.href}`}
                         href={item.href}
+                        prefetch={false}
                         className="rounded-full border border-[color:var(--border)] bg-[color:var(--surface-alt)] px-4 py-2 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
                       >
                         {item.phrase}
@@ -219,7 +222,7 @@ export function ToolPage({
             <Section title={`More ${categoryLabel}`}>
               <p>
                 If you want a nearby workflow in the same topic cluster, browse more tools from the{" "}
-                <Link href={`/category/${tool.category}`} className="font-semibold text-[color:var(--primary)]">
+                <Link href={`/category/${tool.category}`} prefetch={false} className="font-semibold text-[color:var(--primary)]">
                   {categoryLabel}
                 </Link>{" "}
                 category below.
@@ -229,6 +232,7 @@ export function ToolPage({
                   <Link
                     key={`category-popular-${item.slug}`}
                     href={`/tools/${item.slug}`}
+                    prefetch={false}
                     className="app-panel-muted site-feature-card rounded-2xl px-4 py-4 text-sm text-[color:var(--muted)] transition hover:border-[color:var(--primary)] hover:text-[color:var(--foreground)]"
                   >
                     <span className="block font-semibold text-[color:var(--foreground)]">{item.name}</span>
@@ -261,11 +265,12 @@ export function ToolPage({
                   <Link href="/" className="block transition hover:text-[color:var(--primary)]">
                     Browse all tools
                   </Link>
-                  <Link href="/#search-tools" className="block transition hover:text-[color:var(--primary)]">
+                  <Link href="/#search-tools" prefetch={false} className="block transition hover:text-[color:var(--primary)]">
                     Search all tools
                   </Link>
                   <Link
                     href={`/category/${tool.category}`}
+                    prefetch={false}
                     className="block transition hover:text-[color:var(--primary)]"
                   >
                     More {categoryLabel}
@@ -279,6 +284,7 @@ export function ToolPage({
                     <Link
                       key={item.slug}
                       href={`/tools/${item.slug}`}
+                      prefetch={false}
                       className="block transition hover:text-[color:var(--primary)]"
                     >
                       {item.name}
@@ -295,6 +301,7 @@ export function ToolPage({
                     <Link
                       key={`popular-${item.slug}`}
                       href={`/tools/${item.slug}`}
+                      prefetch={false}
                       className="block transition hover:text-[color:var(--primary)]"
                     >
                       {item.name}
@@ -309,6 +316,7 @@ export function ToolPage({
                     <Link
                       key={`recent-${item.slug}`}
                       href={`/tools/${item.slug}`}
+                      prefetch={false}
                       className="block transition hover:text-[color:var(--primary)]"
                     >
                       {item.name}

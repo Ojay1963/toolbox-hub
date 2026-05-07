@@ -165,6 +165,7 @@ export function SearchBox({
               <Link
                 key={`instant-${tool.id}`}
                 href={tool.href}
+                prefetch={false}
                 className="rounded-full border border-[color:var(--border)] bg-white/80 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
               >
                 {tool.name}
@@ -210,6 +211,7 @@ export function SearchBox({
                     <Link
                       key={tool.id}
                       href={tool.href}
+                      prefetch={false}
                       className="rounded-full border border-[color:var(--border)] bg-white/70 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
                     >
                       {tool.name}
@@ -356,6 +358,7 @@ function SearchResultCard({
     return (
       <Link
         href={tool.href}
+        prefetch={false}
         className="mobile-compact-tool-card app-panel-muted group block rounded-2xl px-4 py-3 transition hover:border-[color:var(--primary)]"
       >
         <p className="text-sm font-semibold text-[color:var(--foreground)] transition group-hover:text-[color:var(--primary)]">
@@ -371,6 +374,7 @@ function SearchResultCard({
   return (
     <Link
       href={tool.href}
+      prefetch={false}
       className="mobile-tool-card app-panel group rounded-3xl p-5 transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
     >
       <div className="flex flex-wrap items-center gap-2">

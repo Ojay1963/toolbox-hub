@@ -19,6 +19,8 @@ export function CategoryCard({
   return (
     <Link
       href={href ?? `/category/${category.slug}#tools-list`}
+      // Category grids stay above the fold on several pages, so disabling eager prefetch trims the network tree.
+      prefetch={false}
       className="app-panel group rounded-3xl p-6 transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
     >
       <div className="flex items-center justify-between gap-4">

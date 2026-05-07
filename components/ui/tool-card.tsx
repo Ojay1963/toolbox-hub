@@ -12,6 +12,8 @@ export function ToolCard({
     return (
       <Link
         href={`/tools/${tool.slug}`}
+        // Large card grids can trigger a lot of eager route prefetching in viewport.
+        prefetch={false}
         className="mobile-compact-tool-card app-panel-muted group block rounded-2xl px-4 py-3 transition hover:border-[color:var(--primary)]"
       >
         <p className="text-sm font-semibold text-[color:var(--foreground)] transition group-hover:text-[color:var(--primary)]">
@@ -27,6 +29,8 @@ export function ToolCard({
   return (
     <Link
       href={`/tools/${tool.slug}`}
+      // Keep tool discovery lightweight by prefetching on demand instead of for every visible card.
+      prefetch={false}
       className="mobile-tool-card app-panel group rounded-3xl p-5 transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
     >
       <div className="flex flex-wrap items-center gap-2">

@@ -249,6 +249,7 @@ export default function HomePage() {
               <Link
                 key={`new-${tool.slug}`}
                 href={`/tools/${tool.slug}`}
+                prefetch={false}
                 className="site-feature-card app-panel-muted group block rounded-[1.5rem] px-4 py-4 transition hover:border-[color:var(--primary)] hover:-translate-y-0.5"
               >
                 <div className="flex items-start justify-between gap-3">
@@ -434,6 +435,7 @@ function FeatureToolCard({
     return (
       <Link
         href={`/tools/${tool.slug}`}
+        prefetch={false}
         className="site-feature-card app-panel-muted group rounded-[1.6rem] p-4 transition hover:-translate-y-0.5 hover:border-[color:var(--primary)]"
       >
         <div className="flex items-center gap-3">
@@ -452,6 +454,7 @@ function FeatureToolCard({
   return (
     <Link
       href={`/tools/${tool.slug}`}
+      prefetch={false}
       className="site-feature-card app-panel group rounded-[2rem] p-5 transition hover:-translate-y-1 hover:border-[color:var(--primary)]/35 hover:shadow-lg"
     >
       <div className="flex items-start justify-between gap-4">
