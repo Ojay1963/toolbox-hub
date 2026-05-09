@@ -8,6 +8,10 @@ import {
   tools,
 } from "@/lib/tools";
 
+// Serve sitemap.xml as a static asset and refresh it periodically instead of computing it per request.
+export const dynamic = "force-static";
+export const revalidate = 86400;
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();
   const staticPages = ["/about", "/blog", "/contact", "/privacy-policy", "/terms-of-use", "/disclaimer", "/tools", "/tools/education"];

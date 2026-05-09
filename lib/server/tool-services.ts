@@ -3,9 +3,6 @@ import "server-only";
 import { Buffer } from "node:buffer";
 import { lookup, resolve4, resolve6, resolveCaa, resolveCname, resolveMx, resolveNs, resolveSoa, resolveSrv, resolveTxt } from "node:dns/promises";
 import { isIP } from "node:net";
-import mammoth from "mammoth";
-import { Document, Packer, Paragraph, TextRun } from "docx";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
 type JsonRecord = Record<string, unknown>;
 type ApiSuccess<T> = { ok: true; data: T };
@@ -29,12 +26,40 @@ type FetchTimeoutOptions = RequestInit & {
     tags?: string[];
   };
 };
+type MammothModule = typeof import("mammoth");
+type DocxModule = typeof import("docx");
+type PdfLibModule = typeof import("pdf-lib");
 
 const blockedHostnames = new Set(["localhost", "localhost.localdomain"]);
 const blockedHostnameSuffixes = [".localhost", ".local", ".internal", ".home", ".home.arpa"];
 const MAX_PUBLIC_FILE_BYTES = 25 * 1024 * 1024;
 const DEFAULT_FETCH_TIMEOUT_MS = 12_000;
 const RATE_LIMIT_TIMEOUT_MS = 5_000;
+
+let mammothPromise: Promise<MammothModule> | null = null;
+let docxPromise: Promise<DocxModule> | null = null;
+let pdfLibPromise: Promise<PdfLibModule> | null = null;
+
+function getMammoth() {
+  if (!mammothPromise) {
+    mammothPromise = import("mammoth");
+  }
+  return mammothPromise;
+}
+
+function getDocx() {
+  if (!docxPromise) {
+    docxPromise = import("docx");
+  }
+  return docxPromise;
+}
+
+function getPdfLib() {
+  if (!pdfLibPromise) {
+    pdfLibPromise = import("pdf-lib");
+  }
+  return pdfLibPromise;
+}
 
 class SimpleDOMMatrix {
   a = 1;
@@ -488,7 +513,12 @@ function normalizePdfText(text: string) {
     .replace(/[^\u0020-\u007E\n\r\t]/g, "");
 }
 
-function wrapText(font: Awaited<ReturnType<PDFDocument["embedFont"]>>, text: string, fontSize: number, maxWidth: number) {
+function wrapText(
+  font: { widthOfTextAtSize: (text: string, size: number) => number },
+  text: string,
+  fontSize: number,
+  maxWidth: number,
+) {
   const words = text.split(/\s+/).filter(Boolean);
   const lines: string[] = [];
   let current = "";
@@ -524,6 +554,7 @@ export async function convertWordToPdf(file: File) {
     throw new ToolServiceError("Upload a DOCX Word document to continue.");
   }
 
+  const mammoth = await getMammoth();
   const result = await mammoth.extractRawText({ buffer: Buffer.from(await file.arrayBuffer()) });
   const rawText = result.value.trim();
   if (!rawText) {
@@ -534,6 +565,7 @@ export async function convertWordToPdf(file: File) {
     throw new ToolServiceError("This Word document contains text that could not be exported cleanly to PDF.");
   }
 
+  const { PDFDocument, StandardFonts, rgb } = await getPdfLib();
   const pdf = await PDFDocument.create();
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const titleFont = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -606,6 +638,7 @@ export async function convertPdfToWord(file: File) {
     throw new ToolServiceError("No selectable text was found in this PDF. Try the PDF OCR tool for scanned pages.");
   }
 
+  const { Document, Packer, Paragraph, TextRun } = await getDocx();
   const doc = new Document({
     sections: [
       {
@@ -631,6 +664,7 @@ export async function compressPdf(file: File) {
     throw new ToolServiceError("Upload a PDF file to continue.");
   }
 
+  const { PDFDocument } = await getPdfLib();
   const source = await PDFDocument.load(await file.arrayBuffer());
   const output = await PDFDocument.create();
   const copiedPages = await output.copyPages(source, source.getPageIndices());

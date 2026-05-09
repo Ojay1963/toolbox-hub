@@ -1,59 +1,44 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import {
-  BackgroundRemoverTool,
-  BlurImageTool,
-  ExifDataRemoverTool,
-  ExifDataViewerTool,
-  CropImageTool,
-  GifMakerTool,
-  GifToMp4ConverterTool,
-  ImageBorderGeneratorTool,
-  ImageBrightnessAdjusterTool,
-  ImageColorInverterTool,
-  ImageColorPaletteGeneratorTool,
-  ImageColorPickerTool,
-  ImageCompressorTool,
-  ImageContrastAdjusterTool,
-  ImageCropperProTool,
-  ImageDpiCheckerTool,
-  ImageFormatConverterTool,
-  ImageGrayscaleConverterTool,
-  ImageHistogramAnalyzerTool,
-  ImageMetadataViewerTool,
-  ImageNoiseReducerTool,
-  ImageResizerTool,
-  ImageRotatorTool,
-  ImageToBase64ConverterTool,
-  ImageToWebpConverterTool,
-  ImageWatermarkTool,
-  JpgToPngConverterTool,
-  PngToJpgConverterTool,
-  VideoFrameExtractorTool,
-  VideoMetadataViewerTool,
-  VideoResolutionCheckerTool,
-  VideoToGifConverterTool,
-} from "@/components/tools/image-tools";
+import { buildLazyTool } from "@/components/tools/lazy-tool";
 import { ToolPlaceholder } from "@/components/tools/tool-placeholder";
 import type { ToolDefinition } from "@/lib/tools";
 
-function LoadingToolPanel() {
-  return (
-    <div className="rounded-3xl border border-[color:var(--border)] bg-white p-6 shadow-sm">
-      <div className="h-5 w-32 rounded-full bg-stone-100" />
-      <div className="mt-4 h-9 w-56 rounded-xl bg-stone-100" />
-      <div className="mt-4 space-y-3">
-        <div className="h-4 w-full rounded bg-stone-100" />
-        <div className="h-4 w-11/12 rounded bg-stone-100" />
-      </div>
-    </div>
-  );
-}
-
-const BarcodeScannerTool = dynamic(() => import("@/components/tools/image-lazy-tools").then((module) => module.BarcodeScannerTool), { loading: () => <LoadingToolPanel /> });
-const QrCodeScannerTool = dynamic(() => import("@/components/tools/image-lazy-tools").then((module) => module.QrCodeScannerTool), { loading: () => <LoadingToolPanel /> });
-const ColorContrastCheckerTool = dynamic(() => import("@/components/tools/image-lazy-tools").then((module) => module.ColorContrastCheckerTool), { loading: () => <LoadingToolPanel /> });
+const BarcodeScannerTool = buildLazyTool(() => import("@/components/tools/image-lazy-tools").then((module) => module.BarcodeScannerTool));
+const QrCodeScannerTool = buildLazyTool(() => import("@/components/tools/image-lazy-tools").then((module) => module.QrCodeScannerTool));
+const ColorContrastCheckerTool = buildLazyTool(() => import("@/components/tools/image-lazy-tools").then((module) => module.ColorContrastCheckerTool));
+const ImageCompressorTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageCompressorTool));
+const ImageFormatConverterTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageFormatConverterTool));
+const ImageCropperProTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageCropperProTool));
+const GifMakerTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.GifMakerTool));
+const GifToMp4ConverterTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.GifToMp4ConverterTool));
+const VideoToGifConverterTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.VideoToGifConverterTool));
+const ImageColorPaletteGeneratorTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageColorPaletteGeneratorTool));
+const ExifDataViewerTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ExifDataViewerTool));
+const ExifDataRemoverTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ExifDataRemoverTool));
+const ImageColorInverterTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageColorInverterTool));
+const ImageNoiseReducerTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageNoiseReducerTool));
+const ImageHistogramAnalyzerTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageHistogramAnalyzerTool));
+const VideoMetadataViewerTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.VideoMetadataViewerTool));
+const VideoFrameExtractorTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.VideoFrameExtractorTool));
+const VideoResolutionCheckerTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.VideoResolutionCheckerTool));
+const ImageMetadataViewerTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageMetadataViewerTool));
+const ImageDpiCheckerTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageDpiCheckerTool));
+const ImageBorderGeneratorTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageBorderGeneratorTool));
+const ImageColorPickerTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageColorPickerTool));
+const BlurImageTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.BlurImageTool));
+const ImageBrightnessAdjusterTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageBrightnessAdjusterTool));
+const ImageContrastAdjusterTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageContrastAdjusterTool));
+const ImageGrayscaleConverterTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageGrayscaleConverterTool));
+const ImageResizerTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageResizerTool));
+const CropImageTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.CropImageTool));
+const JpgToPngConverterTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.JpgToPngConverterTool));
+const PngToJpgConverterTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.PngToJpgConverterTool));
+const ImageToWebpConverterTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageToWebpConverterTool));
+const BackgroundRemoverTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.BackgroundRemoverTool));
+const ImageRotatorTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageRotatorTool));
+const ImageWatermarkTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageWatermarkTool));
+const ImageToBase64ConverterTool = buildLazyTool(() => import("@/components/tools/image-tools").then((module) => module.ImageToBase64ConverterTool));
 
 export function ImageToolRouter({ tool }: { tool: ToolDefinition }) {
   switch (tool.slug) {

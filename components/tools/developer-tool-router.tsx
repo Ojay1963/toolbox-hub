@@ -1,86 +1,71 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import {
-  Base64DecoderTool,
-  Base64EncoderTool,
-  BCryptGeneratorTool,
-  CronExpressionGeneratorTool,
-  CronExpressionParserTool,
-  CsvFormatterTool,
-  CsvDiffCheckerTool,
-  CsvToJsonConverterTool,
-  CsvViewerTool,
-  CssMinifierTool,
-  EmailValidatorTool,
-  HashIdentifierTool,
-  HmacGeneratorTool,
-  HashGeneratorTool,
-  HtmlDecoderTool,
-  HtmlEncoderTool,
-  HtmlMinifierTool,
-  HtmlPreviewTool,
-  HtmlToMarkdownConverterTool,
-  JsonDiffCheckerTool,
-  JsonFormatterTool,
-  JsonKeyExtractorTool,
-  JsonSchemaValidatorTool,
-  JsonToCsvConverterTool,
-  JsonToXmlConverterTool,
-  JwtDecoderTool,
-  JwtEncoderTool,
-  KeywordDensityCheckerTool,
-  MarkdownToHtmlConverterTool,
-  MarkdownEditorTool,
-  Md5GeneratorTool,
-  MetaTagGeneratorTool,
-  OpenGraphGeneratorTool,
-  PasswordEntropyCalculatorTool,
-  PhoneNumberFormatterTool,
-  RandomApiKeyGeneratorTool,
-  RandomTokenGeneratorTool,
-  RegexTesterTool,
-  RobotsTxtGeneratorTool,
-  SecurePasswordStrengthCheckerTool,
-  SecureTokenGeneratorTool,
-  SecretKeyGeneratorTool,
-  Sha256GeneratorTool,
-  SqlBeautifierTool,
-  SqlMinifierTool,
-  SqlQueryFormatterTool,
-  SitemapGeneratorTool,
-  UUIDValidatorTool,
-  UrlDecoderTool,
-  UrlEncoderTool,
-  UrlParserTool,
-  UrlSlugGeneratorTool,
-  XmlToJsonConverterTool,
-  XmlFormatterTool,
-  YamlFormatterTool,
-} from "@/components/tools/developer-tools";
+import { buildLazyTool } from "@/components/tools/lazy-tool";
 import { ToolPlaceholder } from "@/components/tools/tool-placeholder";
 import type { ToolDefinition } from "@/lib/tools";
 
-function LoadingToolPanel() {
-  return (
-    <div className="rounded-3xl border border-[color:var(--border)] bg-white p-6 shadow-sm">
-      <div className="h-5 w-32 rounded-full bg-stone-100" />
-      <div className="mt-4 h-9 w-56 rounded-xl bg-stone-100" />
-      <div className="mt-4 space-y-3">
-        <div className="h-4 w-full rounded bg-stone-100" />
-        <div className="h-4 w-11/12 rounded bg-stone-100" />
-      </div>
-    </div>
-  );
-}
-
-const FileHashCheckerTool = dynamic(() => import("@/components/tools/developer-lazy-tools").then((module) => module.FileHashCheckerTool), { loading: () => <LoadingToolPanel /> });
-const FileChecksumGeneratorTool = dynamic(() => import("@/components/tools/developer-lazy-tools").then((module) => module.FileChecksumGeneratorTool), { loading: () => <LoadingToolPanel /> });
-const KeywordDifficultyCheckerPlaceholderTool = dynamic(() => import("@/components/tools/developer-lazy-tools").then((module) => module.KeywordDifficultyCheckerPlaceholderTool), { loading: () => <LoadingToolPanel /> });
-const KeywordSuggestionGeneratorTool = dynamic(() => import("@/components/tools/developer-lazy-tools").then((module) => module.KeywordSuggestionGeneratorTool), { loading: () => <LoadingToolPanel /> });
-const MetaTagAnalyzerTool = dynamic(() => import("@/components/tools/developer-lazy-tools").then((module) => module.MetaTagAnalyzerTool), { loading: () => <LoadingToolPanel /> });
-const PageTitleGeneratorTool = dynamic(() => import("@/components/tools/developer-lazy-tools").then((module) => module.PageTitleGeneratorTool), { loading: () => <LoadingToolPanel /> });
-const DescriptionGeneratorTool = dynamic(() => import("@/components/tools/developer-lazy-tools").then((module) => module.DescriptionGeneratorTool), { loading: () => <LoadingToolPanel /> });
+const JsonFormatterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.JsonFormatterTool));
+const JsonToCsvConverterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.JsonToCsvConverterTool));
+const CsvToJsonConverterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.CsvToJsonConverterTool));
+const Base64EncoderTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.Base64EncoderTool));
+const Base64DecoderTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.Base64DecoderTool));
+const CssMinifierTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.CssMinifierTool));
+const HtmlMinifierTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.HtmlMinifierTool));
+const HtmlEncoderTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.HtmlEncoderTool));
+const HtmlDecoderTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.HtmlDecoderTool));
+const HtmlToMarkdownConverterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.HtmlToMarkdownConverterTool));
+const MarkdownToHtmlConverterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.MarkdownToHtmlConverterTool));
+const MarkdownEditorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.MarkdownEditorTool));
+const YamlFormatterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.YamlFormatterTool));
+const XmlFormatterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.XmlFormatterTool));
+const JsonDiffCheckerTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.JsonDiffCheckerTool));
+const CsvFormatterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.CsvFormatterTool));
+const CsvViewerTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.CsvViewerTool));
+const CsvDiffCheckerTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.CsvDiffCheckerTool));
+const HtmlPreviewTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.HtmlPreviewTool));
+const MetaTagGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.MetaTagGeneratorTool));
+const KeywordDensityCheckerTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.KeywordDensityCheckerTool));
+const RobotsTxtGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.RobotsTxtGeneratorTool));
+const SitemapGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.SitemapGeneratorTool));
+const UrlSlugGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.UrlSlugGeneratorTool));
+const OpenGraphGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.OpenGraphGeneratorTool));
+const UrlEncoderTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.UrlEncoderTool));
+const UrlDecoderTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.UrlDecoderTool));
+const UrlParserTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.UrlParserTool));
+const RegexTesterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.RegexTesterTool));
+const JwtDecoderTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.JwtDecoderTool));
+const JwtEncoderTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.JwtEncoderTool));
+const Sha256GeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.Sha256GeneratorTool));
+const Md5GeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.Md5GeneratorTool));
+const HashGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.HashGeneratorTool));
+const BCryptGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.BCryptGeneratorTool));
+const HmacGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.HmacGeneratorTool));
+const SqlMinifierTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.SqlMinifierTool));
+const SqlBeautifierTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.SqlBeautifierTool));
+const SqlQueryFormatterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.SqlQueryFormatterTool));
+const CronExpressionGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.CronExpressionGeneratorTool));
+const CronExpressionParserTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.CronExpressionParserTool));
+const JsonSchemaValidatorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.JsonSchemaValidatorTool));
+const JsonKeyExtractorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.JsonKeyExtractorTool));
+const XmlToJsonConverterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.XmlToJsonConverterTool));
+const JsonToXmlConverterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.JsonToXmlConverterTool));
+const RandomTokenGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.RandomTokenGeneratorTool));
+const SecurePasswordStrengthCheckerTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.SecurePasswordStrengthCheckerTool));
+const SecretKeyGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.SecretKeyGeneratorTool));
+const EmailValidatorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.EmailValidatorTool));
+const PhoneNumberFormatterTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.PhoneNumberFormatterTool));
+const UUIDValidatorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.UUIDValidatorTool));
+const RandomApiKeyGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.RandomApiKeyGeneratorTool));
+const SecureTokenGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.SecureTokenGeneratorTool));
+const PasswordEntropyCalculatorTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.PasswordEntropyCalculatorTool));
+const HashIdentifierTool = buildLazyTool(() => import("@/components/tools/developer-tools").then((module) => module.HashIdentifierTool));
+const FileHashCheckerTool = buildLazyTool(() => import("@/components/tools/developer-lazy-tools").then((module) => module.FileHashCheckerTool));
+const FileChecksumGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-lazy-tools").then((module) => module.FileChecksumGeneratorTool));
+const KeywordDifficultyCheckerPlaceholderTool = buildLazyTool(() => import("@/components/tools/developer-lazy-tools").then((module) => module.KeywordDifficultyCheckerPlaceholderTool));
+const KeywordSuggestionGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-lazy-tools").then((module) => module.KeywordSuggestionGeneratorTool));
+const MetaTagAnalyzerTool = buildLazyTool(() => import("@/components/tools/developer-lazy-tools").then((module) => module.MetaTagAnalyzerTool));
+const PageTitleGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-lazy-tools").then((module) => module.PageTitleGeneratorTool));
+const DescriptionGeneratorTool = buildLazyTool(() => import("@/components/tools/developer-lazy-tools").then((module) => module.DescriptionGeneratorTool));
 
 export function DeveloperToolRouter({ tool }: { tool: ToolDefinition }) {
   switch (tool.slug) {

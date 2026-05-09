@@ -1,26 +1,26 @@
 "use client";
 
-import {
-  CaseConverterTool,
-  CharacterCounterTool,
-  LoremIpsumGeneratorTool,
-  PalindromeCheckerTool,
-  RandomSentenceGeneratorTool,
-  ReadingTimeCalculatorTool,
-  RemoveDuplicateLinesTool,
-  SentenceCounterTool,
-  TextCompareTool,
-  TextDuplicateRemoverTool,
-  TextLineCounterTool,
-  TextReplaceTool,
-  TextReverserTool,
-  TextSorterTool,
-  TextToSlugConverterTool,
-  WordFrequencyCounterTool,
-  WordCounterTool,
-} from "@/components/tools/text-tools";
+import { buildLazyTool } from "@/components/tools/lazy-tool";
 import { ToolPlaceholder } from "@/components/tools/tool-placeholder";
 import type { ToolDefinition } from "@/lib/tools";
+
+const WordCounterTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.WordCounterTool));
+const CharacterCounterTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.CharacterCounterTool));
+const CaseConverterTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.CaseConverterTool));
+const RemoveDuplicateLinesTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.RemoveDuplicateLinesTool));
+const TextSorterTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.TextSorterTool));
+const TextReverserTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.TextReverserTool));
+const TextToSlugConverterTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.TextToSlugConverterTool));
+const TextLineCounterTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.TextLineCounterTool));
+const RandomSentenceGeneratorTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.RandomSentenceGeneratorTool));
+const LoremIpsumGeneratorTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.LoremIpsumGeneratorTool));
+const TextReplaceTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.TextReplaceTool));
+const TextDuplicateRemoverTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.TextDuplicateRemoverTool));
+const TextCompareTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.TextCompareTool));
+const WordFrequencyCounterTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.WordFrequencyCounterTool));
+const PalindromeCheckerTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.PalindromeCheckerTool));
+const SentenceCounterTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.SentenceCounterTool));
+const ReadingTimeCalculatorTool = buildLazyTool(() => import("@/components/tools/text-tools").then((module) => module.ReadingTimeCalculatorTool));
 
 export function TextToolRouter({ tool }: { tool: ToolDefinition }) {
   switch (tool.slug) {
