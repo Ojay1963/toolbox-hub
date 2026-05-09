@@ -520,16 +520,16 @@ input[type="file"]::-webkit-file-upload-button {
   .mobile-bottom-nav {
     position: fixed;
     left: 50%;
-    width: min(calc(100% - 1.2rem), 29rem);
+    width: min(calc(100% - 2.5rem), 23rem);
     transform: translateX(-50%);
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 0.6rem);
+    bottom: env(safe-area-inset-bottom, 0px);
     z-index: 50;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 0.45rem;
-    padding: 0.5rem;
+    gap: 0.25rem;
+    padding: 0.38rem;
     border: 1px solid rgba(255, 255, 255, 0.72);
-    border-radius: 1.75rem;
+    border-radius: 1.5rem 1.5rem 0 0;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(18px);
     box-shadow:
@@ -543,8 +543,8 @@ input[type="file"]::-webkit-file-upload-button {
     align-items: center;
     justify-content: center;
     gap: 0.3rem;
-    min-height: 4.25rem;
-    border-radius: 1.25rem;
+    min-height: 3.95rem;
+    border-radius: 1.1rem;
     color: var(--muted);
     font-size: 0.72rem;
     font-weight: 700;
