@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { ToolRenderer } from "@/components/tools/tool-renderer";
 import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { CategorySidebar } from "@/components/ui/category-sidebar";
@@ -21,6 +22,9 @@ export function ToolPage({
   const categoryLabel = tool.category.replace(/-/g, " ");
   const isPubliclyActive = shouldIndexTool(tool);
   const primaryRelatedTools = relatedTools.slice(0, 3);
+  const benefits = buildToolBenefits(tool, categoryLabel);
+  const useCases = buildToolUseCases(tool, categoryLabel);
+  const qualityChecks = buildToolQualityChecks(tool, categoryLabel);
   const visiblePeopleAlsoSearchFor = tool.peopleAlsoSearchFor.filter(
     (item) => !item.href || shouldIndexTool(item.href.replace("/tools/", "")),
   );
@@ -35,24 +39,13 @@ export function ToolPage({
         <div className="min-w-0 grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0 space-y-8">
             <section className="site-hero app-panel rounded-[2rem] p-6 sm:p-8">
-              <nav
-                aria-label="Breadcrumb"
-                className="flex flex-wrap items-center gap-2 text-sm text-[color:var(--muted)]"
-              >
-                <Link href="/" className="transition hover:text-[color:var(--primary)]">
-                  Home
-                </Link>
-                <span>/</span>
-                <Link
-                  href={`/category/${tool.category}`}
-                  prefetch={false}
-                  className="transition hover:text-[color:var(--primary)]"
-                >
-                  {categoryLabel}
-                </Link>
-                <span>/</span>
-                <span className="text-[color:var(--foreground)]">{tool.name}</span>
-              </nav>
+              <Breadcrumbs
+                items={[
+                  { name: "Home", href: "/" },
+                  { name: categoryLabel, href: `/category/${tool.category}` },
+                  { name: tool.name, href: `/tools/${tool.slug}` },
+                ]}
+              />
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="rounded-full bg-[color:var(--soft)] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[color:var(--primary-dark)]">
                   Tool workspace
@@ -136,6 +129,41 @@ export function ToolPage({
                       <li key={step}>{step}</li>
                     ))}
                   </ol>
+                </Section>
+
+                <Section title={`${tool.name} benefits`}>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    {benefits.map((item) => (
+                      <div key={item.title} className="rounded-[1.5rem] border border-[color:var(--border)] bg-[color:var(--surface-alt)] px-5 py-5">
+                        <h3 className="text-base font-bold tracking-tight text-[color:var(--foreground)]">{item.title}</h3>
+                        <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">{item.detail}</p>
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+
+                <Section title={`Common ${tool.name.toLowerCase()} use cases`}>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {useCases.map((item) => (
+                      <article key={item.title} className="rounded-[1.5rem] border border-[color:var(--border)] bg-white/80 px-5 py-5">
+                        <h3 className="text-base font-bold tracking-tight text-[color:var(--foreground)]">{item.title}</h3>
+                        <p className="mt-2 text-sm leading-7 text-[color:var(--muted)]">{item.detail}</p>
+                      </article>
+                    ))}
+                  </div>
+                </Section>
+
+                <Section title={`Best practices for ${tool.name.toLowerCase()}`}>
+                  <p>
+                    A good result usually comes from checking the input first, choosing settings that match your final use,
+                    and reviewing the output before sharing it. That matters for {tool.name.toLowerCase()} because small
+                    differences in files, text, URLs, or values can change what the finished result should look like.
+                  </p>
+                  <ul className="space-y-3 pl-5">
+                    {qualityChecks.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
                 </Section>
 
                 <Section title="Privacy note">
@@ -353,4 +381,55 @@ export function ToolPage({
       </div>
     </div>
   );
+}
+
+function buildToolBenefits(tool: ToolDefinition, categoryLabel: string) {
+  return [
+    {
+      title: "Faster task completion",
+      detail: `${tool.name} keeps the workflow focused on one clear ${categoryLabel.toLowerCase()} task, so visitors can complete the job without opening a heavy editor or searching through unrelated features.`,
+    },
+    {
+      title: "Clear next steps",
+      detail: `The page includes how-to steps, FAQs, related tools, and category links so users can move from ${tool.name.toLowerCase()} to nearby workflows without going back to search results.`,
+    },
+    {
+      title: "Mobile-friendly workflow",
+      detail: `Controls, explanations, and internal links are organized for small screens as well as desktop, which helps the page serve visitors who need a quick result from a phone or tablet.`,
+    },
+    {
+      title: "Transparent tool scope",
+      detail: `If a workflow is browser-side or has limits, the page explains that context clearly. This improves trust and helps users choose the right ${categoryLabel.toLowerCase()} for the job.`,
+    },
+  ];
+}
+
+function buildToolUseCases(tool: ToolDefinition, categoryLabel: string) {
+  const relatedNames = tool.relatedToolSlugs.slice(0, 2).map((slug) => slug.replace(/-/g, " "));
+
+  return [
+    {
+      title: "Everyday quick fixes",
+      detail: `Use ${tool.name} when you need a quick answer or output for a common ${categoryLabel.toLowerCase()} task and do not want to install a separate app.`,
+    },
+    {
+      title: "Publishing and sharing",
+      detail: `The tool is useful before uploading, sending, publishing, or reusing content because it gives you a cleaner result and a simple way to check what changed.`,
+    },
+    {
+      title: "Multi-step workflows",
+      detail: relatedNames.length
+        ? `After this step, continue with related tools such as ${relatedNames.join(" or ")} if you need a second pass in the same workflow.`
+        : `After this step, browse the ${categoryLabel.toLowerCase()} category if you need another tool that solves a nearby problem.`,
+    },
+  ];
+}
+
+function buildToolQualityChecks(tool: ToolDefinition, categoryLabel: string) {
+  return [
+    `Start with the cleanest input you have, especially for ${categoryLabel.toLowerCase()} that depend on file quality, formatting, or exact values.`,
+    `Use the preview, output, or result area to confirm that ${tool.name.toLowerCase()} produced the result you expected before downloading or copying it.`,
+    `Read the FAQ when a result looks unusual, because many tools have format limits, browser limits, or practical tradeoffs that are easier to understand before repeating the task.`,
+    `Open the related tools section when the result is close but not final; many tasks work best as a short sequence instead of one isolated step.`,
+  ];
 }

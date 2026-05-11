@@ -46,7 +46,7 @@ function resolveSiteUrl() {
     normalizeSiteUrl(process.env.NEXT_PUBLIC_SITE_URL) ||
     normalizeSiteUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL) ||
     normalizeSiteUrl(process.env.VERCEL_URL) ||
-    "http://localhost:3000"
+    "https://toolboxhubapp.com"
   );
 }
 
@@ -84,6 +84,8 @@ export const siteMetadata = {
   description:
     "A fast, SEO-friendly collection of free online tools for images, PDFs, text, developers, generators, calculators, converters, and internet tasks.",
   siteUrl: resolvedSiteUrl,
+  canonicalHost: siteUrlHostname,
+  socialImagePath: "/icon.png",
   contactEmail: resolvedContactEmail,
   isLocalSiteUrl,
   shouldAllowIndexing: isProductionRuntime ? !isPreviewDeployment : !isLocalSiteUrl && !isPreviewDeployment,
@@ -95,6 +97,11 @@ export function getPublicContactEmail() {
 
 export function absoluteUrl(pathname: string) {
   return new URL(pathname, siteMetadata.siteUrl).toString();
+}
+
+export function canonicalPath(pathname: string) {
+  const normalizedPathname = pathname.split("?")[0].split("#")[0] || "/";
+  return normalizedPathname === "/" ? "/" : normalizedPathname.replace(/\/+$/, "");
 }
 
 export function buildMetadata({
@@ -112,31 +119,56 @@ export function buildMetadata({
   index?: boolean;
   canonicalPathname?: string;
 }): Metadata {
+  const canonical = canonicalPath(canonicalPathname ?? pathname);
+  const canonicalUrl = absoluteUrl(canonical);
+  const imageUrl = absoluteUrl(siteMetadata.socialImagePath);
+
   return {
+    metadataBase: new URL(siteMetadata.siteUrl),
     title: {
       absolute: title,
     },
     description,
     keywords,
+    applicationName: siteMetadata.name,
+    authors: [{ name: siteMetadata.name, url: siteMetadata.siteUrl }],
+    creator: siteMetadata.name,
+    publisher: siteMetadata.name,
     robots: {
       index,
       follow: true,
+      googleBot: {
+        index,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
     },
     alternates: {
-      canonical: absoluteUrl(canonicalPathname ?? pathname),
+      canonical: canonicalUrl,
     },
     openGraph: {
       title,
       description,
-      url: absoluteUrl(canonicalPathname ?? pathname),
+      url: canonicalUrl,
       siteName: siteMetadata.name,
       type: "website",
       locale: "en_US",
+      images: [
+        {
+          url: imageUrl,
+          width: 512,
+          height: 512,
+          alt: `${siteMetadata.name} logo`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [imageUrl],
     },
   };
 }
@@ -263,6 +295,11 @@ export function buildWebsiteJsonLd() {
     name: siteMetadata.name,
     url: siteMetadata.siteUrl,
     description: siteMetadata.description,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${siteMetadata.siteUrl}/?q={search_term_string}#search-tools`,
+      "query-input": "required name=search_term_string",
+    },
   };
 }
 

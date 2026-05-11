@@ -20,6 +20,19 @@ const nextConfig: NextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
   },
+  async headers() {
+    return [
+      {
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "X-Robots-Tag",
+            value: "noindex, nofollow",
+          },
+        ],
+      },
+    ];
+  },
   experimental: {
     // Let Next.js rewrite package imports more aggressively where supported.
     optimizePackageImports: ["pdf-lib", "qrcode", "docx", "mammoth"],

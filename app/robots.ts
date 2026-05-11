@@ -10,18 +10,28 @@ export default function robots(): MetadataRoute.Robots {
     process.env.NODE_ENV === "production"
       ? process.env.VERCEL_ENV !== "preview"
       : siteMetadata.shouldAllowIndexing;
+  const canonicalHost = new URL(siteMetadata.siteUrl).host;
 
   return {
     rules: shouldAllowIndexing
       ? {
           userAgent: "*",
           allow: "/",
+          disallow: [
+            "/api/",
+            "/*?*",
+            "/*?utm_*",
+            "/*?fbclid=*",
+            "/*?gclid=*",
+            "/*?msclkid=*",
+            "/_next/data/",
+          ],
         }
       : {
           userAgent: "*",
           disallow: "/",
         },
     sitemap: `${siteMetadata.siteUrl}/sitemap.xml`,
-    ...(shouldAllowIndexing ? { host: siteMetadata.siteUrl } : {}),
+    ...(shouldAllowIndexing ? { host: canonicalHost } : {}),
   };
 }

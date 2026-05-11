@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
+import { JsonLd } from "@/components/seo/json-ld";
 import { ToolPage } from "@/components/tool-page";
 import {
   buildBreadcrumbJsonLd,
@@ -111,28 +112,10 @@ export default async function ToolDetailPage({
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
-      {faqJsonLd ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-        />
-      ) : null}
-      {howToJsonLd ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
-        />
-      ) : null}
-      {softwareJsonLd ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
-        />
-      ) : null}
+      <JsonLd data={breadcrumbJsonLd} />
+      <JsonLd data={faqJsonLd} />
+      <JsonLd data={howToJsonLd} />
+      <JsonLd data={softwareJsonLd} />
       <ToolPage
         tool={tool}
         relatedTools={relatedTools}
