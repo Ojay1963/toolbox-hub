@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(mkdir -p \"C:/Users/user/.claude/projects/c--Users-user-Desktop-SOFTWARE-Tools-Website/memory\")"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\user\\.claude\\projects\\c--Users-user-Desktop-SOFTWARE-Tools-Website\\memory"
+    ]
+  }
+}

@@ -57,7 +57,7 @@ export function ToolPage({
               <p className="mt-4 text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
                 {tool.name}
               </p>
-              <h1 className="site-hero-title mt-3 text-4xl font-black tracking-tight sm:text-5xl">{tool.name}</h1>
+              <h1 className="site-hero-title mt-3 text-4xl font-black tracking-tight sm:text-5xl">{buildActionH1(tool.seoTitle)}</h1>
               <p className="mt-4 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
                 {isPubliclyActive ? tool.longDescription : tool.shortDescription}
               </p>
@@ -432,4 +432,15 @@ function buildToolQualityChecks(tool: ToolDefinition, categoryLabel: string) {
     `Read the FAQ when a result looks unusual, because many tools have format limits, browser limits, or practical tradeoffs that are easier to understand before repeating the task.`,
     `Open the related tools section when the result is close but not final; many tasks work best as a short sequence instead of one isolated step.`,
   ];
+}
+
+function buildActionH1(seoTitle: string): string {
+  const sep = seoTitle.indexOf(" - ");
+  if (sep > 0) {
+    const action = seoTitle.slice(sep + 3).trim();
+    if (action.length >= 10) {
+      return /\bfree\b/i.test(action) ? action : `${action} Free`;
+    }
+  }
+  return /\bfree\b/i.test(seoTitle) ? seoTitle : `${seoTitle} Free`;
 }

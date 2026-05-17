@@ -54,11 +54,12 @@ const categoryBadgeMap: Record<string, { short: string; tone: string }> = {
   "education-tools": { short: "EDU", tone: "bg-lime-100 text-lime-800" },
 };
 
-const trustHighlights = [
-  {
-    title: "50+ Free Tools",
-    detail: "Useful workflows across images, PDFs, text, developer tasks, generators, and calculators.",
-  },
+function getTrustHighlights(toolCount: number) {
+  return [
+    {
+      title: `${toolCount}+ Free Tools`,
+      detail: "Useful workflows across images, PDFs, text, developer tasks, generators, and calculators.",
+    },
   {
     title: "No Signup Required",
     detail: "Open a tool and start working immediately without an account wall or dashboard.",
@@ -71,7 +72,8 @@ const trustHighlights = [
     title: "Fast Browser Tools",
     detail: "Many tasks run directly in your browser for quick results and fewer unnecessary steps.",
   },
-];
+  ];
+}
 
 export const metadata = buildMetadata({
   title: "Fast Free Online Tools That Work Instantly",
@@ -90,6 +92,7 @@ export const metadata = buildMetadata({
 
 export default function HomePage() {
   const publicTools = getDiscoveryEntries();
+  const trustHighlights = getTrustHighlights(publicTools.length);
   const suggestedTools = getDiscoverySuggestedEntries(8);
   const educationSpotlightTools = getEducationHomepageSpotlight(6);
   const popularTools = featuredToolSlugs

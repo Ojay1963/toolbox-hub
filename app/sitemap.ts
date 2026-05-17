@@ -63,9 +63,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
         changeFrequency: "monthly" as const,
         priority:
           tool.implementationStatus === "working-local"
-            ? 0.8
+            ? 0.9
             : tool.implementationStatus === "reduced-scope-local"
-              ? 0.72
+              ? 0.78
               : 0.68,
       })),
     ...educationTools.map((tool) => ({

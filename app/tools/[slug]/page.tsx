@@ -20,6 +20,17 @@ import {
   tools,
 } from "@/lib/tools";
 
+function buildToolPageTitle(seoTitle: string, toolName: string): string {
+  const base = seoTitle.trim().length >= 20 ? seoTitle : `${toolName} Online Free`;
+  if (base.includes("Toolbox Hub")) return base;
+  const sep = base.indexOf(" - ");
+  if (sep > 0) {
+    const action = base.slice(sep + 3).trim();
+    if (action.length >= 10) return `${action} — No Signup | Toolbox Hub`;
+  }
+  return `${base} — No Signup | Toolbox Hub`;
+}
+
 export function generateStaticParams() {
   return tools.map((tool) => ({ slug: tool.slug }));
 }
@@ -37,9 +48,7 @@ export async function generateMetadata({
 
   const canonicalSlug = getCanonicalToolSlug(tool.slug);
   const shouldIndex = shouldIndexTool(tool);
-  const title = tool.seoTitle.trim().length >= 20
-    ? tool.seoTitle
-    : `${tool.name} Online Free | Toolbox Hub`;
+  const title = buildToolPageTitle(tool.seoTitle, tool.name);
   const description = tool.seoDescription.trim().length >= 110
     ? tool.seoDescription
     : `${tool.shortDescription} Use ${tool.name.toLowerCase()} online with clear steps, related tools, FAQs, and a browser-first workflow on Toolbox Hub.`;
@@ -106,7 +115,7 @@ export default async function ToolDetailPage({
       name: tool.name,
       description: tool.seoDescription,
       pathname: `/tools/${tool.slug}`,
-      category: "UtilityApplication",
+      category: "WebApplication",
     })
     : null;
 
