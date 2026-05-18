@@ -1487,8 +1487,15 @@ export function shouldIndexTool(toolOrSlug: Pick<ToolDefinition, "slug" | "imple
     return false;
   }
 
-  if (config && !isToolAvailableOnDeployment(tool)) {
-    return false;
+  // Only noindex when specific required API keys/services are missing.
+  // Rate-limiting backend absence alone is not a reason to noindex.
+  if (config?.requiredEnvVars?.length) {
+    const missingVars = config.requiredEnvVars.filter(
+      (envVar) => !process.env[envVar]?.trim(),
+    );
+    if (missingVars.length > 0) {
+      return false;
+    }
   }
 
   if (noindexWeakToolSlugs.has(tool.slug)) {
