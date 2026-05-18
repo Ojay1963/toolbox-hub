@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AnalyticsHook } from "@/components/monitoring/analytics-hook";
+import { EngagementProvider } from "@/components/engagement/engagement-provider";
+import { FAB } from "@/components/engagement/fab";
+import { KeyboardShortcuts } from "@/components/engagement/keyboard-shortcuts";
+import { ToastContainer } from "@/components/engagement/toast-container";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { buildOrganizationJsonLd, buildWebsiteJsonLd, siteMetadata } from "@/lib/seo";
@@ -70,11 +74,18 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
         <AnalyticsHook />
-        <div className="app-shell mobile-only-app-frame relative min-h-screen max-w-full overflow-x-clip">
-          <Header />
-          <main id="main-content" className="app-main max-w-full overflow-x-clip pb-10">{children}</main>
-          <Footer />
-        </div>
+        <EngagementProvider>
+          <div className="app-shell mobile-only-app-frame relative min-h-screen max-w-full overflow-x-clip">
+            <Header />
+            <main id="main-content" className="app-main max-w-full overflow-x-clip pb-10">
+              {children}
+            </main>
+            <Footer />
+          </div>
+          <ToastContainer />
+          <FAB />
+          <KeyboardShortcuts />
+        </EngagementProvider>
       </body>
     </html>
   );

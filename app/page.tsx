@@ -1,12 +1,17 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { EducationToolCard } from "@/components/education/tool-card";
+import { FavouritesRow } from "@/components/engagement/favourites-row";
+import { RecentToolsRow } from "@/components/engagement/recent-tools-row";
+import { ToolOfTheDay } from "@/components/engagement/tool-of-the-day";
+import { WelcomeBanner } from "@/components/engagement/welcome-banner";
 import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { FaqList } from "@/components/ui/faq-list";
 import { getEducationHomepageSpotlight } from "@/lib/education-tools";
+import { getTodayIndex } from "@/lib/engagement-store";
 import { buildBreadcrumbJsonLd, buildCollectionPageJsonLd, buildFaqJsonLd, buildMetadata } from "@/lib/seo";
 import { discoveryCategories, getDiscoveryEntries, getDiscoverySuggestedEntries } from "@/lib/tool-discovery";
-import { getPopularTools, getRecentTools, getTool, getTrendingTools, shouldIndexTool, type ToolDefinition } from "@/lib/tools";
+import { getIndexableTools, getPopularTools, getRecentTools, getTool, getTrendingTools, shouldIndexTool, type ToolDefinition } from "@/lib/tools";
 
 const SearchBox = dynamic(() => import("@/components/ui/search-box").then((module) => module.SearchBox));
 
@@ -92,6 +97,7 @@ export const metadata = buildMetadata({
 
 export default function HomePage() {
   const publicTools = getDiscoveryEntries();
+  const allIndexableTools = getIndexableTools();
   const trustHighlights = getTrustHighlights(publicTools.length);
   const suggestedTools = getDiscoverySuggestedEntries(8);
   const educationSpotlightTools = getEducationHomepageSpotlight(6);
@@ -114,6 +120,10 @@ export default function HomePage() {
     ].includes(category.slug),
   );
 
+  // Tool of the Day — deterministic, same tool for all visitors on a given day
+  const todayIndex = getTodayIndex();
+  const toolOfTheDay = allIndexableTools[todayIndex % allIndexableTools.length];
+
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([{ name: "Home", pathname: "/" }]);
   const homepageCollectionJsonLd = buildCollectionPageJsonLd({
     name: "Free Online Tools Directory",
@@ -126,6 +136,14 @@ export default function HomePage() {
     })),
   });
   const homepageFaqJsonLd = buildFaqJsonLd(homepageFaq);
+
+  // Minimal shape for client-side lookups
+  const toolMetas = allIndexableTools.map((t) => ({
+    slug: t.slug,
+    name: t.name,
+    category: t.category,
+    shortDescription: t.shortDescription,
+  }));
 
   return (
     <div className="site-shell mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
@@ -141,6 +159,14 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqJsonLd) }}
       />
+
+      <WelcomeBanner toolCount={publicTools.length} />
+
+      <div id="recent-tools">
+        <RecentToolsRow allTools={toolMetas} />
+      </div>
+
+      <FavouritesRow allTools={toolMetas} />
 
       <section className="site-hero app-panel rounded-[2rem] p-7 sm:p-10 lg:p-12">
         <div className="max-w-4xl">
@@ -223,6 +249,12 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {toolOfTheDay && (
+        <section className="mt-10">
+          <ToolOfTheDay tool={toolOfTheDay} />
+        </section>
+      )}
 
       <section className="mt-10 grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
         <div className="app-panel rounded-[2rem] p-6 sm:p-7">

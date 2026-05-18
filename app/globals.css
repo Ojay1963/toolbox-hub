@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable Tailwind dark: variant using .dark class on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f3ecdd;
   --foreground: #1d3557;
@@ -14,6 +17,46 @@
   --surface-alt: #f7f1e4;
   --shadow-soft: 0 18px 40px rgba(42, 56, 84, 0.08);
   --mobile-nav-height: 5.75rem;
+}
+
+/* Dark mode — toggled by adding .dark to <html> */
+html.dark {
+  --background: #0f172a;
+  --foreground: #e2e8f0;
+  --surface: rgba(15, 23, 42, 0.85);
+  --surface-strong: rgba(15, 23, 42, 0.97);
+  --border: rgba(226, 232, 240, 0.1);
+  --primary: #2dd4bf;
+  --primary-dark: #14b8a6;
+  --accent: #f2b56b;
+  --muted: #94a3b8;
+  --soft: #1e3a3a;
+  --surface-alt: #1e293b;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.3);
+}
+
+html.dark body {
+  background: linear-gradient(180deg, #0f172a 0%, #111827 60%, #0f172a 100%);
+  color: var(--foreground);
+}
+
+html.dark header {
+  background-color: rgba(15, 23, 42, 0.92);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(20, 125, 115, 0.35); }
+  50%       { box-shadow: 0 0 0 10px rgba(20, 125, 115, 0); }
+}
+
+@keyframes badgePop {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 * {

@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { ShareButton } from "@/components/engagement/share-button";
+import { ToolRating } from "@/components/engagement/tool-rating";
+import { ToolTracker } from "@/components/engagement/tool-tracker";
+import { UsageCounter } from "@/components/engagement/usage-counter";
 import { Breadcrumbs } from "@/components/seo/breadcrumbs";
 import { ToolRenderer } from "@/components/tools/tool-renderer";
 import { AdPlaceholder } from "@/components/ui/ad-placeholder";
@@ -54,10 +58,12 @@ export function ToolPage({
                   {categoryLabel}
                 </span>
               </div>
+              <ToolTracker slug={tool.slug} name={tool.name} />
               <p className="mt-4 text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
                 {tool.name}
               </p>
               <h1 className="site-hero-title mt-3 text-4xl font-black tracking-tight sm:text-5xl">{buildActionH1(tool.seoTitle)}</h1>
+              <UsageCounter slug={tool.slug} />
               <p className="mt-4 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
                 {isPubliclyActive ? tool.longDescription : tool.shortDescription}
               </p>
@@ -93,6 +99,9 @@ export function ToolPage({
               </div>
               <div className="mt-8 rounded-[1.75rem] bg-[color:var(--surface-alt)]/70 p-3 sm:p-4">
                 <ToolRenderer tool={tool} />
+              </div>
+              <div className="mt-4 flex items-center gap-3">
+                <ShareButton slug={tool.slug} toolName={tool.name} />
               </div>
             </section>
 
@@ -183,6 +192,8 @@ export function ToolPage({
                     .
                   </p>
                 </Section>
+
+                <ToolRating slug={tool.slug} />
               </>
             ) : (
               <Section title="Try a working alternative">

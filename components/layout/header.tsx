@@ -4,6 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import siteMark from "@/components/images/Tools-hub-favicorn.png";
+import { DarkModeToggle } from "@/components/engagement/dark-mode-toggle";
+import { FavouritesCount } from "@/components/engagement/favourite-button";
+import { StreakBadge } from "@/components/engagement/streak-widget";
 
 export function Header() {
   const pathname = usePathname();
@@ -16,8 +19,8 @@ export function Header() {
     { href: "/", label: "Home", icon: "home" },
     { href: "/tools", label: "Tools", icon: "grid" },
     { href: "/#search-tools", label: "Search", icon: "search" },
-    { href: "/blog", label: "Guides", icon: "spark" },
-    { href: "/contact", label: "Contact", icon: "user" },
+    { href: "/profile", label: "Profile", icon: "user" },
+    { href: "/recommend", label: "AI", icon: "spark" },
   ] as const;
 
   const pageTitle = pathname.startsWith("/tools/")
@@ -32,19 +35,22 @@ export function Header() {
             ? "Contact"
             : pathname.startsWith("/about")
               ? "About"
-              : "Home";
+              : pathname.startsWith("/profile")
+                ? "My Profile"
+                : pathname.startsWith("/recommend")
+                  ? "AI Recommender"
+                  : "Home";
 
   const isNavActive = (href: string) => {
     const baseHref = href.split("#")[0];
-
-    if (href === "/") {
-      return pathname === "/";
-    }
-
+    if (href === "/") return pathname === "/";
     if (href === "/tools#browse-categories") {
-      return pathname === "/tools" || pathname.startsWith("/category/") || pathname.startsWith("/tools/education");
+      return (
+        pathname === "/tools" ||
+        pathname.startsWith("/category/") ||
+        pathname.startsWith("/tools/education")
+      );
     }
-
     return pathname === baseHref || pathname.startsWith(`${baseHref}/`);
   };
 
@@ -53,7 +59,11 @@ export function Header() {
       <header className="sticky top-0 z-40 border-b border-[color:var(--border)] bg-[color:var(--surface-strong)]/88 backdrop-blur">
         <div className="site-header-shell mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-4 lg:grid-cols-[1fr_auto_1fr]">
-            <Link href="/" className="site-header-brand flex min-w-0 items-center gap-3" aria-label="Go to Toolbox Hub homepage">
+            <Link
+              href="/"
+              className="site-header-brand flex min-w-0 items-center gap-3"
+              aria-label="Go to Toolbox Hub homepage"
+            >
               <Image
                 src={siteMark}
                 alt="Toolbox Hub logo"
@@ -73,12 +83,11 @@ export function Header() {
               {[
                 { href: "/", label: "Home" },
                 { href: "/tools", label: "Tools" },
+                { href: "/recommend", label: "AI Finder" },
                 { href: "/about", label: "About" },
                 { href: "/blog", label: "Guides" },
-                { href: "/contact", label: "Contact" },
               ].map((item) => {
                 const isActive = isNavActive(item.href);
-
                 return (
                   <Link
                     key={item.href}
@@ -96,18 +105,21 @@ export function Header() {
                 );
               })}
             </nav>
-            <div className="hidden justify-end lg:flex">
+            <div className="hidden items-center justify-end gap-3 lg:flex">
+              <StreakBadge />
+              <FavouritesCount />
+              <DarkModeToggle />
               <Link
-                href="/tools#browse-categories"
+                href="/profile"
                 prefetch={false}
-                aria-current={isNavActive("/tools#browse-categories") ? "page" : undefined}
+                aria-current={isNavActive("/profile") ? "page" : undefined}
                 className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-                  isNavActive("/tools#browse-categories")
+                  isNavActive("/profile")
                     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                     : "border-[color:var(--border)] bg-white text-[color:var(--foreground)] hover:border-[color:var(--primary)]"
                 }`}
               >
-                Browse categories
+                My Profile
               </Link>
             </div>
           </div>
@@ -118,16 +130,21 @@ export function Header() {
                 <p className="truncate text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
                   {pageTitle}
                 </p>
-                <p className="truncate text-sm text-[color:var(--muted)]">Touch-first browsing and quick actions</p>
+                <p className="truncate text-sm text-[color:var(--muted)]">
+                  Touch-first browsing and quick actions
+                </p>
               </div>
-              <Link
-                href="/#search-tools"
-                prefetch={false}
-                className="mobile-app-search-button"
-                aria-label="Open tool search from the homepage"
-              >
-                Search
-              </Link>
+              <div className="flex items-center gap-2">
+                <DarkModeToggle />
+                <Link
+                  href="/#search-tools"
+                  prefetch={false}
+                  className="mobile-app-search-button"
+                  aria-label="Open tool search from the homepage"
+                >
+                  Search
+                </Link>
+              </div>
             </div>
 
             <nav aria-label="Mobile quick actions" className="mobile-app-shortcuts">
@@ -138,9 +155,7 @@ export function Header() {
                   prefetch={item.href === "/" || item.href === "/tools" ? undefined : false}
                   aria-current={isNavActive(item.href) ? "page" : undefined}
                   className={`mobile-app-shortcut ${
-                    isNavActive(item.href)
-                      ? "mobile-app-shortcut-active"
-                      : ""
+                    isNavActive(item.href) ? "mobile-app-shortcut-active" : ""
                   }`}
                 >
                   {item.label}

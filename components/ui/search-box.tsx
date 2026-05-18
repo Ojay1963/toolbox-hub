@@ -124,6 +124,9 @@ export function SearchBox({
       <div id={`${inputId}-hint`} className="sr-only">
         Search for tools by name, category, or keyword.
       </div>
+      <p className="mt-1.5 text-xs text-[color:var(--muted)]">
+        Press <kbd className="rounded border border-[color:var(--border)] bg-[color:var(--surface-alt)] px-1.5 py-0.5 font-mono text-[11px]">/</kbd> to search from anywhere
+      </p>
       {showCategoryFilter ? (
         <div className="mobile-wrap-chip-row mt-4 flex flex-wrap gap-2">
           <button

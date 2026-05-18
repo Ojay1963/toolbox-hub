@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(del \"c:\\\\Users\\\\user\\\\Desktop\\\\SOFTWARE\\\\Tools Website\\\\.env.example\")"
+    ]
+  }
+}

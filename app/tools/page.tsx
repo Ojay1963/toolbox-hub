@@ -1,6 +1,8 @@
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { EducationToolCard } from "@/components/education/tool-card";
+import { FavouritesRow } from "@/components/engagement/favourites-row";
+import { RecentToolsRow } from "@/components/engagement/recent-tools-row";
 import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { CategoryCard } from "@/components/ui/category-card";
 import { ToolCard } from "@/components/ui/tool-card";
@@ -21,6 +23,13 @@ export const metadata = buildMetadata({
 
 export default function ToolsPage() {
   const publicTools = getDiscoveryEntries();
+  const allIndexableTools = getIndexableTools();
+  const toolMetas = allIndexableTools.map((t) => ({
+    slug: t.slug,
+    name: t.name,
+    category: t.category,
+    shortDescription: t.shortDescription,
+  }));
   const suggestedTools = getDiscoverySuggestedEntries(8);
   const popularTools = getPopularTools(9);
   const recentTools = getRecentTools(6);
@@ -71,6 +80,11 @@ export default function ToolsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(toolsCollectionJsonLd) }}
       />
+
+      <div id="recent-tools">
+        <RecentToolsRow allTools={toolMetas} />
+      </div>
+      <FavouritesRow allTools={toolMetas} />
 
       <section className="site-hero app-panel rounded-[2rem] p-7 sm:p-10">
         <div className="mb-4 flex flex-wrap gap-2">
