@@ -27,7 +27,9 @@ export default function RecommendPage() {
 
   useEffect(() => {
     if (results.length > 0) {
-      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
     }
   }, [results]);
 
@@ -117,6 +119,7 @@ export default function RecommendPage() {
         </div>
       )}
 
+      <div ref={resultsRef} />
       <AnimatePresence mode="wait">
         {results.length > 0 && (
           <motion.div
@@ -125,8 +128,7 @@ export default function RecommendPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            ref={resultsRef}
-          className="mt-8"
+            className="mt-8"
           >
             <p className="mb-5 text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
               Top recommendations
