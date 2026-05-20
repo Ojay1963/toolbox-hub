@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Recommendation {
@@ -23,6 +23,13 @@ export default function RecommendPage() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Recommendation[]>([]);
   const [error, setError] = useState("");
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (results.length > 0) {
+      resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [results]);
 
   const handleSubmit = async (q: string) => {
     const trimmed = q.trim();
@@ -118,7 +125,8 @@ export default function RecommendPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ type: "spring", stiffness: 300, damping: 28 }}
-            className="mt-8"
+            ref={resultsRef}
+          className="mt-8"
           >
             <p className="mb-5 text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--primary-dark)]">
               Top recommendations
