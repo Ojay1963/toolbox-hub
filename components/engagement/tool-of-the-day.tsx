@@ -40,7 +40,7 @@ export function ToolOfTheDay({ tool }: { tool: ToolMeta }) {
       <div className="relative z-10">
         <div className="flex flex-wrap items-center gap-3">
           <span className="rounded-full bg-amber-100 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.2em] text-amber-800">
-            ✨ Tool of the Day
+            Tool of the Day
           </span>
           {countdown && (
             <span className="text-xs text-[color:var(--muted)]">

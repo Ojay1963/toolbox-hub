@@ -4,15 +4,15 @@ import Link from "next/link";
 import { useEngagement } from "./engagement-provider";
 
 const categoryBadgeMap: Record<string, { short: string; tone: string }> = {
-  "image-tools": { short: "IMG", tone: "bg-emerald-100 text-emerald-800" },
-  "pdf-tools": { short: "PDF", tone: "bg-amber-100 text-amber-800" },
-  "text-tools": { short: "TXT", tone: "bg-sky-100 text-sky-800" },
-  "developer-tools": { short: "DEV", tone: "bg-slate-200 text-slate-800" },
-  "generator-tools": { short: "GEN", tone: "bg-rose-100 text-rose-800" },
-  "calculator-tools": { short: "CAL", tone: "bg-violet-100 text-violet-800" },
-  "converter-tools": { short: "CNV", tone: "bg-orange-100 text-orange-800" },
-  "internet-tools": { short: "WEB", tone: "bg-cyan-100 text-cyan-800" },
-  "education-tools": { short: "EDU", tone: "bg-lime-100 text-lime-800" },
+  "image-tools": { short: "IMG", tone: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300" },
+  "pdf-tools": { short: "PDF", tone: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" },
+  "text-tools": { short: "TXT", tone: "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300" },
+  "developer-tools": { short: "DEV", tone: "bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-300" },
+  "generator-tools": { short: "GEN", tone: "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300" },
+  "calculator-tools": { short: "CAL", tone: "bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300" },
+  "converter-tools": { short: "CNV", tone: "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300" },
+  "internet-tools": { short: "WEB", tone: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300" },
+  "education-tools": { short: "EDU", tone: "bg-lime-100 text-lime-800 dark:bg-lime-900/40 dark:text-lime-300" },
 };
 
 interface ToolMeta {
@@ -37,8 +37,11 @@ export function FavouritesRow({ allTools }: { allTools: ToolMeta[] }) {
     <section className="mb-8" id="favourites">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.22em] text-rose-600">
-            ★ Your Favourites
+          <p className="flex items-center gap-1.5 text-sm font-semibold uppercase tracking-[0.22em] text-rose-600">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+              <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+            </svg>
+            Your Favourites
           </p>
           <h2 className="mt-1 text-2xl font-black tracking-tight">Saved tools</h2>
         </div>
@@ -69,7 +72,9 @@ export function FavouritesRow({ allTools }: { allTools: ToolMeta[] }) {
                   {tool.shortDescription}
                 </p>
               </div>
-              <span className="shrink-0 text-rose-400 opacity-60 group-hover:opacity-100">★</span>
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 shrink-0 text-rose-400 opacity-60 transition group-hover:opacity-100" aria-hidden="true">
+                <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+              </svg>
             </Link>
           );
         })}

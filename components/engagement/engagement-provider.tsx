@@ -156,7 +156,7 @@ export function EngagementProvider({ children }: { children: React.ReactNode }) 
         const badge = ALL_BADGES.find((b) => b.id === id);
         if (badge) {
           setTimeout(() => {
-            showToast(`${badge.emoji} Badge Unlocked: ${badge.name}!`, { type: "badge" });
+            showToast(`Badge Unlocked: ${badge.name}!`, { type: "badge" });
           }, 1500 + i * 800);
         }
       });
@@ -204,7 +204,7 @@ export function EngagementProvider({ children }: { children: React.ReactNode }) 
           const badge = ALL_BADGES.find((b) => b.id === id);
           if (badge) {
             setTimeout(
-              () => showToast(`${badge.emoji} Badge Unlocked: ${badge.name}!`, { type: "badge" }),
+              () => showToast(`Badge Unlocked: ${badge.name}!`, { type: "badge" }),
               500 + i * 600,
             );
           }

@@ -73,14 +73,18 @@ export function KeyboardShortcuts() {
       onClick={() => setOpen(false)}
     >
       <div
-        className="w-full max-w-md rounded-[2rem] border border-[color:var(--border)] bg-white p-6 shadow-xl"
+        className="w-full max-w-md rounded-[2rem] border border-[color:var(--border)] bg-white p-6 shadow-xl dark:bg-slate-800"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-label="Keyboard shortcuts"
       >
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-black tracking-tight text-[color:var(--foreground)]">
-            ⌨ Keyboard Shortcuts
+          <h2 className="flex items-center gap-2 text-lg font-black tracking-tight text-[color:var(--foreground)]">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5 shrink-0">
+              <rect x="2" y="6" width="20" height="13" rx="2" />
+              <path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8" strokeLinecap="round" />
+            </svg>
+            Keyboard Shortcuts
           </h2>
           <button
             type="button"

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useDeferredValue, useId, useMemo, useState } from "react";
+import { useDeferredValue, useId, useMemo, useRef, useState } from "react";
 import { categories, getCategory, type ToolDefinition } from "@/lib/tools";
 
 export function SearchBox({
@@ -87,6 +87,11 @@ export function SearchBox({
       .map((entry) => entry.tool);
   }, [categoryFilter, deferredQuery, filteredTools, maxResults]);
   const instantSuggestions = matches.slice(0, 4);
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  const scrollToResults = () => {
+    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  };
 
   const visibleSuggestions = suggestionList
     .map(normalizeEntry)
@@ -112,15 +117,26 @@ export function SearchBox({
       <label htmlFor={inputId} className="sr-only">
         Search the tool directory
       </label>
-      <input
-        id={inputId}
-        type="search"
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        placeholder={placeholder}
-        aria-describedby={`${inputId}-hint`}
-        className="mobile-search-input mt-5 w-full rounded-[1.4rem] border border-[color:var(--border)] bg-white/95 px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm"
-      />
+      <div className="mt-5 flex gap-2">
+        <input
+          id={inputId}
+          type="search"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") scrollToResults(); }}
+          placeholder={placeholder}
+          aria-describedby={`${inputId}-hint`}
+          className="mobile-search-input flex-1 rounded-[1.4rem] border border-[color:var(--border)] bg-white/95 px-4 py-3.5 text-base text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--primary)] dark:bg-[#1e293b] sm:text-sm"
+        />
+        <button
+          type="button"
+          onClick={scrollToResults}
+          aria-label="Search"
+          className="shrink-0 rounded-[1.4rem] bg-[color:var(--primary)] px-5 py-3.5 text-sm font-semibold text-white transition hover:bg-[color:var(--primary-dark)] sm:hidden"
+        >
+          Search
+        </button>
+      </div>
       <div id={`${inputId}-hint`} className="sr-only">
         Search for tools by name, category, or keyword.
       </div>
@@ -169,19 +185,19 @@ export function SearchBox({
                 key={`instant-${tool.id}`}
                 href={tool.href}
                 prefetch={false}
-                className="rounded-full border border-[color:var(--border)] bg-white/80 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                className="rounded-full border border-[color:var(--border)] bg-white/80 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)] dark:bg-slate-800/80 dark:border-slate-700/60"
               >
                 {tool.name}
               </Link>
             )) : (
-              <span className="rounded-full border border-dashed border-[color:var(--border)] bg-white/60 px-3 py-2 text-sm text-[color:var(--muted)]">
+              <span className="rounded-full border border-dashed border-[color:var(--border)] bg-white/60 px-3 py-2 text-sm text-[color:var(--muted)] dark:bg-slate-800/60 dark:border-slate-700/60">
                 Keep typing to narrow the directory
               </span>
             )}
           </div>
         </div>
       ) : null}
-      <div className="mt-5" aria-live="polite">
+      <div ref={resultsRef} className="mt-5" aria-live="polite">
         {!query ? (
           <div className="space-y-4">
             <p className="text-sm text-[color:var(--muted)]">
@@ -198,7 +214,7 @@ export function SearchBox({
                   key={quickQuery}
                   type="button"
                   onClick={() => setQuery(quickQuery)}
-                  className="rounded-full border border-[color:var(--border)] bg-white/70 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                  className="rounded-full border border-[color:var(--border)] bg-white/70 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)] dark:bg-slate-800/70 dark:border-slate-700/60"
                 >
                   {quickQuery}
                 </button>
@@ -215,7 +231,7 @@ export function SearchBox({
                       key={tool.id}
                       href={tool.href}
                       prefetch={false}
-                      className="rounded-full border border-[color:var(--border)] bg-white/70 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                      className="rounded-full border border-[color:var(--border)] bg-white/70 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)] dark:bg-slate-800/70 dark:border-slate-700/60"
                     >
                       {tool.name}
                     </Link>
@@ -273,7 +289,7 @@ export function SearchBox({
                   key={`empty-${quickQuery}`}
                   type="button"
                   onClick={() => setQuery(quickQuery)}
-                  className="rounded-full border border-[color:var(--border)] bg-white/70 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                  className="rounded-full border border-[color:var(--border)] bg-white/70 px-3 py-2 text-sm text-[color:var(--foreground)] transition hover:border-[color:var(--primary)] dark:bg-slate-800/70 dark:border-slate-700/60"
                 >
                   {quickQuery}
                 </button>

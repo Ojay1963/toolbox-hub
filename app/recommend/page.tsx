@@ -77,7 +77,7 @@ export default function RecommendPage() {
           }}
           placeholder="e.g. I want to compress my image without losing quality"
           rows={3}
-          className="w-full rounded-[1.4rem] border border-[color:var(--border)] bg-white/90 px-4 py-3.5 text-base leading-7 outline-none transition focus:border-[color:var(--primary)]"
+          className="w-full rounded-[1.4rem] border border-[color:var(--border)] bg-white/90 px-4 py-3.5 text-base leading-7 text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--primary)] dark:bg-[#1e293b]"
         />
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button

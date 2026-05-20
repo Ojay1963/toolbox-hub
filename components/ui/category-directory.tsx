@@ -74,7 +74,7 @@ export function CategoryDirectory({
           }}
           placeholder={placeholder}
           aria-describedby={`${inputId}-hint`}
-          className="mobile-search-input w-full rounded-[1.4rem] border border-[color:var(--border)] bg-white/95 px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm"
+          className="mobile-search-input w-full rounded-[1.4rem] border border-[color:var(--border)] bg-white/95 px-4 py-3.5 text-base text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--primary)] dark:bg-slate-800 sm:text-sm"
         />
         <div id={`${inputId}-hint`} className="sr-only">
           Use this field to narrow the tools shown in the category directory.
@@ -97,7 +97,7 @@ export function CategoryDirectory({
               <button
                 type="button"
                 onClick={() => setVisibleCount((current) => current + 12)}
-                className="mobile-show-more-button rounded-2xl border border-[color:var(--border)] bg-white/92 px-4 py-3.5 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                className="mobile-show-more-button rounded-2xl border border-[color:var(--border)] bg-white/92 px-4 py-3.5 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)] dark:bg-slate-800 dark:border-slate-700/60"
               >
                 Show more tools
               </button>

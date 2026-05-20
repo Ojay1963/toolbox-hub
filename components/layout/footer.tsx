@@ -18,7 +18,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="border-t border-[color:var(--border)] bg-white/35">
+    <footer className="border-t border-[color:var(--border)] bg-white/35 dark:bg-slate-900/80">
       <div className="site-footer-grid mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.9fr] lg:px-8">
         <div>
           <div className="site-header-brand flex items-center gap-3">
@@ -26,7 +26,7 @@ export function Footer() {
               src={siteMark}
               alt="Toolbox Hub logo"
               sizes="64px"
-              className="site-header-logo h-16 w-16 shrink-0 rounded-[1.15rem] border border-white/70 bg-white/90 object-contain p-2 shadow-[0_14px_30px_rgba(42,56,84,0.1)]"
+              className="site-header-logo h-16 w-16 shrink-0 rounded-[1.15rem] border border-white/70 bg-white/90 object-contain p-2 shadow-[0_14px_30px_rgba(42,56,84,0.1)] dark:border-slate-700 dark:bg-slate-800"
             />
             <h2 className="text-xl font-bold tracking-tight">Toolbox Hub</h2>
           </div>

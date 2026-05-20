@@ -34,7 +34,7 @@ export function BlogPage({
         {article.sections.map((section) => (
           <section
             key={section.title}
-            className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8"
+            className="site-card rounded-[2rem] border border-[color:var(--border)] p-7 shadow-sm sm:p-8"
           >
             <h2 className="site-section-title text-2xl font-black tracking-tight">{section.title}</h2>
             <div className="prose-content mt-5 text-sm leading-7 text-[color:var(--muted)] sm:text-base">

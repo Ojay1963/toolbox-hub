@@ -26,7 +26,7 @@ export function StaticPage({ eyebrow, title, intro, sections }: StaticPageProps)
         {sections.map((section) => (
           <section
             key={section.title}
-            className="site-card rounded-[2rem] border border-[color:var(--border)] bg-white/88 p-7 shadow-sm sm:p-8"
+            className="site-card rounded-[2rem] border border-[color:var(--border)] p-7 shadow-sm sm:p-8"
           >
             <h2 className="site-section-title text-2xl font-black tracking-tight">{section.title}</h2>
             <div className="mt-4 space-y-4 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
@@ -37,7 +37,7 @@ export function StaticPage({ eyebrow, title, intro, sections }: StaticPageProps)
             {section.bullets?.length ? (
               <ul className="mt-5 space-y-3 text-sm leading-7 text-[color:var(--muted)] sm:text-base">
                 {section.bullets.map((bullet) => (
-                  <li key={bullet} className="rounded-2xl bg-stone-50 px-4 py-3">
+                  <li key={bullet} className="rounded-2xl bg-stone-50 px-4 py-3 dark:bg-slate-700/50">
                     {bullet}
                   </li>
                 ))}

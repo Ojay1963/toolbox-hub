@@ -114,17 +114,17 @@ export function getTodayIndex(): number {
 
 export interface BadgeDef {
   id: string;
-  emoji: string;
+  iconType: "trophy-bronze" | "trophy-silver" | "trophy-gold" | "fire" | "bolt";
   name: string;
   description: string;
 }
 
 export const ALL_BADGES: BadgeDef[] = [
-  { id: "first-tool", emoji: "🥉", name: "First Tool Used", description: "Used any tool for the first time" },
-  { id: "power-user", emoji: "🥈", name: "Power User", description: "Used 5 different tools" },
-  { id: "toolbox-pro", emoji: "🥇", name: "Toolbox Pro", description: "Used 10 different tools" },
-  { id: "on-fire", emoji: "🔥", name: "On Fire", description: "7-day visit streak" },
-  { id: "speed-run", emoji: "⚡", name: "Speed Run", description: "Used 3 tools in one session" },
+  { id: "first-tool", iconType: "trophy-bronze", name: "First Tool Used", description: "Used any tool for the first time" },
+  { id: "power-user", iconType: "trophy-silver", name: "Power User", description: "Used 5 different tools" },
+  { id: "toolbox-pro", iconType: "trophy-gold", name: "Toolbox Pro", description: "Used 10 different tools" },
+  { id: "on-fire", iconType: "fire", name: "On Fire", description: "7-day visit streak" },
+  { id: "speed-run", iconType: "bolt", name: "Speed Run", description: "Used 3 tools in one session" },
 ];
 
 export function checkNewBadges(

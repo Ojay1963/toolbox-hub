@@ -13,7 +13,7 @@ export function WelcomeBanner({ toolCount }: { toolCount: number }) {
     >
       <div className="min-w-0">
         <p className="text-base font-black tracking-tight text-[color:var(--foreground)]">
-          Welcome to Toolbox Hub 👋
+          Welcome to Toolbox Hub
         </p>
         <p className="mt-1.5 text-sm leading-7 text-[color:var(--muted)]">
           {toolCount}+ free tools, no signup ever. Your tools and favourites are saved automatically.

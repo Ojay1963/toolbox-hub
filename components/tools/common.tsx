@@ -3,14 +3,14 @@
 import type { ChangeEvent, InputHTMLAttributes } from "react";
 import { useEffect, useState } from "react";
 
-export const panelClass = "max-w-full overflow-hidden rounded-3xl border border-[color:var(--border)] bg-white p-6 shadow-sm";
+export const panelClass = "max-w-full overflow-hidden rounded-3xl border border-[color:var(--border)] bg-white dark:bg-slate-800/95 p-6 shadow-sm";
 export const inputClass =
-  "w-full min-w-0 max-w-full rounded-[1.35rem] border border-[color:var(--border)] bg-white/95 px-4 py-3.5 text-base outline-none transition focus:border-[color:var(--primary)] sm:text-sm";
+  "w-full min-w-0 max-w-full rounded-[1.35rem] border border-[color:var(--border)] bg-white/95 px-4 py-3.5 text-base text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--primary)] dark:bg-slate-800 sm:text-sm";
 export const textareaClass = `${inputClass} min-h-44`;
 export const buttonClass =
   "inline-flex max-w-full items-center justify-center rounded-[1.35rem] bg-[color:var(--primary)] px-5 py-3.5 text-center text-sm font-semibold text-white shadow-[0_14px_30px_rgba(20,125,115,0.22)] transition hover:bg-[color:var(--primary-dark)] disabled:cursor-not-allowed disabled:opacity-60";
 export const secondaryButtonClass =
-  "inline-flex max-w-full items-center justify-center rounded-[1.35rem] border border-[color:var(--border)] bg-white/92 px-5 py-3.5 text-center text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]";
+  "inline-flex max-w-full items-center justify-center rounded-[1.35rem] border border-[color:var(--border)] bg-white/92 px-5 py-3.5 text-center text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)] dark:bg-slate-800 dark:border-slate-700/60";
 
 export function Field({
   label,
@@ -120,10 +120,10 @@ export function Notice({
 }) {
   const toneClass =
     tone === "error"
-      ? "border-rose-200 bg-rose-50/95 text-rose-800"
+      ? "border-rose-200 bg-rose-50/95 text-rose-800 dark:border-rose-800/50 dark:bg-rose-900/20 dark:text-rose-300"
       : tone === "success"
-        ? "border-emerald-200 bg-emerald-50/95 text-emerald-800"
-        : "border-[color:var(--border)] bg-[color:var(--surface-alt)] text-stone-700";
+        ? "border-emerald-200 bg-emerald-50/95 text-emerald-800 dark:border-emerald-800/50 dark:bg-emerald-900/20 dark:text-emerald-300"
+        : "border-[color:var(--border)] bg-[color:var(--surface-alt)] text-[color:var(--foreground)]";
 
   return <div className={`rounded-[1.35rem] border px-4 py-3 text-sm ${toneClass}`}>{children}</div>;
 }
@@ -143,11 +143,11 @@ export function OutputBlock({
         {title}
       </p>
       {multiline ? (
-        <pre className="mt-2 max-w-full overflow-x-auto whitespace-pre-wrap break-words text-sm text-slate-700">
+        <pre className="mt-2 max-w-full overflow-x-auto whitespace-pre-wrap break-words text-sm text-slate-700 dark:text-slate-200">
           {value}
         </pre>
       ) : (
-        <p className="mt-2 break-words text-sm text-slate-700">{value}</p>
+        <p className="mt-2 break-words text-sm text-slate-700 dark:text-slate-200">{value}</p>
       )}
     </div>
   );

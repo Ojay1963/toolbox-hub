@@ -35,24 +35,24 @@ export function ToolRating({ slug }: { slug: string }) {
           <button
             type="button"
             onClick={() => vote(slug, "up")}
-            className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+            className="flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-800/50 dark:bg-emerald-900/20 dark:text-emerald-300 dark:hover:bg-emerald-900/30"
           >
-            👍 Yes
+            Yes
           </button>
           <button
             type="button"
             onClick={handleThumbsDown}
-            className="flex items-center gap-2 rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--muted)] transition hover:border-rose-300 hover:text-rose-600"
+            className="flex items-center gap-2 rounded-full border border-[color:var(--border)] bg-white/80 px-4 py-2 text-sm font-semibold text-[color:var(--muted)] transition hover:border-rose-300 hover:text-rose-600 dark:bg-slate-800/80"
           >
-            👎 No
+            No
           </button>
           <p className="text-xs text-[color:var(--muted)]">
             {pct}% helpful ({total.toLocaleString()} votes)
           </p>
         </div>
       ) : userVote === "up" ? (
-        <p className="mt-3 text-sm text-emerald-700">
-          Thanks! Glad it helped 😊 — {pct}% found this helpful ({total.toLocaleString()} votes)
+        <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-300">
+          Thanks! Glad it helped — {pct}% found this helpful ({total.toLocaleString()} votes)
         </p>
       ) : (
         <div className="mt-3 space-y-3">
@@ -64,7 +64,7 @@ export function ToolRating({ slug }: { slug: string }) {
                 onChange={(e) => setFeedback(e.target.value)}
                 placeholder="Tell us what didn't work..."
                 rows={3}
-                className="w-full rounded-[1rem] border border-[color:var(--border)] bg-white/90 px-4 py-3 text-sm outline-none transition focus:border-[color:var(--primary)]"
+                className="w-full rounded-[1rem] border border-[color:var(--border)] bg-white/90 px-4 py-3 text-sm text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--primary)] dark:bg-slate-800"
               />
               <button
                 type="button"

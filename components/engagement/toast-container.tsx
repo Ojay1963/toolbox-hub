@@ -24,10 +24,10 @@ export function ToastContainer() {
             transition={{ type: "spring", stiffness: 420, damping: 32 }}
             className={`relative flex flex-col gap-2 rounded-[1.4rem] px-4 py-3.5 shadow-lg ${
               toast.type === "badge"
-                ? "border border-amber-200 bg-amber-50 text-amber-900"
+                ? "border border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800/50 dark:bg-amber-900/20 dark:text-amber-200"
                 : toast.type === "success"
-                  ? "border border-emerald-200 bg-emerald-50 text-emerald-900"
-                  : "border border-[color:var(--border)] bg-white text-[color:var(--foreground)]"
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-800/50 dark:bg-emerald-900/20 dark:text-emerald-200"
+                  : "border border-[color:var(--border)] bg-white text-[color:var(--foreground)] dark:bg-slate-800"
             }`}
           >
             <div className="flex items-start gap-3">
@@ -50,7 +50,7 @@ export function ToastContainer() {
                     <Link
                       key={action.label}
                       href={action.href}
-                      className="rounded-full border border-current/20 bg-white/60 px-3 py-1 text-xs font-semibold transition hover:bg-white/90"
+                      className="rounded-full border border-current/20 bg-white/60 px-3 py-1 text-xs font-semibold transition hover:bg-white/90 dark:bg-slate-800/60 dark:hover:bg-slate-700/80"
                     >
                       {action.label}
                     </Link>
@@ -59,7 +59,7 @@ export function ToastContainer() {
                       key={action.label}
                       type="button"
                       onClick={action.onClick}
-                      className="rounded-full border border-current/20 bg-white/60 px-3 py-1 text-xs font-semibold transition hover:bg-white/90"
+                      className="rounded-full border border-current/20 bg-white/60 px-3 py-1 text-xs font-semibold transition hover:bg-white/90 dark:bg-slate-800/60 dark:hover:bg-slate-700/80"
                     >
                       {action.label}
                     </button>

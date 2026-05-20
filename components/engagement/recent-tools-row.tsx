@@ -4,15 +4,15 @@ import Link from "next/link";
 import { useEngagement } from "./engagement-provider";
 
 const categoryBadgeMap: Record<string, { short: string; tone: string }> = {
-  "image-tools": { short: "IMG", tone: "bg-emerald-100 text-emerald-800" },
-  "pdf-tools": { short: "PDF", tone: "bg-amber-100 text-amber-800" },
-  "text-tools": { short: "TXT", tone: "bg-sky-100 text-sky-800" },
-  "developer-tools": { short: "DEV", tone: "bg-slate-200 text-slate-800" },
-  "generator-tools": { short: "GEN", tone: "bg-rose-100 text-rose-800" },
-  "calculator-tools": { short: "CAL", tone: "bg-violet-100 text-violet-800" },
-  "converter-tools": { short: "CNV", tone: "bg-orange-100 text-orange-800" },
-  "internet-tools": { short: "WEB", tone: "bg-cyan-100 text-cyan-800" },
-  "education-tools": { short: "EDU", tone: "bg-lime-100 text-lime-800" },
+  "image-tools": { short: "IMG", tone: "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300" },
+  "pdf-tools": { short: "PDF", tone: "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300" },
+  "text-tools": { short: "TXT", tone: "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300" },
+  "developer-tools": { short: "DEV", tone: "bg-slate-200 text-slate-800 dark:bg-slate-700 dark:text-slate-300" },
+  "generator-tools": { short: "GEN", tone: "bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300" },
+  "calculator-tools": { short: "CAL", tone: "bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300" },
+  "converter-tools": { short: "CNV", tone: "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300" },
+  "internet-tools": { short: "WEB", tone: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300" },
+  "education-tools": { short: "EDU", tone: "bg-lime-100 text-lime-800 dark:bg-lime-900/40 dark:text-lime-300" },
 };
 
 interface ToolMeta {

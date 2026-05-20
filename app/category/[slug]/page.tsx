@@ -158,7 +158,7 @@ export default async function CategoryPage({
               </Link>
               <Link
                 href="#category-search"
-                className="mobile-category-action-link rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                className="mobile-category-action-link rounded-full border border-[color:var(--border)] bg-white px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)] dark:bg-slate-800 dark:border-slate-700/60"
               >
                 Search this category
               </Link>
@@ -166,7 +166,7 @@ export default async function CategoryPage({
                 <Link
                   key={tool.slug}
                   href={`/tools/${tool.slug}`}
-                  className="mobile-category-action-link rounded-full border border-[color:var(--border)] bg-white/92 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)]"
+                  className="mobile-category-action-link rounded-full border border-[color:var(--border)] bg-white/92 px-4 py-2 text-sm font-semibold text-[color:var(--foreground)] transition hover:border-[color:var(--primary)] dark:bg-slate-800 dark:border-slate-700/60"
                 >
                   {tool.name}
                 </Link>
@@ -186,7 +186,7 @@ export default async function CategoryPage({
                     <Link
                       key={tool.slug}
                       href={`/tools/${tool.slug}`}
-                      className="rounded-[1.25rem] border border-[color:var(--border)] bg-white/90 px-4 py-4 transition hover:border-[color:var(--primary)]"
+                      className="rounded-[1.25rem] border border-[color:var(--border)] bg-white/90 px-4 py-4 transition hover:border-[color:var(--primary)] dark:bg-slate-800/80 dark:border-slate-700/60"
                     >
                       <p className="text-sm font-bold tracking-tight text-[color:var(--foreground)]">{tool.name}</p>
                       <p className="mt-1 text-sm leading-6 text-[color:var(--muted)]">{tool.shortDescription}</p>

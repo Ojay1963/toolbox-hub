@@ -22,17 +22,17 @@
 /* Dark mode — toggled by adding .dark to <html> */
 html.dark {
   --background: #0f172a;
-  --foreground: #e2e8f0;
-  --surface: rgba(15, 23, 42, 0.85);
-  --surface-strong: rgba(15, 23, 42, 0.97);
-  --border: rgba(226, 232, 240, 0.1);
+  --foreground: #f1f5f9;
+  --surface: rgba(30, 41, 59, 0.92);
+  --surface-strong: rgba(30, 41, 59, 0.98);
+  --border: rgba(226, 232, 240, 0.14);
   --primary: #2dd4bf;
-  --primary-dark: #14b8a6;
+  --primary-dark: #5eead4;
   --accent: #f2b56b;
   --muted: #94a3b8;
   --soft: #1e3a3a;
   --surface-alt: #1e293b;
-  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.3);
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.4);
 }
 
 html.dark body {
@@ -41,7 +41,181 @@ html.dark body {
 }
 
 html.dark header {
-  background-color: rgba(15, 23, 42, 0.92);
+  background-color: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.08);
+}
+
+/* ── Dark mode global utility overrides ─────────────────────────────────────
+   These cover hardcoded Tailwind classes inside tool components and
+   third-party output areas without touching every individual file.
+   html.dark prefix gives higher specificity than the bare utility class.
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* Backgrounds */
+html.dark .bg-stone-50  { background-color: #1e293b; }
+html.dark .bg-stone-100 { background-color: #172032; }
+html.dark .bg-white\/80,
+html.dark .bg-white\/88,
+html.dark .bg-white\/90,
+html.dark .bg-white\/92,
+html.dark .bg-white\/95 { background-color: rgba(30, 41, 59, 0.97); }
+
+/* Success / emerald states (copy button, tool-rating, toasts, alerts) */
+html.dark .bg-emerald-50  { background-color: rgba(6, 78, 59, 0.25); }
+html.dark .bg-emerald-100 { background-color: rgba(6, 78, 59, 0.35); }
+html.dark .border-emerald-200 { border-color: rgba(52, 211, 153, 0.3); }
+html.dark .border-emerald-300 { border-color: rgba(52, 211, 153, 0.4); }
+html.dark .text-emerald-700 { color: #6ee7b7; }
+html.dark .text-emerald-800 { color: #34d399; }
+html.dark .hover\:bg-emerald-100:hover { background-color: rgba(6, 78, 59, 0.4); }
+
+/* Warning / amber states */
+html.dark .bg-amber-50  { background-color: rgba(120, 53, 15, 0.25); }
+html.dark .bg-amber-100 { background-color: rgba(120, 53, 15, 0.35); }
+html.dark .border-amber-200 { border-color: rgba(245, 158, 11, 0.3); }
+html.dark .text-amber-700 { color: #fcd34d; }
+html.dark .text-amber-800 { color: #fbbf24; }
+
+/* Error / rose states */
+html.dark .bg-rose-50  { background-color: rgba(136, 19, 55, 0.25); }
+html.dark .bg-rose-100 { background-color: rgba(136, 19, 55, 0.35); }
+html.dark .border-rose-200 { border-color: rgba(251, 113, 133, 0.3); }
+html.dark .text-rose-700 { color: #fda4af; }
+html.dark .text-rose-800 { color: #fb7185; }
+
+/* Blue info states */
+html.dark .bg-blue-50  { background-color: rgba(30, 58, 138, 0.25); }
+html.dark .bg-blue-100 { background-color: rgba(30, 58, 138, 0.35); }
+html.dark .border-blue-200 { border-color: rgba(96, 165, 250, 0.3); }
+html.dark .text-blue-700 { color: #93c5fd; }
+html.dark .text-blue-800 { color: #60a5fa; }
+
+/* Text colours */
+html.dark .text-slate-700 { color: #cbd5e1; }
+html.dark .text-slate-800 { color: #e2e8f0; }
+html.dark .text-slate-900 { color: #f1f5f9; }
+html.dark .text-gray-700  { color: #d1d5db; }
+html.dark .text-gray-800  { color: #e5e7eb; }
+html.dark .text-gray-900  { color: #f9fafb; }
+
+/* Borders */
+html.dark .border-slate-200 { border-color: rgba(226, 232, 240, 0.12); }
+html.dark .border-gray-200  { border-color: rgba(226, 232, 240, 0.12); }
+html.dark .border-gray-300  { border-color: rgba(226, 232, 240, 0.18); }
+
+/* Skeleton/pulse loaders */
+html.dark .animate-pulse { background-color: #1e293b; }
+
+/* Native input dark rendering */
+html.dark input,
+html.dark textarea,
+html.dark select {
+  color-scheme: dark;
+}
+
+/* Selection highlight */
+html.dark ::selection {
+  background-color: #2dd4bf;
+  color: #0f172a;
+}
+
+/* Placeholder text */
+html.dark ::placeholder {
+  color: #64748b;
+  opacity: 1;
+}
+
+/* Dark mode structural overrides */
+html.dark footer {
+  background: rgba(15, 23, 42, 0.98);
+  border-top-color: rgba(226, 232, 240, 0.08);
+}
+
+html.dark .site-card {
+  background: rgba(30, 41, 59, 0.97);
+  border-color: rgba(226, 232, 240, 0.1);
+}
+
+html.dark .site-feature-card {
+  background: rgba(30, 41, 59, 0.95);
+  border-color: rgba(226, 232, 240, 0.1);
+}
+
+/* Dark mode panel overrides */
+html.dark .app-panel {
+  border: 1px solid rgba(226, 232, 240, 0.1);
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.97), rgba(24, 33, 51, 0.92));
+}
+
+html.dark .app-panel-muted {
+  border: 1px solid rgba(226, 232, 240, 0.08);
+  background: linear-gradient(180deg, rgba(20, 29, 47, 0.95), rgba(15, 23, 42, 0.88));
+}
+
+/* Dark mode prose text */
+html.dark .prose-content p,
+html.dark .prose-content li {
+  color: #cbd5e1;
+}
+
+html.dark .prose-content h2,
+html.dark .prose-content h3 {
+  color: #f1f5f9;
+}
+
+/* Dark mode inputs and textareas globally */
+html.dark input[type="search"],
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="number"],
+html.dark input[type="password"],
+html.dark input[type="url"],
+html.dark input[type="date"],
+html.dark input[type="datetime-local"],
+html.dark select,
+html.dark textarea {
+  background: rgba(30, 41, 59, 0.95);
+  color: #f1f5f9;
+  border-color: rgba(226, 232, 240, 0.15);
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b;
+}
+
+/* Dark mode tool-app-shell file input */
+html.dark .tool-app-shell input[type="file"] {
+  background: rgba(30, 41, 59, 0.95);
+  color: #94a3b8;
+  border-color: rgba(226, 232, 240, 0.12);
+}
+
+/* Dark mode mobile UI */
+html.dark .mobile-app-status-bar {
+  border-color: rgba(226, 232, 240, 0.1);
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.98), rgba(24, 33, 51, 0.94));
+}
+
+html.dark .mobile-bottom-nav {
+  border-color: rgba(226, 232, 240, 0.1);
+  background: rgba(15, 23, 42, 0.97);
+  backdrop-filter: blur(20px);
+}
+
+html.dark .mobile-bottom-nav-item {
+  color: #64748b;
+}
+
+html.dark .mobile-bottom-nav-item-active {
+  background: linear-gradient(180deg, rgba(45, 212, 191, 0.14), rgba(45, 212, 191, 0.07));
+  color: #2dd4bf;
+}
+
+html.dark .mobile-app-shortcut {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(226, 232, 240, 0.1);
+  color: #cbd5e1;
 }
 
 @keyframes slideDown {

@@ -68,7 +68,7 @@ export function Header() {
                 src={siteMark}
                 alt="Toolbox Hub logo"
                 sizes="(max-width: 640px) 46px, 96px"
-                className="site-header-logo h-24 w-24 shrink-0 rounded-[1.35rem] border border-white/70 bg-white/90 object-contain p-2 shadow-[0_14px_30px_rgba(42,56,84,0.1)]"
+                className="site-header-logo h-24 w-24 shrink-0 rounded-[1.35rem] border border-white/70 bg-white/90 object-contain p-2 shadow-[0_14px_30px_rgba(42,56,84,0.1)] dark:border-slate-700 dark:bg-slate-800"
                 priority
               />
               <div className="min-w-0">
@@ -96,7 +96,7 @@ export function Header() {
                     aria-current={isActive ? "page" : undefined}
                     className={`transition ${
                       isActive
-                        ? "font-semibold text-emerald-700"
+                        ? "font-semibold text-emerald-700 dark:text-teal-400"
                         : "hover:text-[color:var(--primary)]"
                     }`}
                   >
@@ -115,8 +115,8 @@ export function Header() {
                 aria-current={isNavActive("/profile") ? "page" : undefined}
                 className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
                   isNavActive("/profile")
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : "border-[color:var(--border)] bg-white text-[color:var(--foreground)] hover:border-[color:var(--primary)]"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-teal-700/60 dark:bg-teal-900/30 dark:text-teal-300"
+                    : "border-[color:var(--border)] bg-white text-[color:var(--foreground)] hover:border-[color:var(--primary)] dark:bg-slate-800 dark:hover:border-teal-600"
                 }`}
               >
                 My Profile

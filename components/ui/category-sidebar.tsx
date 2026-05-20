@@ -43,7 +43,7 @@ export function CategorySidebar({
                 className={`mobile-category-chip flex min-w-0 flex-1 basis-[calc(50%-0.25rem)] items-center justify-center rounded-full px-4 py-2.5 text-center text-sm font-medium transition sm:basis-[calc(33.333%-0.35rem)] ${
                   isActive
                     ? "bg-[color:var(--primary)] text-white"
-                    : "border border-[color:var(--border)] bg-white/72 text-[color:var(--foreground)] hover:border-[color:var(--primary)]"
+                    : "border border-[color:var(--border)] bg-white/72 text-[color:var(--foreground)] hover:border-[color:var(--primary)] dark:bg-slate-800/80 dark:border-slate-700/60"
                 }`}
               >
                 {category.name}
@@ -71,7 +71,7 @@ export function CategorySidebar({
                   className={`block rounded-2xl px-4 py-3 text-sm font-medium transition ${
                     isActive
                       ? "bg-[color:var(--primary)] text-white shadow-sm"
-                      : "border border-[color:var(--border)] bg-white/72 text-[color:var(--foreground)] hover:border-[color:var(--primary)]"
+                      : "border border-[color:var(--border)] bg-white/72 text-[color:var(--foreground)] hover:border-[color:var(--primary)] dark:bg-slate-800/80 dark:border-slate-700/60"
                   }`}
                 >
                   {category.name}
