@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useDeferredValue, useId, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useId, useMemo, useRef, useState } from "react";
 import { categories, getCategory, type ToolDefinition } from "@/lib/tools";
 
 export function SearchBox({
@@ -88,10 +88,18 @@ export function SearchBox({
   }, [categoryFilter, deferredQuery, filteredTools, maxResults]);
   const instantSuggestions = matches.slice(0, 4);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToResults = () => {
     resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   };
+
+  useEffect(() => {
+    if (!sectionId) return;
+    if (window.location.hash === `#${sectionId}`) {
+      setTimeout(() => inputRef.current?.focus(), 120);
+    }
+  }, [sectionId]);
 
   const visibleSuggestions = suggestionList
     .map(normalizeEntry)
@@ -119,6 +127,7 @@ export function SearchBox({
       </label>
       <div className="mt-5 flex gap-2">
         <input
+          ref={inputRef}
           id={inputId}
           type="search"
           value={query}
@@ -126,6 +135,7 @@ export function SearchBox({
           onKeyDown={(e) => { if (e.key === "Enter") scrollToResults(); }}
           placeholder={placeholder}
           aria-describedby={`${inputId}-hint`}
+          data-search-input="true"
           className="mobile-search-input flex-1 rounded-[1.4rem] border border-[color:var(--border)] bg-white/95 px-4 py-3.5 text-base text-[color:var(--foreground)] outline-none transition focus:border-[color:var(--primary)] dark:bg-[#1e293b] sm:text-sm"
         />
         <button

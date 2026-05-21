@@ -310,7 +310,7 @@ export default function HomePage() {
         />
       </section>
 
-      <section id="search-tools" className="mt-10">
+      <section className="mt-10">
         <SearchBox
           tools={publicTools}
           title="Search tools with instant suggestions"
@@ -319,6 +319,7 @@ export default function HomePage() {
           maxResults={8}
           suggestedTools={suggestedTools}
           showCategoryFilter
+          sectionId="search-tools"
         />
       </section>
 

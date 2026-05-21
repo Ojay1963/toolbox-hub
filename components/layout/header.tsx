@@ -2,14 +2,25 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import siteMark from "@/components/images/Tools-hub-favicorn.png";
 import { DarkModeToggle } from "@/components/engagement/dark-mode-toggle";
 import { FavouritesCount } from "@/components/engagement/favourite-button";
 import { StreakBadge } from "@/components/engagement/streak-widget";
 
+function focusSearch(e: React.MouseEvent) {
+  const section = document.getElementById("search-tools");
+  if (section) {
+    e.preventDefault();
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+    const input = document.querySelector<HTMLInputElement>("[data-search-input]");
+    input?.focus();
+  }
+}
+
 export function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const mobilePrimaryNav = [
     { href: "/", label: "Home" },
     { href: "/tools", label: "Tools" },
@@ -141,6 +152,10 @@ export function Header() {
                   prefetch={false}
                   className="mobile-app-search-button"
                   aria-label="Open tool search from the homepage"
+                  onClick={(e) => {
+                    if (pathname === "/") focusSearch(e);
+                    else router.push("/#search-tools");
+                  }}
                 >
                   Search
                 </Link>
@@ -183,6 +198,10 @@ export function Header() {
               prefetch={item.href === "/" || item.href === "/tools" ? undefined : false}
               className={`mobile-bottom-nav-item ${isActive ? "mobile-bottom-nav-item-active" : ""}`}
               aria-current={isActive ? "page" : undefined}
+              onClick={item.icon === "search" ? (e) => {
+                if (pathname === "/") focusSearch(e);
+                else router.push("/#search-tools");
+              } : undefined}
             >
               <span className="mobile-bottom-nav-icon" aria-hidden="true">
                 {item.icon === "home" ? (
