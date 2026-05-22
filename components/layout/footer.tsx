@@ -24,7 +24,7 @@ export function Footer() {
           <div className="site-header-brand flex items-center gap-3">
             <Image
               src={siteMark}
-              alt="Toolbox Hub logo"
+              alt="Toolbox Hub — Free Online Tools"
               sizes="64px"
               className="site-header-logo h-16 w-16 shrink-0 rounded-[1.15rem] border border-white/70 bg-white/90 object-contain p-2 shadow-[0_14px_30px_rgba(42,56,84,0.1)] dark:border-slate-700 dark:bg-slate-800"
             />
@@ -101,7 +101,7 @@ export function Footer() {
       </div>
       <div className="border-t border-[color:var(--border)]/80">
         <div className="site-footer-bottom mx-auto flex max-w-7xl flex-col gap-2 px-4 py-4 text-sm text-[color:var(--muted)] sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <p>{currentYear} Toolbox Hub. Free online tools with clear help and public site pages.</p>
+          <p>© {currentYear} Toolbox Hub — Free Online Tools. Clear help pages and public site information for everyday digital tasks.</p>
           <div className="flex flex-wrap gap-4">
             <Link href="/contact" prefetch={false} className="transition hover:text-[color:var(--primary)]">
               Contact

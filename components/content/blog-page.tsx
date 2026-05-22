@@ -8,16 +8,25 @@ import type { ToolDefinition } from "@/lib/tools";
 export function BlogPage({
   article,
   relatedTools,
+  readingTimeMinutes,
 }: {
   article: BlogArticle;
   relatedTools: ToolDefinition[];
+  readingTimeMinutes?: number;
 }) {
   return (
     <div className="site-shell mx-auto max-w-4xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <section className="site-hero rounded-[2rem] border border-[color:var(--border)] bg-[color:var(--surface-strong)] p-7 shadow-sm sm:p-10">
-        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[color:var(--primary-dark)]">
-          Guides
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[color:var(--primary-dark)]">
+            Guides
+          </p>
+          {readingTimeMinutes ? (
+            <span className="rounded-full border border-[color:var(--border)] bg-[color:var(--surface-alt)] px-3 py-1 text-xs font-semibold text-[color:var(--muted)]">
+              ~{readingTimeMinutes} min read
+            </span>
+          ) : null}
+        </div>
         <h1 className="site-hero-title mt-4 text-4xl font-black tracking-tight sm:text-5xl">{article.h1}</h1>
         <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">{article.intro}</p>
       </section>

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogPage } from "@/components/content/blog-page";
-import { buildBreadcrumbJsonLd, buildFaqJsonLd, buildHowToJsonLd, buildMetadata } from "@/lib/seo";
+import { buildArticleJsonLd, buildBreadcrumbJsonLd, buildFaqJsonLd, buildHowToJsonLd, buildMetadata } from "@/lib/seo";
 import { blogArticles, getBlogArticle, getBlogRelatedTools } from "@/lib/blog";
 
 export function generateStaticParams() {
@@ -39,6 +39,9 @@ export default async function BlogArticlePage({
   }
 
   const relatedTools = getBlogRelatedTools(article.relatedToolSlugs);
+  const readingTimeMinutes = Math.max(2, Math.round(article.sections.length * 1.5));
+  const publishedAt = process.env.NEXT_PUBLIC_CONTENT_LASTMOD ?? "2026-05-01";
+
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Home", pathname: "/" },
     { name: "Guides", pathname: "/blog" },
@@ -46,6 +49,12 @@ export default async function BlogArticlePage({
   ]);
   const faqJsonLd = buildFaqJsonLd(article.faq);
   const howToJsonLd = buildHowToJsonLd(article.title, article.description, article.sections.map((section) => section.title), `/blog/${article.slug}`);
+  const articleJsonLd = buildArticleJsonLd({
+    headline: article.h1 || article.title,
+    description: article.description,
+    pathname: `/blog/${article.slug}`,
+    publishedAt,
+  });
 
   return (
     <>
@@ -61,7 +70,11 @@ export default async function BlogArticlePage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }}
       />
-      <BlogPage article={article} relatedTools={relatedTools} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <BlogPage article={article} relatedTools={relatedTools} readingTimeMinutes={readingTimeMinutes} />
     </>
   );
 }

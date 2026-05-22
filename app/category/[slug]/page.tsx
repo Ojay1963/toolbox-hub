@@ -22,6 +22,58 @@ import {
   shouldIndexTool,
 } from "@/lib/tools";
 
+const categoryPageTitles: Record<string, string> = {
+  "image-tools": "Free Image Tools — Compress, Resize, Convert & Edit Images Online | Toolbox Hub",
+  "pdf-tools": "Free PDF Tools — Merge, Split, Convert & Compress PDFs Online | Toolbox Hub",
+  "text-tools": "Free Text Tools — Word Counter, Formatter, Sorter & More | Toolbox Hub",
+  "developer-tools": "Free Developer Tools — JSON Formatter, Base64 Encoder & More | Toolbox Hub",
+  "generator-tools": "Free Generator Tools — QR Code, Password, UUID & More | Toolbox Hub",
+  "calculator-tools": "Free Calculator Tools — Loan, GPA, Percentage & More | Toolbox Hub",
+  "converter-tools": "Free Converter Tools — Unit, Currency & File Converter Online | Toolbox Hub",
+  "internet-tools": "Free Internet Tools — DNS Lookup, Speed Test & More | Toolbox Hub",
+};
+
+const categoryPageDescriptions: Record<string, string> = {
+  "image-tools": "Free online image tools for compressing, resizing, cropping, converting, and editing images in your browser. No signup required. Compress JPG, resize PNG, remove backgrounds, make GIFs, and more.",
+  "pdf-tools": "Free online PDF tools to merge, split, compress, convert, and edit PDF files instantly in your browser. No signup required. Merge PDFs, convert to Word, compress large files, and extract pages.",
+  "text-tools": "Free online text tools for word counting, character counting, case conversion, sorting lines, and formatting text. No signup required. Work with written content faster in your browser.",
+  "developer-tools": "Free online developer tools for formatting JSON, encoding Base64, hashing files, validating regex, and more. No signup required. Fast browser-based utilities for everyday development tasks.",
+  "generator-tools": "Free online generator tools for QR codes, passwords, UUIDs, random usernames, placeholder text, and more. No signup required. Generate useful values instantly in your browser.",
+  "calculator-tools": "Free online calculators for loans, GPA, percentages, BMI, age, dates, and everyday math. No signup required. Get instant results in your browser for personal finance, school, and planning.",
+  "converter-tools": "Free online converter tools for units, currencies, temperatures, timestamps, and file formats. No signup required. Convert between common values quickly in your browser.",
+  "internet-tools": "Free online internet tools for DNS lookups, website speed tests, mobile-friendly checks, and URL inspections. No signup required. Run quick web checks in your browser.",
+};
+
+const categoryActionH1s: Record<string, string> = {
+  "image-tools": "Free Image Tools — Compress, Resize, Convert and Edit Images Online",
+  "pdf-tools": "Free PDF Tools — Merge, Split, Convert and Compress PDFs Online",
+  "text-tools": "Free Text Tools — Word Counter, Formatter, Sorter and More",
+  "developer-tools": "Free Developer Tools — JSON Formatter, Base64 Encoder and More",
+  "generator-tools": "Free Generator Tools — QR Code, Password, UUID and More",
+  "calculator-tools": "Free Calculator Tools — Loan Calculator, GPA, Percentage and More",
+  "converter-tools": "Free Converter Tools — Unit, Currency and File Converter Online",
+  "internet-tools": "Free Internet Tools — DNS Lookup, Speed Test and More",
+};
+
+const categoryIntros: Record<string, string> = {
+  "image-tools":
+    "Toolbox Hub image tools cover every common image editing task from a single free directory. Compress JPGs and PNGs before uploading them to a website, resize photos to match a template or profile size, crop portraits to remove distracting edges, convert between JPG, PNG, and WebP for the format that fits your workflow, and use tools like the background remover, watermark tool, and GIF maker for more specialised jobs. Every image tool runs in your browser with no signup required, so you can complete a quick edit without installing software or creating an account. Browse the full list below and use the search box to narrow results to the specific task you need.",
+  "pdf-tools":
+    "Toolbox Hub PDF tools give you a fast and free way to handle the most common PDF editing tasks in the browser. Merge multiple PDF files into one document for cleaner sharing, split a long file into smaller sections, compress a PDF that is too large to email, convert between PDF and Word for editing, and extract or rebuild pages with the JPG conversion tools. Each tool runs in your browser without requiring an account or installation. Whether you need to prepare a file for a client, combine pages for a report, or reduce a scan for an upload limit, the tools below cover the standard PDF workflows people reach for most often.",
+  "text-tools":
+    "Toolbox Hub text tools are built for writers, students, developers, and anyone who works with written content and needs a fast browser-based result. Count words and characters, check reading time, convert text between cases, sort or deduplicate lines, remove extra whitespace, and perform other quick text edits without copying content into a heavy application. Every tool runs in your browser with no account required. Whether you are preparing blog copy, cleaning up a data export, checking an assignment word count, or formatting a list for a project, the text tools below cover the common tasks that come up most often in everyday writing and editing workflows.",
+  "developer-tools":
+    "Toolbox Hub developer tools are designed for quick browser-based tasks that developers, designers, and technical users hit regularly. Format and validate JSON with clear error messages, encode and decode Base64 strings, convert between color formats, check regular expressions, hash files, inspect MIME types, and work through a range of other lightweight utility tasks without leaving the browser or installing a separate app. Every tool runs client-side where possible and does not require a login. Use these tools for fast formatting during development, quick conversions during debugging, or lightweight checks when you need a clean result before moving on to the next task.",
+  "generator-tools":
+    "Toolbox Hub generator tools let you create passwords, QR codes, UUIDs, random usernames, placeholder text, random colors, and more — all in a free browser-based workflow with no signup required. Generators are useful when you need a specific value quickly without writing code or opening a heavier tool. Generate a strong password for a new account, create a QR code for a URL or contact card, build a unique identifier for a project, or grab random placeholder names and colors for a design mockup. Every generator page explains the output format clearly and lets you copy or download the result immediately. Browse the full list below or search the category to find the specific generator you need.",
+  "calculator-tools":
+    "Toolbox Hub calculator tools cover the common financial, health, educational, and date-based calculations that come up in everyday planning. Calculate loan payments and total interest for a mortgage or car purchase, check a GPA for a school term, find percentages for a tip or discount, estimate a BMI, plan around dates with an age calculator, and work through other standard number tasks without installing anything. Each calculator runs in your browser with no account required. Whether you need a quick answer for a purchase decision, a school assignment, or a personal finance check, the tools below give you clear results with explanations of what the numbers mean.",
+  "converter-tools":
+    "Toolbox Hub converter tools make it fast to switch between units, formats, and values in a free browser-based workflow. Convert length, weight, temperature, area, and speed between metric and imperial units, switch between currencies, change timestamps and time zones, and handle other common conversions without downloading a separate app. Every converter runs in your browser with no signup required so you can get a result immediately. Whether you are checking a recipe measurement, planning an international trip, working on a technical document, or switching between file formats, the tools below cover the most frequently needed conversions in one accessible directory.",
+  "internet-tools":
+    "Toolbox Hub internet tools help you check, test, and inspect web-related details directly from your browser. Look up DNS records for a domain, test a website's speed and performance, check whether a site is mobile-friendly, inspect URL redirect chains, verify SSL details, and run other lightweight web checks that come up in site management, development, and technical troubleshooting. Each tool is free to use and does not require an account. Whether you are diagnosing a domain issue, preparing a site for launch, checking a live URL, or testing basic web performance, the tools below cover the standard internet checks that developers and site owners need most often.",
+};
+
 const SearchBox = dynamic(() => import("@/components/ui/search-box").then((module) => module.SearchBox));
 const CategoryDirectory = dynamic(() => import("@/components/ui/category-directory").then((module) => module.CategoryDirectory));
 
@@ -41,15 +93,20 @@ export async function generateMetadata({
   }
   const categoryTools = getToolsByCategory(category.slug).filter((tool) => shouldIndexTool(tool));
 
+  const pageTitle = categoryPageTitles[category.slug] ?? `${category.title} — Free Online Tools | Toolbox Hub`;
+  const pageDescription = categoryPageDescriptions[category.slug]
+    ?? `${category.description} Browse clear how-to steps, FAQs, and related links for tools in this category.`;
+
   return buildMetadata({
-    title: `${category.title} - Free Online Tools`,
-    description: `${category.description} Browse clear how-to steps, FAQs, and related links for tools in this category.`,
+    title: pageTitle,
+    description: pageDescription,
     pathname: `/category/${category.slug}`,
     keywords: [
       category.name,
       category.title,
       "free online tools",
-      "browser tools",
+      "no signup required",
+      "browser-based tools",
       ...categoryTools.slice(0, 5).map((tool) => tool.name),
     ],
   });
@@ -141,13 +198,10 @@ export default async function CategoryPage({
               {category.name}
             </p>
             <h1 className="mobile-category-title mt-3 text-4xl font-black tracking-tight sm:text-5xl">
-              {category.title}
+              {categoryActionH1s[category.slug] ?? category.title}
             </h1>
             <p className="mt-4 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
-              {category.hero}
-            </p>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-[color:var(--muted)]">
-              {category.description}
+              {categoryIntros[category.slug] ?? category.hero}
             </p>
             <div className="mobile-category-actions mt-6 flex flex-wrap gap-3">
               <Link

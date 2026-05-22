@@ -303,6 +303,47 @@ export function buildWebsiteJsonLd() {
   };
 }
 
+export function buildArticleJsonLd({
+  headline,
+  description,
+  pathname,
+  publishedAt,
+}: {
+  headline: string;
+  description: string;
+  pathname: string;
+  publishedAt?: string;
+}) {
+  const url = absoluteUrl(pathname);
+  const imageUrl = absoluteUrl(siteMetadata.socialImagePath);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline,
+    description,
+    url,
+    image: imageUrl,
+    author: {
+      "@type": "Organization",
+      name: siteMetadata.name,
+      url: siteMetadata.siteUrl,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: siteMetadata.name,
+      url: siteMetadata.siteUrl,
+      logo: {
+        "@type": "ImageObject",
+        url: imageUrl,
+        width: 512,
+        height: 512,
+      },
+    },
+    ...(publishedAt ? { datePublished: publishedAt, dateModified: publishedAt } : {}),
+  };
+}
+
 export function buildOrganizationJsonLd() {
   return {
     "@context": "https://schema.org",

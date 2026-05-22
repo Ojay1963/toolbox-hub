@@ -81,17 +81,19 @@ function getTrustHighlights(toolCount: number) {
 }
 
 export const metadata = buildMetadata({
-  title: "Fast Free Online Tools That Work Instantly",
+  title: "Fast Free Online Tools That Work Instantly — No Signup | Toolbox Hub",
   description:
-    "Compress images, merge PDFs, format JSON, generate QR codes, calculate values, convert files, and more directly in your browser with no signup required.",
+    "Free online tools for images, PDFs, text, developers, generators, calculators, and converters. Browser-based, no signup required, and instant results every time.",
   pathname: "/",
   keywords: [
-    "fast free online tools",
-    "browser tools",
-    "image tools",
-    "pdf tools",
-    "developer tools",
-    "calculator tools",
+    "free online tools",
+    "browser-based tools",
+    "no signup required",
+    "compress images online",
+    "merge pdf files",
+    "json formatter",
+    "qr code generator",
+    "fast online tools",
   ],
 });
 
@@ -174,11 +176,17 @@ export default function HomePage() {
             Free online tools
           </p>
           <h1 className="site-hero-title mt-4 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-            Fast Free Online Tools That Work Instantly
+            Fast Free Online Tools — No Signup Required
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
-            Compress images, merge PDFs, format JSON, generate QR codes, calculate values, convert files, and more
-            {" "}directly in your browser with no signup required.
+            Toolbox Hub is a collection of free online tools built for everyday browser-based tasks — no signup
+            required, no software to install. Whether you need to compress images before a blog post, merge PDF files
+            for a document workflow, format JSON for a development task, or generate a QR code for a link or contact
+            card, every tool opens instantly in your browser and delivers a result in seconds. The directory spans
+            image editing, PDF editing, text tools, developer utilities, generators, calculators, converters, and
+            internet tools. Each page explains what the tool does, includes step-by-step instructions, and links to
+            related tools so you can keep moving without returning to a search engine. No account wall, no
+            dashboard — just a clean, fast, browser-first workflow for the tasks that come up most often.
           </p>
           <div className="site-inline-links mt-8 flex flex-col gap-3 sm:flex-row">
             <Link

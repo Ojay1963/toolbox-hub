@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AnalyticsHook } from "@/components/monitoring/analytics-hook";
 import { EngagementProvider } from "@/components/engagement/engagement-provider";
-import { FAB } from "@/components/engagement/fab";
-import { KeyboardShortcuts } from "@/components/engagement/keyboard-shortcuts";
-import { ToastContainer } from "@/components/engagement/toast-container";
+import { LazyEngagementOverlays } from "@/components/engagement/lazy-engagement-overlays";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
 import { buildOrganizationJsonLd, buildWebsiteJsonLd, siteMetadata } from "@/lib/seo";
@@ -26,6 +24,9 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "/",
+    languages: {
+      en: siteMetadata.siteUrl,
+    },
   },
   openGraph: {
     type: "website",
@@ -82,9 +83,7 @@ export default function RootLayout({
             </main>
             <Footer />
           </div>
-          <ToastContainer />
-          <FAB />
-          <KeyboardShortcuts />
+          <LazyEngagementOverlays />
         </EngagementProvider>
       </body>
     </html>
