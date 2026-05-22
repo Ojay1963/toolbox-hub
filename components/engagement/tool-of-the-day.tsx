@@ -57,8 +57,8 @@ export function ToolOfTheDay({ tool }: { tool: ToolMeta }) {
           className="mt-6 inline-flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-bold text-white transition"
           style={{
             background: "linear-gradient(135deg, var(--primary), var(--primary-dark))",
-            boxShadow: "0 0 0 0 color-mix(in srgb, var(--primary) 40%, transparent)",
             animation: "glowPulse 2.4s ease-in-out infinite",
+            willChange: "transform, opacity",
           }}
         >
           Try Today&apos;s Tool →

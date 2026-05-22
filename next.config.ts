@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     // Let Next.js rewrite package imports more aggressively where supported.
-    optimizePackageImports: ["pdf-lib", "qrcode", "docx", "mammoth"],
+    optimizePackageImports: ["pdf-lib", "qrcode", "docx", "mammoth", "framer-motion", "gifenc"],
   },
 };
 

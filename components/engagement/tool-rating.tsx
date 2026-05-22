@@ -21,7 +21,6 @@ export function ToolRating({ slug }: { slug: string }) {
 
   const handleFeedback = () => {
     if (feedback.trim()) {
-      console.log(`[Toolbox Hub feedback] ${slug}:`, feedback.trim());
       setFeedbackSent(true);
     }
   };

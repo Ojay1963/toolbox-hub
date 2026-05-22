@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import siteMark from "@/components/images/Tools-hub-favicorn.png";
+import siteMark from "@/components/images/Tools-hub-favicorn.webp";
 import { getPublicContactEmail } from "@/lib/seo";
 import { discoveryCategories, getDiscoverySuggestedEntries } from "@/lib/tool-discovery";
 
@@ -25,6 +25,8 @@ export function Footer() {
             <Image
               src={siteMark}
               alt="Toolbox Hub — Free Online Tools"
+              width={64}
+              height={64}
               sizes="64px"
               className="site-header-logo h-16 w-16 shrink-0 rounded-[1.15rem] border border-white/70 bg-white/90 object-contain p-2 shadow-[0_14px_30px_rgba(42,56,84,0.1)] dark:border-slate-700 dark:bg-slate-800"
             />

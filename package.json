@@ -36,8 +36,10 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "eslint": "^10.0.3",
+    "glob": "^13.0.6",
     "globals": "^17.4.0",
     "playwright-core": "^1.59.1",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.1"

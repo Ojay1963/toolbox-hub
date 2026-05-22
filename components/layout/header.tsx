@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import siteMark from "@/components/images/Tools-hub-favicorn.png";
+import siteMark from "@/components/images/Tools-hub-favicorn.webp";
 import { DarkModeToggle } from "@/components/engagement/dark-mode-toggle";
 import { FavouritesCount } from "@/components/engagement/favourite-button";
 import { StreakBadge } from "@/components/engagement/streak-widget";
@@ -78,6 +78,8 @@ export function Header() {
               <Image
                 src={siteMark}
                 alt="Toolbox Hub logo"
+                width={96}
+                height={96}
                 sizes="(max-width: 640px) 46px, 96px"
                 className="site-header-logo h-24 w-24 shrink-0 rounded-[1.35rem] border border-white/70 bg-white/90 object-contain p-2 shadow-[0_14px_30px_rgba(42,56,84,0.1)] dark:border-slate-700 dark:bg-slate-800"
                 priority
