@@ -1547,6 +1547,152 @@ export const blogArticles: BlogArticle[] = [
     ],
     relatedToolSlugs: ["json-formatter", "markdown-editor", "text-compare-tool", "uuid-generator", "url-encoder"],
   },
+  {
+    slug: "png-vs-jpg",
+    title: "PNG vs JPG: Which Format Should You Use?",
+    description: "PNG preserves quality and supports transparency; JPG compresses photos to smaller sizes. Learn when to choose each format and how to convert between them free.",
+    h1: "PNG vs JPG: Which Image Format Should You Use?",
+    intro: "Choosing between PNG and JPG is one of the most common image decisions designers, developers, and everyday users face. Pick the wrong format and you either end up with a bloated file that slows your page down, or a compressed image that looks blurry and unprofessional. This guide explains exactly what each format does, where it excels, and how to make the right call every time — with a quick comparison table and free tools to convert between formats in seconds.",
+    primaryKeyword: "png vs jpg",
+    sections: [
+      {
+        title: "PNG vs JPG at a Glance",
+        content: (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-[color:var(--border)] text-left">
+                  <th className="py-2 pr-4 font-semibold">Feature</th>
+                  <th className="py-2 pr-4 font-semibold">PNG</th>
+                  <th className="py-2 font-semibold">JPG</th>
+                </tr>
+              </thead>
+              <tbody className="text-[color:var(--muted)]">
+                <tr className="border-b border-[color:var(--border)]">
+                  <td className="py-2 pr-4 font-medium text-[color:var(--foreground)]">Compression</td>
+                  <td className="py-2 pr-4">Lossless</td>
+                  <td className="py-2">Lossy</td>
+                </tr>
+                <tr className="border-b border-[color:var(--border)]">
+                  <td className="py-2 pr-4 font-medium text-[color:var(--foreground)]">Transparency</td>
+                  <td className="py-2 pr-4">Yes (alpha channel)</td>
+                  <td className="py-2">No</td>
+                </tr>
+                <tr className="border-b border-[color:var(--border)]">
+                  <td className="py-2 pr-4 font-medium text-[color:var(--foreground)]">File size</td>
+                  <td className="py-2 pr-4">Larger</td>
+                  <td className="py-2">Smaller</td>
+                </tr>
+                <tr className="border-b border-[color:var(--border)]">
+                  <td className="py-2 pr-4 font-medium text-[color:var(--foreground)]">Best for</td>
+                  <td className="py-2 pr-4">Logos, screenshots, graphics</td>
+                  <td className="py-2">Photos, banners, social media</td>
+                </tr>
+                <tr className="border-b border-[color:var(--border)]">
+                  <td className="py-2 pr-4 font-medium text-[color:var(--foreground)]">Quality loss on save</td>
+                  <td className="py-2 pr-4">None</td>
+                  <td className="py-2">Yes (each save degrades)</td>
+                </tr>
+                <tr>
+                  <td className="py-2 pr-4 font-medium text-[color:var(--foreground)]">Browser support</td>
+                  <td className="py-2 pr-4">Universal</td>
+                  <td className="py-2">Universal</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        ),
+      },
+      {
+        title: "When to Use PNG",
+        content: (
+          <div className="space-y-4 text-[color:var(--muted)]">
+            <p>PNG (Portable Network Graphics) uses lossless compression, which means the image data is preserved perfectly no matter how many times you save the file. This makes it the right choice whenever image quality cannot be sacrificed.</p>
+            <p><strong className="text-[color:var(--foreground)]">Use PNG when your image has transparency.</strong> Logos placed on coloured backgrounds, icons with transparent areas, and product images that need to sit on different page colours all require the alpha channel that only PNG supports. JPG always fills transparent areas with white or black, which ruins the effect.</p>
+            <p><strong className="text-[color:var(--foreground)]">Use PNG for screenshots and graphics with text.</strong> Lossless compression keeps edges razor-sharp. JPG compression introduces blurry artefacts around high-contrast edges — letters, icons, and line art look noticeably worse.</p>
+            <p><strong className="text-[color:var(--foreground)]">Use PNG for source files.</strong> If you are exporting a finished design or creating an image you will edit further, PNG preserves every pixel. Saving a JPG repeatedly causes quality to degrade with each cycle.</p>
+            <p>The trade-off is file size. A PNG of a photograph can be three to five times larger than the same image saved as JPG at high quality. For photographs on the web, that size penalty usually outweighs the quality benefit.</p>
+          </div>
+        ),
+      },
+      {
+        title: "When to Use JPG",
+        content: (
+          <div className="space-y-4 text-[color:var(--muted)]">
+            <p>JPG (or JPEG) uses lossy compression to discard image data that the human eye is unlikely to notice. The result is dramatically smaller file sizes — typically 60–80% smaller than the equivalent PNG — making JPG the dominant format for photographs on the web.</p>
+            <p><strong className="text-[color:var(--foreground)]">Use JPG for photographs.</strong> Camera shots, product photos, blog hero images, and social media banners all work better as JPG. A high-quality JPG at 80–85% compression looks nearly identical to the original and loads in a fraction of the time.</p>
+            <p><strong className="text-[color:var(--foreground)]">Use JPG when file size matters most.</strong> Email attachments, WhatsApp image shares, passport photo uploads, and slow-connection users all benefit from smaller JPG files. Many upload forms (JAMB, visa applications, university portals) set maximum file size limits that only JPG realistically meets.</p>
+            <p><strong className="text-[color:var(--foreground)]">Avoid re-saving JPGs repeatedly.</strong> Every time you open and save a JPG, the compression runs again and discards more data. For images you edit regularly, work in PNG and export to JPG only for the final published version.</p>
+            <p>JPG does not support transparency. Any transparent area is filled with a solid colour when the image is saved, so for logos or overlays, PNG remains the correct choice.</p>
+          </div>
+        ),
+      },
+      {
+        title: "How to Choose: A Simple Decision Guide",
+        content: (
+          <div className="space-y-4 text-[color:var(--muted)]">
+            <p>If you are unsure which format to use, answer these three questions:</p>
+            <ol className="list-decimal space-y-3 pl-5">
+              <li><strong className="text-[color:var(--foreground)]">Does the image need a transparent background?</strong> If yes, use PNG. JPG cannot do this.</li>
+              <li><strong className="text-[color:var(--foreground)]">Is the image a photograph or a graphic?</strong> Photographs compress well as JPG. Logos, icons, and text-heavy graphics preserve better as PNG.</li>
+              <li><strong className="text-[color:var(--foreground)]">Is file size a constraint?</strong> If the file must be under a specific size limit (20 KB, 50 KB, 200 KB), JPG with adjusted quality is almost always your route. Use the{" "}
+                <Link href="/tools/image-compressor" className="font-semibold text-[color:var(--primary)] hover:underline underline-offset-4">free image compressor</Link>{" "}
+                to reduce size without switching formats when possible.</li>
+            </ol>
+            <p>For the web in 2026, WebP is often the best choice for both use cases — it supports transparency like PNG and achieves smaller files than JPG. Toolbox Hub&apos;s{" "}
+              <Link href="/tools/image-to-webp-converter" className="font-semibold text-[color:var(--primary)] hover:underline underline-offset-4">image to WebP converter</Link>{" "}
+              handles this conversion free in your browser.</p>
+          </div>
+        ),
+      },
+      {
+        title: "Convert Between PNG and JPG Free",
+        content: (
+          <div className="space-y-4 text-[color:var(--muted)]">
+            <p>Need to switch formats? Toolbox Hub has free browser-based converters for both directions — no signup, no install, no upload limits:</p>
+            <ul className="list-disc space-y-2 pl-5">
+              <li>
+                <Link href="/tools/jpg-to-png-converter" className="font-semibold text-[color:var(--primary)] hover:underline underline-offset-4">JPG to PNG converter</Link>
+                {" "}— convert JPG files to transparent-background PNG instantly
+              </li>
+              <li>
+                <Link href="/tools/png-to-jpg-converter" className="font-semibold text-[color:var(--primary)] hover:underline underline-offset-4">PNG to JPG converter</Link>
+                {" "}— flatten PNG to JPG and reduce file size for sharing
+              </li>
+              <li>
+                <Link href="/tools/image-to-webp-converter" className="font-semibold text-[color:var(--primary)] hover:underline underline-offset-4">Image to WebP converter</Link>
+                {" "}— convert PNG or JPG to the modern WebP format
+              </li>
+              <li>
+                <Link href="/tools/image-format-converter" className="font-semibold text-[color:var(--primary)] hover:underline underline-offset-4">Image format converter</Link>
+                {" "}— convert between PNG, JPG, WebP, and more in one tool
+              </li>
+            </ul>
+            <p>All tools run in your browser — your images are never uploaded to a server or stored after conversion.</p>
+          </div>
+        ),
+      },
+    ],
+    faq: [
+      {
+        question: "Is PNG or JPG better for websites?",
+        answer: "JPG is better for photographs because it produces smaller files that load faster. PNG is better for logos, icons, and images that need transparent backgrounds. For the best of both worlds, consider converting images to WebP, which supports transparency and achieves smaller sizes than either PNG or JPG.",
+      },
+      {
+        question: "Does converting JPG to PNG improve quality?",
+        answer: "No. Converting JPG to PNG does not recover lost quality. Once JPG compression has removed image data, it cannot be restored. The PNG version will simply be a larger file of the same quality. If you need the highest quality, always start from the original uncompressed source.",
+      },
+      {
+        question: "Why do my PNG logos look blurry in some places?",
+        answer: "This usually happens when a PNG is resized in a browser or editor that does not apply high-quality scaling. Export the logo at its intended display size, or use SVG format for logos that need to scale to any size without loss of quality.",
+      },
+      {
+        question: "Can I use JPG for images with transparent backgrounds?",
+        answer: "No. JPG does not support transparency. Any transparent area is filled with a solid colour (usually white or black) when the image is saved as JPG. Use PNG or WebP if your image needs a transparent background.",
+      },
+    ],
+    relatedToolSlugs: ["image-compressor", "jpg-to-png-converter", "png-to-jpg-converter", "image-to-webp-converter", "image-format-converter"],
+  },
 ];
 
 export function getBlogArticle(slug: string) {

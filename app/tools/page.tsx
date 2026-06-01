@@ -15,10 +15,10 @@ const SearchBox = dynamic(() => import("@/components/ui/search-box").then((modul
 const CategoryDirectory = dynamic(() => import("@/components/ui/category-directory").then((module) => module.CategoryDirectory));
 
 export const metadata = buildMetadata({
-  title: "Free Online Tools Directory",
-  description: "Browse a free online tools directory for images, PDFs, text, developer workflows, generators, calculators, converters, and more.",
+  title: "242+ Free Online Tools — No Signup, Instant Results",
+  description: "Browse 242+ free browser-based tools for images, PDFs, text, developers, and more. No account, no install — open any tool and start in seconds.",
   pathname: "/tools",
-  keywords: ["free online tools directory", "tools directory", "browse free online tools", "online tools"],
+  keywords: ["free online tools", "free online tools directory", "browser-based tools", "image tools online", "pdf tools online", "developer tools online", "no signup tools"],
 });
 
 export default function ToolsPage() {
@@ -95,9 +95,9 @@ export default function ToolsPage() {
         <p className="text-sm font-semibold uppercase tracking-[0.25em] text-[color:var(--primary-dark)]">
           Tools
         </p>
-        <h1 className="site-hero-title mt-4 text-4xl font-black tracking-tight sm:text-5xl">Browse free online tools</h1>
+        <h1 className="site-hero-title mt-4 text-4xl font-black tracking-tight sm:text-5xl">242+ Free Online Tools — No Signup Required</h1>
         <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
-          Find tools for images, PDFs, text, developer workflows, generators, calculators, converters, and more.
+          Toolbox Hub collects 242+ browser-based tools across nine categories so you can get things done without installing software or creating an account. Image tools handle compression, resizing, background removal, format conversion, and more — open any image tool and your result is ready in seconds. PDF tools cover merging, splitting, compressing, and converting, all free. Developer tools include a JSON formatter, Base64 encoder, regex tester, and colour picker. Calculators, text utilities, generators, converters, and education tools round out the directory. Every free online tool works directly in your browser: upload a file or paste your content, click run, and download your output. No signup, no subscription, no friction.
         </p>
         <div className="mt-8 max-w-4xl">
           <SearchBox

@@ -54,6 +54,7 @@ export default async function BlogArticlePage({
     description: article.description,
     pathname: `/blog/${article.slug}`,
     publishedAt,
+    readingTimeMinutes,
   });
 
   return (

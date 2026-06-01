@@ -308,11 +308,13 @@ export function buildArticleJsonLd({
   description,
   pathname,
   publishedAt,
+  readingTimeMinutes,
 }: {
   headline: string;
   description: string;
   pathname: string;
   publishedAt?: string;
+  readingTimeMinutes?: number;
 }) {
   const url = absoluteUrl(pathname);
   const imageUrl = absoluteUrl(siteMetadata.socialImagePath);
@@ -320,14 +322,16 @@ export function buildArticleJsonLd({
   return {
     "@context": "https://schema.org",
     "@type": "Article",
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
     headline,
     description,
     url,
     image: imageUrl,
+    inLanguage: "en",
     author: {
-      "@type": "Organization",
-      name: siteMetadata.name,
-      url: siteMetadata.siteUrl,
+      "@type": "Person",
+      name: "Ada Okonkwo",
+      url: absoluteUrl("/blog"),
     },
     publisher: {
       "@type": "Organization",
@@ -341,6 +345,7 @@ export function buildArticleJsonLd({
       },
     },
     ...(publishedAt ? { datePublished: publishedAt, dateModified: publishedAt } : {}),
+    ...(readingTimeMinutes ? { timeRequired: `PT${readingTimeMinutes}M` } : {}),
   };
 }
 

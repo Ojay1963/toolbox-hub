@@ -176,17 +176,24 @@ export default function HomePage() {
             Free online tools
           </p>
           <h1 className="site-hero-title mt-4 text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-            Fast Free Online Tools — No Signup Required
+            Free Online Tools — Images, PDFs, Text, Dev and More
           </h1>
           <p className="mt-5 max-w-3xl text-base leading-8 text-[color:var(--muted)]">
-            Toolbox Hub is a collection of free online tools built for everyday browser-based tasks — no signup
-            required, no software to install. Whether you need to compress images before a blog post, merge PDF files
-            for a document workflow, format JSON for a development task, or generate a QR code for a link or contact
-            card, every tool opens instantly in your browser and delivers a result in seconds. The directory spans
-            image editing, PDF editing, text tools, developer utilities, generators, calculators, converters, and
-            internet tools. Each page explains what the tool does, includes step-by-step instructions, and links to
-            related tools so you can keep moving without returning to a search engine. No account wall, no
-            dashboard — just a clean, fast, browser-first workflow for the tasks that come up most often.
+            Toolbox Hub is a collection of 242+ free online tools spanning nine categories — images, PDFs, text,
+            developer utilities, generators, calculators, converters, and more. Whether you need the{" "}
+            <Link href="/tools/image-compressor" className="font-semibold text-[color:var(--primary)]">image compressor</Link>{" "}
+            to shrink photos before publishing,{" "}
+            <Link href="/tools/pdf-merge" className="font-semibold text-[color:var(--primary)]">PDF merge</Link>{" "}
+            to combine documents into one file, the{" "}
+            <Link href="/tools/json-formatter" className="font-semibold text-[color:var(--primary)]">JSON formatter</Link>{" "}
+            to clean up an API response, or the{" "}
+            <Link href="/tools/qr-code-generator" className="font-semibold text-[color:var(--primary)]">QR code generator</Link>{" "}
+            to create a scannable link in seconds — every tool opens directly in your browser and delivers a result
+            without friction. The{" "}
+            <Link href="/tools/word-counter" className="font-semibold text-[color:var(--primary)]">word counter</Link>{" "}
+            handles essay drafts and character limits. The{" "}
+            <Link href="/tools/education/gpa-calculator" className="font-semibold text-[color:var(--primary)]">GPA calculator</Link>{" "}
+            and other education tools are built for students. No signup required — just open any tool and start.
           </p>
           <div className="site-inline-links mt-8 flex flex-col gap-3 sm:flex-row">
             <Link
