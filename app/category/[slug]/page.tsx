@@ -135,18 +135,276 @@ export default async function CategoryPage({
       : [];
   const relatedCategories = categories.filter((item) => item.slug !== category.slug).slice(0, 4);
   const featuredLinks = popularInCategory.slice(0, 4);
-  const categoryFaq = [
+  const categoryFaqMap: Record<string, { question: string; answer: string }[]> = {
+    "image-tools": [
+      {
+        question: "What image formats do the image tools support?",
+        answer: "The image tools work with the most common formats used on the web and in everyday workflows: JPG, PNG, WebP, GIF, BMP, and TIFF. The format converter handles switching between any of these. WebP is the recommended output for web use because it produces smaller files than JPG or PNG at the same visual quality.",
+      },
+      {
+        question: "Do the image tools upload my files to a server?",
+        answer: "No. Every image tool on this page processes your file directly in your browser using your own device. Nothing is uploaded to a server, and nothing is stored after you close the tab. This means your photos and graphics stay private even when you use tools like Background Remover or EXIF Data Remover.",
+      },
+      {
+        question: "What is the difference between compressing and resizing an image?",
+        answer: "Compressing reduces the file size by removing data the eye is unlikely to notice, while keeping the dimensions the same. Resizing changes the pixel width and height of the image. For the smallest possible file, resize the image to its final display size first, then compress it. The Image Resizer and Image Compressor work well together in that order.",
+      },
+      {
+        question: "How do I remove a background from an image online for free?",
+        answer: "Open the Background Remover tool, upload your image, and the tool will detect and remove the background automatically. The result downloads as a PNG with a transparent background. This is useful for product photos, profile pictures, and design assets where you need the subject placed on a different colour or background.",
+      },
+      {
+        question: "What is EXIF data and should I remove it before sharing photos?",
+        answer: "EXIF data is metadata embedded in photo files by cameras and phones. It can include the GPS coordinates where the photo was taken, the device model, the date and time, and camera settings. Before posting photos publicly online, it is a good idea to strip this metadata using the EXIF Data Remover to protect your location and device information.",
+      },
+      {
+        question: "How do I convert an image to WebP for my website?",
+        answer: "Open the Image to WebP Converter, upload your JPG or PNG file, and download the WebP output. WebP files are typically 25–35% smaller than JPG and PNG at the same quality level, which speeds up page load times. Most modern browsers — Chrome, Firefox, Edge, and Safari — fully support WebP, so it is safe to use as the primary image format on any current website.",
+      },
+      {
+        question: "Can I add a watermark to my photos without Photoshop?",
+        answer: "Yes. The Image Watermark Tool lets you upload a photo, type your watermark text, choose the position, and download the result — no Photoshop or account needed. This is useful for photographers, content creators, and businesses that want to protect images before sharing them online.",
+      },
+      {
+        question: "What is the best way to make a GIF from a video clip?",
+        answer: "Use the Video to GIF Converter. Upload a short video clip, select the portion you want to turn into a GIF, and download the result. GIFs work well for short animations, product previews, and social media content. Keep the clip under 5–10 seconds for a manageable file size — longer GIFs become very large very quickly.",
+      },
+    ],
+    "pdf-tools": [
+      {
+        question: "How do I merge multiple PDF files into one document?",
+        answer: "Open the PDF Merge tool, upload the files you want to combine, arrange them in the order you need, and click merge. The result downloads as a single PDF. This is useful for combining invoices, combining chapters, or assembling a report from separately written sections. If the merged file is too large to email, run it through the PDF Compressor next.",
+      },
+      {
+        question: "Can I split a PDF into individual pages or sections?",
+        answer: "Yes. The PDF Split tool lets you extract specific pages or divide a PDF into separate files. You can pull out a single page, split at a specific page number, or extract a range. This is useful when you need to share only part of a document, extract a signed page from a contract, or separate chapters of a book.",
+      },
+      {
+        question: "What is the best way to reduce a PDF file size?",
+        answer: "The PDF Compressor reduces file size by optimising embedded images and removing redundant data. This is the fastest route for shrinking a PDF that is too large to attach to an email or upload to a portal. If the PDF contains large embedded photos, converting those images to WebP before creating the PDF will often produce a smaller result than compressing afterwards.",
+      },
+      {
+        question: "How do I convert a PDF to a Word document I can edit?",
+        answer: "Open the PDF to Word tool, upload your PDF, and download the .docx file. The tool preserves the text content so you can continue editing in Microsoft Word, Google Docs, or any compatible editor. Heavily formatted PDFs with tables, columns, or complex layouts may need minor cleanup after conversion — this is normal and not a limitation unique to any specific converter.",
+      },
+      {
+        question: "Do the PDF tools send my documents to an external server?",
+        answer: "Some PDF operations — particularly PDF to Word conversion and PDF password protection — require a backend process to complete. These use secure connections and do not retain your files after processing. Tools like PDF Page Rotator and JPG to PDF run in your browser without any server contact. Each tool page indicates clearly whether processing happens locally or requires a remote step.",
+      },
+      {
+        question: "How do I add page numbers to a PDF?",
+        answer: "Use the PDF Page Number Adder. Upload your PDF, choose where you want the numbers to appear (top left, bottom centre, etc.), and download the updated document. This is useful for reports, academic submissions, legal documents, and any file that needs clear pagination for navigation or reference.",
+      },
+      {
+        question: "Can I protect a PDF with a password for free?",
+        answer: "Yes. The Protect PDF tool adds a password to your file so that only someone with the correct password can open it. This is suitable for contracts, financial documents, and any PDF that should not be readable by anyone who happens to have the file. Password-protected PDFs open in any standard PDF viewer — the reader just sees a password prompt before the document loads.",
+      },
+      {
+        question: "How do I convert a PDF to JPG images?",
+        answer: "Open the PDF to JPG tool and upload your document. Each page of the PDF is converted to a separate JPG image. This is useful for sharing individual pages on social media, embedding PDF content into a website that does not support PDF embeds, or extracting pages for use in a presentation.",
+      },
+    ],
+    "text-tools": [
+      {
+        question: "How do I count words in a document online?",
+        answer: "Paste or type your text into the Word Counter tool and it shows the word count, character count, sentence count, paragraph count, and estimated reading time instantly. There is no character limit — you can paste an entire essay, article, or report. The reading time estimate uses an average adult reading speed of 200–238 words per minute.",
+      },
+      {
+        question: "What does a case converter do?",
+        answer: "A case converter changes the capitalisation of text. Common options include UPPER CASE (all capitals), lower case (all small letters), Title Case (first letter of each word capitalised), Sentence case (first letter of each sentence capitalised), and alternating case. This is useful for formatting headings, cleaning up data exports, and fixing text that was typed with Caps Lock on.",
+      },
+      {
+        question: "How do I remove duplicate lines from a list?",
+        answer: "Paste your list into the Remove Duplicate Lines tool and it strips every repeated line, keeping only the first occurrence of each. This is useful when combining lists from different sources, cleaning up URL lists, and deduplicating email or contact exports before importing them into a CRM.",
+      },
+      {
+        question: "Can I sort a list alphabetically online?",
+        answer: "Yes. The Text Sorter arranges lines in alphabetical or reverse alphabetical order. You can also sort numerically if the lines start with numbers. Paste any list — names, URLs, keywords, product titles — and download or copy the sorted result in seconds.",
+      },
+      {
+        question: "What is a URL slug and how do I convert text to one?",
+        answer: "A URL slug is the lowercase, hyphenated version of a title used in web addresses. For example, the title 'Best Free Image Tools Online' becomes 'best-free-image-tools-online'. The Text to Slug Converter handles this automatically: it lowercases the text, replaces spaces with hyphens, and removes characters that are not valid in URLs. This is useful for content management systems, blog platforms, and any workflow where you create URLs from text.",
+      },
+      {
+        question: "How do I reverse the words or letters in a sentence?",
+        answer: "Use the Text Reverser tool. You can reverse either the full string character by character (so 'Hello World' becomes 'dlroW olleH') or reverse the order of the words (so 'Hello World' becomes 'World Hello'). This is used in coding exercises, data formatting, puzzle creation, and occasional creative writing workflows.",
+      },
+      {
+        question: "What is the difference between a word counter and a character counter?",
+        answer: "A word counter counts the number of separate words separated by spaces. A character counter counts every individual character including spaces, punctuation, and letters. Character counts are important for social media posts (Twitter's 280-character limit), SMS messages (160 characters per segment), and meta descriptions (typically kept under 160 characters for SEO). The Word Counter tool on Toolbox Hub shows both figures simultaneously.",
+      },
+    ],
+    "developer-tools": [
+      {
+        question: "What does a JSON formatter do and when should I use one?",
+        answer: "A JSON formatter takes raw or minified JSON text and adds consistent indentation and line breaks to make it readable. Minified JSON puts everything on one line to reduce file size — useful in production, but impossible to read when debugging. Paste a minified API response or config file into the JSON Formatter and it instantly becomes scannable. The formatter also validates the input and flags any syntax errors that would prevent it from parsing.",
+      },
+      {
+        question: "What is Base64 encoding used for?",
+        answer: "Base64 encoding converts binary data (images, files, arbitrary bytes) into a string of printable ASCII characters. It is used when binary data needs to travel through systems that only handle text — email attachments, data URLs in CSS, JSON payloads that embed image content, and HTTP Basic Authentication headers all rely on Base64. The Base64 Encoder and Base64 Decoder on Toolbox Hub handle both directions instantly in your browser.",
+      },
+      {
+        question: "How do I test a regular expression online?",
+        answer: "Open the Regex Tester, paste your pattern into the pattern field, and paste the text you want to test in the test field. The tool highlights every match in real time and shows capture group results. This is useful for verifying email validation patterns, extracting data from log files, and building search-and-replace rules for code editors.",
+      },
+      {
+        question: "What is a JWT and how do I decode one without a library?",
+        answer: "A JSON Web Token (JWT) is a compact, URL-safe string used to transmit authentication and authorization data between systems. It has three Base64-encoded parts separated by dots: a header, a payload, and a signature. The JWT Decoder on Toolbox Hub separates these three parts and shows the decoded header and payload in readable JSON — useful for debugging auth flows, inspecting token expiry, and checking claim values during development. Note: decoding reveals the data but does not verify the signature without the secret key.",
+      },
+      {
+        question: "What is the difference between URL encoding and HTML encoding?",
+        answer: "URL encoding (also called percent-encoding) replaces characters that are not valid in a URL with a percent sign followed by a two-digit hex code. A space becomes %20, an ampersand becomes %26. HTML encoding replaces characters that have special meaning in HTML markup with entity references. An ampersand becomes &amp;, a less-than sign becomes &lt;. Use URL encoding for query strings and links; use HTML encoding when inserting text into HTML to prevent injection issues.",
+      },
+      {
+        question: "How do I generate an MD5 or SHA256 hash online?",
+        answer: "Open the MD5 Generator or SHA256 Generator tool, type or paste the input text, and copy the resulting hash. Hashing is one-way — you cannot recover the original text from the hash. MD5 is fast and still used for checksums and non-security file verification. SHA256 is stronger and is used for password storage, digital signatures, and data integrity checks. For security-sensitive applications, always use SHA256 or stronger — MD5 is considered cryptographically broken.",
+      },
+      {
+        question: "How do I convert JSON to CSV or CSV to JSON?",
+        answer: "Use the JSON to CSV Converter to flatten a JSON array into a spreadsheet-ready CSV file, or the CSV to JSON Converter to turn a CSV export into structured JSON. These are useful when moving data between APIs (which typically use JSON) and spreadsheet tools like Excel or Google Sheets (which use CSV). The converters handle the mapping automatically as long as the input is well-formed.",
+      },
+      {
+        question: "What is HTML minification and does it affect how a page looks?",
+        answer: "HTML minification removes whitespace, comments, and redundant characters from HTML source code to reduce file size. It does not change how the page renders — browsers ignore extra whitespace when rendering HTML. A minified HTML file loads slightly faster because fewer bytes travel over the network. The HTML Minifier tool on Toolbox Hub handles this in one step without any configuration needed.",
+      },
+    ],
+    "generator-tools": [
+      {
+        question: "How do I generate a strong password online?",
+        answer: "Open the Password Generator, choose the length (12 characters minimum is a reasonable baseline for most accounts; 16 or more for anything sensitive), and select which character types to include: uppercase letters, lowercase letters, numbers, and symbols. The generator creates a cryptographically random password in your browser — it is not sent to any server. Copy the result and store it in a password manager rather than writing it down or reusing it across accounts.",
+      },
+      {
+        question: "What is a UUID and when do I need to generate one?",
+        answer: "A UUID (Universally Unique Identifier) is a 128-bit value formatted as a 32-character hex string divided into five groups by hyphens, like 550e8400-e29b-41d4-a716-446655440000. UUIDs are used as unique IDs in databases, distributed systems, file names, API keys, and anywhere you need an identifier that is statistically guaranteed not to collide with others. The UUID Generator creates Version 4 UUIDs, which are random and the most widely used type.",
+      },
+      {
+        question: "How do I create a QR code from a URL for free?",
+        answer: "Open the QR Code Generator, paste the URL (or any text you want to encode), and download the QR code image. QR codes work for URLs, contact information (vCard), Wi-Fi credentials, plain text, and more. The generated image is a standard format that any smartphone camera app can scan. Use a sufficiently high resolution if the code will be printed — a minimum of 300×300 pixels for print materials.",
+      },
+      {
+        question: "What is Lorem Ipsum and why do designers use it?",
+        answer: "Lorem Ipsum is placeholder text derived from a work by Cicero, used in design and publishing since the 1500s. It has roughly normal letter distribution and word lengths, which makes a layout look more realistic than blocks of repeated text like 'text text text'. Designers use it when the actual content is not available yet, so the layout can be evaluated without the reader being distracted by the meaning of the words. The Lorem Ipsum Generator on Toolbox Hub lets you specify how many paragraphs, words, or sentences you need.",
+      },
+      {
+        question: "How do I generate a random username?",
+        answer: "The Username Generator combines adjectives, nouns, or words from themed word lists to create readable usernames that are not based on your real name. You can typically regenerate until you find one that fits the tone you want — casual, professional, or themed. Generated usernames are useful for test accounts, gaming handles, anonymous forum profiles, and placeholder data for development.",
+      },
+      {
+        question: "Can I generate random colors for a design project?",
+        answer: "Yes. The Random Color Generator produces hex codes, RGB values, and HSL values for random colours. This is useful for picking accent colours for a quick mockup, generating test data for a data visualisation, or exploring colour options when you do not have a specific palette in mind. Regenerate as many times as needed — the tool creates a new colour each time.",
+      },
+      {
+        question: "What is a passphrase generator and is it more secure than a password?",
+        answer: "A passphrase is a sequence of random words strung together, like 'maple-thunder-orbit-fence'. Passphrases are often more secure than short complex passwords because length matters more than character variety for brute-force resistance — a 5-word passphrase has far more possible combinations than an 8-character random string. They are also easier to remember and type. The Random Password Phrase Generator on Toolbox Hub creates these multi-word combinations.",
+      },
+    ],
+    "calculator-tools": [
+      {
+        question: "How does the loan calculator work?",
+        answer: "Enter the loan amount, the annual interest rate, and the loan term in months or years. The calculator uses the standard amortisation formula to compute the fixed monthly payment and the total amount paid over the life of the loan, including total interest. This is useful for comparing mortgage options, car finance quotes, and personal loan offers before you sign anything.",
+      },
+      {
+        question: "Is a BMI calculator accurate for everyone?",
+        answer: "BMI (Body Mass Index) is a simple ratio of weight to height squared and gives a rough population-level screening number. It does not account for muscle mass, bone density, age, sex, or body composition. A heavily muscled person may have a high BMI without excess body fat. A person with low muscle mass may have a normal BMI despite unhealthy fat levels. Use the BMI Calculator as a starting data point, not a clinical diagnosis — a doctor or dietitian can give a more complete assessment.",
+      },
+      {
+        question: "How do I calculate the percentage of a number online?",
+        answer: "Open the Percentage Calculator and enter the values you need. The tool handles three common percentage questions: what is X% of Y, X is what percentage of Y, and percentage increase or decrease between two numbers. For example, to find 15% of 340, enter 15 in the first field and 340 in the second — the answer is 51.",
+      },
+      {
+        question: "What is compound interest and how is it calculated?",
+        answer: "Compound interest is interest calculated on both the original principal and the accumulated interest from previous periods. It grows faster than simple interest because each period you earn interest on a larger base. The formula is A = P(1 + r/n)^(nt), where P is the principal, r is the annual interest rate as a decimal, n is the number of times interest compounds per year, and t is the time in years. The Compound Interest Calculator handles this automatically — enter the principal, rate, compounding frequency, and term to see the final balance and total interest earned.",
+      },
+      {
+        question: "How do I find the number of days between two dates?",
+        answer: "Open the Date Difference Calculator, enter the start and end dates, and it shows the number of days, weeks, months, and years between them. This is useful for calculating deadlines, figuring out how long a subscription or warranty runs, computing age in days, and planning project timelines.",
+      },
+      {
+        question: "How do I calculate a tip percentage?",
+        answer: "Enter the bill amount and the tip percentage into the Tip Calculator. The tool shows the tip amount, the total per bill, and optionally splits the total between multiple people. Common tip percentages are 10% for basic service, 15–18% for standard restaurant service, and 20% or more for excellent service. The calculator saves the mental arithmetic in the moment.",
+      },
+      {
+        question: "What is the difference between a discount calculator and a profit margin calculator?",
+        answer: "A discount calculator starts from the original price and a discount percentage and tells you the sale price and the amount saved. A profit margin calculator starts from the cost and the selling price and tells you the gross profit and the profit margin as a percentage. Use the Discount Calculator as a buyer to evaluate deals; use the Profit Margin Calculator as a seller to set prices that cover costs and hit a target margin.",
+      },
+      {
+        question: "How do I calculate VAT on a price?",
+        answer: "The VAT Calculator lets you add or remove VAT from a figure. Enter the amount and the VAT rate (for example, 20% in the UK or 7.5% in Nigeria) and choose whether the amount already includes VAT or not. If VAT is not included, the tool adds it and shows the VAT-inclusive price. If VAT is already included, the tool extracts the VAT portion and shows the pre-VAT price.",
+      },
+    ],
+    "converter-tools": [
+      {
+        question: "Can I convert between metric and imperial units for free?",
+        answer: "Yes. The converter tools cover length (metres, feet, inches, kilometres, miles), weight (kilograms, pounds, ounces, stones), temperature (Celsius, Fahrenheit, Kelvin), area, speed, and more. All unit conversions run in your browser instantly with no signup required. Choose the category you need, enter the value, and copy the result.",
+      },
+      {
+        question: "How do I convert Celsius to Fahrenheit online?",
+        answer: "Open the Temperature Converter, enter the value in Celsius, and the Fahrenheit equivalent appears immediately. The formula is F = (C × 9/5) + 32. Common reference points: 0°C = 32°F (water freezes), 100°C = 212°F (water boils), 37°C = 98.6°F (typical body temperature), 20°C = 68°F (comfortable room temperature).",
+      },
+      {
+        question: "What is binary-to-decimal conversion used for?",
+        answer: "Binary is the base-2 number system used by computers, where all values are represented as sequences of 0s and 1s. Decimal is the base-10 system humans use for everyday arithmetic. Conversion between the two comes up in computer science education, low-level programming, working with bitfields and bitmasks, understanding memory addresses, and network configuration tasks like subnet masks. The Binary to Decimal Converter handles the conversion instantly, and the Decimal to Binary Converter does the reverse.",
+      },
+      {
+        question: "How do I convert a hex color code to RGB?",
+        answer: "Open the Hex to RGB Converter and enter the hex code (with or without the # prefix). The tool outputs the R, G, B values as separate numbers between 0 and 255. For example, #1a73e8 converts to R: 26, G: 115, B: 232. This is useful when working between design tools that display hex values and code that needs RGB function notation for CSS, Canvas, or SVG.",
+      },
+      {
+        question: "How do I convert between time zones online?",
+        answer: "The Time Converter lets you enter a time in one zone and see the equivalent in another. This is useful for scheduling international calls and meetings, understanding when a global deadline falls in your local time, and converting timestamps in log files. Select the source and target time zones from the dropdown menus, enter the time, and the converted result appears immediately.",
+      },
+      {
+        question: "Can I convert currency amounts between countries?",
+        answer: "Yes. The Currency Converter fetches live exchange rates and converts between a wide range of currencies including USD, EUR, GBP, NGN, JPY, CAD, AUD, and others. Enter the amount, choose the source and target currencies, and the converted value updates immediately. Exchange rates fluctuate constantly, so for large transactions always verify with your bank or exchange service before committing.",
+      },
+      {
+        question: "What is the difference between text encoding and file format conversion?",
+        answer: "Text encoding conversion changes how characters are represented internally — for example, converting between ASCII, UTF-8, and other encoding schemes, or encoding text as Base64. File format conversion changes the container format of a file — for example, converting a PNG image to a JPG, or a CSV to a JSON file. Toolbox Hub covers both: the developer tools handle encoding and decoding of text and data, while the image and PDF tools handle file format conversions.",
+      },
+    ],
+    "internet-tools": [
+      {
+        question: "What is a DNS lookup and when would I need to do one?",
+        answer: "DNS (Domain Name System) translates human-readable domain names like toolboxhubapp.com into the IP addresses that computers use to connect. A DNS lookup retrieves the records associated with a domain — A records (IPv4 addresses), AAAA records (IPv6), MX records (mail servers), CNAME records (aliases), TXT records (verification strings), and more. DNS lookups are useful when troubleshooting email delivery issues, verifying that DNS changes have propagated, confirming domain ownership records, and diagnosing connectivity problems.",
+      },
+      {
+        question: "How do I test my website speed online?",
+        answer: "Open the Website Speed Test tool, enter your URL, and run the test. The tool measures how long the page takes to load and reports key performance metrics. Slow load times hurt both user experience and search engine rankings — Google uses page speed as a ranking signal for both desktop and mobile searches. Common causes of slow pages include uncompressed images, unminified CSS and JavaScript, slow server response times, and too many external resource requests.",
+      },
+      {
+        question: "What does a mobile-friendly checker test?",
+        answer: "The Mobile Friendly Checker tests whether a web page is usable on a smartphone screen. It checks whether the page uses a responsive layout that adapts to small screens, whether tap targets (buttons, links) are large enough to use with a finger, whether text is readable without zooming, and whether the page avoids horizontal scrolling. Google's mobile-first indexing means a page's mobile version is the one used for ranking, so passing this check is important for SEO.",
+      },
+      {
+        question: "How do I check where a URL redirects?",
+        answer: "The URL Redirect Checker follows a URL through every HTTP redirect in the chain and shows each step with its HTTP status code. A 301 redirect is a permanent redirect, a 302 is temporary, and a 307 is a temporary redirect that preserves the request method. Checking redirect chains is useful for diagnosing broken links, verifying that old URLs are pointing to the correct new destinations, and auditing site migrations where hundreds of redirects were set up.",
+      },
+      {
+        question: "What is a User Agent string and how do I parse one?",
+        answer: "A User Agent string is a line of text that your browser sends to every website you visit, identifying the browser name, version, operating system, and rendering engine. Websites use this to serve appropriate content, track browser usage, and block certain automated clients. The User Agent Parser on Toolbox Hub breaks the string into its components and displays them in plain English — useful for debugging browser-specific issues, checking what a custom client reports, and understanding web analytics data.",
+      },
+      {
+        question: "What is an HTTP status code?",
+        answer: "HTTP status codes are three-digit numbers that a server returns with every response to tell the browser (or API client) what happened. 200 means success. 301 and 302 are redirects. 400 means a bad request, 401 means unauthorised, 403 means forbidden, 404 means the page was not found. 500 is a server error, 502 is a bad gateway, and 503 means the service is temporarily unavailable. Knowing what each code means is essential for debugging websites, APIs, and crawl issues flagged in tools like Google Search Console.",
+      },
+      {
+        question: "What is a MIME type and how do I look one up?",
+        answer: "A MIME type (Multipurpose Internet Mail Extensions type) is a label that tells a browser or server what kind of data a file contains. For example, image/jpeg tells the browser a file is a JPG image, application/json tells an API client the response is JSON, and text/html tells the browser the content is an HTML page. MIME types are set in HTTP response headers and are important for file uploads, API responses, and any system that needs to handle different file types correctly. The MIME Type Lookup tool shows the correct MIME type for any file extension.",
+      },
+    ],
+  };
+  const categoryFaq = categoryFaqMap[category.slug] ?? [
     {
       question: `What kind of tools are in ${category.name}?`,
-      answer: `${category.name} includes tools for common tasks in this category, all collected in one place.`,
+      answer: `${category.name} includes tools for common tasks in this category, all collected in one place. Each tool runs in your browser and does not require an account.`,
     },
     {
-      question: `Are all ${category.name.toLowerCase()} fully local?`,
-      answer: "Some tools run right in your browser, while others may need an online request to finish the job.",
+      question: `Do I need to create an account to use ${category.name.toLowerCase()}?`,
+      answer: "No. Every tool on Toolbox Hub is free to use and does not require signup, login, or any personal information.",
     },
     {
       question: `How do I find related tools outside ${category.name}?`,
-      answer: "Use the related categories and links on this page to find similar tools.",
+      answer: "Use the category links in the sidebar and the cross-links at the bottom of this page. You can also search the full directory from the homepage.",
     },
   ];
   const crossLinks = getPopularTools(6).filter((tool) => tool.category !== category.slug).slice(0, 6);
