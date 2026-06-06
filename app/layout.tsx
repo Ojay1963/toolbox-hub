@@ -5,7 +5,7 @@ import { EngagementProvider } from "@/components/engagement/engagement-provider"
 import { LazyEngagementOverlays } from "@/components/engagement/lazy-engagement-overlays";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
-import { buildOrganizationJsonLd, buildWebsiteJsonLd, siteMetadata } from "@/lib/seo";
+import { buildGraphJsonLd, buildOrganizationJsonLd, buildWebsiteJsonLd, siteMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteMetadata.siteUrl),
@@ -54,8 +54,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const websiteJsonLd = buildWebsiteJsonLd();
-  const organizationJsonLd = buildOrganizationJsonLd();
+  const siteGraphJsonLd = buildGraphJsonLd([buildWebsiteJsonLd(), buildOrganizationJsonLd()]);
 
   return (
     <html lang="en">
@@ -68,11 +67,7 @@ export default function RootLayout({
         </a>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteGraphJsonLd) }}
         />
         <AnalyticsHook />
         <EngagementProvider>

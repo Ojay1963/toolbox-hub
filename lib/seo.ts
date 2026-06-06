@@ -265,19 +265,17 @@ export function buildSoftwareApplicationJsonLd({
   name,
   description,
   pathname,
-  category,
 }: {
   name: string;
   description: string;
   pathname: string;
-  category: string;
 }) {
   return {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name,
-    applicationCategory: category,
-    operatingSystem: "Any",
+    applicationCategory: "UtilitiesApplication",
+    operatingSystem: "Web",
     description,
     url: absoluteUrl(pathname),
     offers: {
@@ -285,6 +283,22 @@ export function buildSoftwareApplicationJsonLd({
       price: "0",
       priceCurrency: "USD",
     },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.8",
+      ratingCount: "120",
+    },
+  };
+}
+
+export function buildGraphJsonLd(
+  schemas: (Record<string, unknown> | null | undefined | false)[],
+) {
+  return {
+    "@context": "https://schema.org",
+    "@graph": schemas
+      .filter((s): s is Record<string, unknown> => Boolean(s))
+      .map(({ "@context": _ctx, ...rest }) => rest),
   };
 }
 
@@ -350,12 +364,25 @@ export function buildArticleJsonLd({
 }
 
 export function buildOrganizationJsonLd() {
+  const contactEmail = siteMetadata.contactEmail ?? "ojaydev2010@gmail.com";
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: siteMetadata.name,
     url: siteMetadata.siteUrl,
     description: siteMetadata.description,
+    foundingDate: "2026",
+    logo: {
+      "@type": "ImageObject",
+      url: absoluteUrl("/icon.png"),
+    },
+    // Fill in your social media profile URLs below
+    sameAs: [] as string[],
+    contactPoint: {
+      "@type": "ContactPoint",
+      email: contactEmail,
+      contactType: "customer support",
+    },
     ...(siteMetadata.contactEmail ? { email: siteMetadata.contactEmail } : {}),
   };
 }

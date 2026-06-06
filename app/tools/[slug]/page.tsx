@@ -5,6 +5,7 @@ import { ToolPage } from "@/components/tool-page";
 import {
   buildBreadcrumbJsonLd,
   buildFaqJsonLd,
+  buildGraphJsonLd,
   buildHowToJsonLd,
   buildMetadata,
   buildSoftwareApplicationJsonLd,
@@ -91,7 +92,7 @@ export default async function ToolDetailPage({
   const categoryRecentTools = getRecentTools(4, tool.category).filter((item) => item.slug !== tool.slug);
   const breadcrumbJsonLd = buildBreadcrumbJsonLd([
     { name: "Home", pathname: "/" },
-    { name: tool.category.replace(/-/g, " "), pathname: `/category/${tool.category}` },
+    { name: "Tools", pathname: "/tools" },
     { name: tool.name, pathname: `/tools/${tool.slug}` },
   ]);
   const faqJsonLd = shouldIndex
@@ -115,16 +116,14 @@ export default async function ToolDetailPage({
       name: tool.name,
       description: tool.seoDescription,
       pathname: `/tools/${tool.slug}`,
-      category: "WebApplication",
     })
     : null;
 
+  const toolGraphJsonLd = buildGraphJsonLd([breadcrumbJsonLd, faqJsonLd, howToJsonLd, softwareJsonLd]);
+
   return (
     <>
-      <JsonLd data={breadcrumbJsonLd} />
-      <JsonLd data={faqJsonLd} />
-      <JsonLd data={howToJsonLd} />
-      <JsonLd data={softwareJsonLd} />
+      <JsonLd data={toolGraphJsonLd} />
       <ToolPage
         tool={tool}
         relatedTools={relatedTools}

@@ -13,6 +13,7 @@ import {
 import {
   buildBreadcrumbJsonLd,
   buildFaqJsonLd,
+  buildGraphJsonLd,
   buildHowToJsonLd,
   buildMetadata,
   buildSoftwareApplicationJsonLd,
@@ -71,15 +72,12 @@ export default async function EducationToolDetailPage({
     name: tool.name,
     description: tool.seoDescription,
     pathname: `/tools/education/${tool.slug}`,
-    category: "EducationalApplication",
   });
+  const toolGraphJsonLd = buildGraphJsonLd([breadcrumbJsonLd, faqJsonLd, howToJsonLd, softwareJsonLd]);
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howToJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(toolGraphJsonLd) }} />
       <EducationToolPage
         tool={tool}
         relatedTools={relatedTools}

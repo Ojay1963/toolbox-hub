@@ -9,7 +9,7 @@ import { AdPlaceholder } from "@/components/ui/ad-placeholder";
 import { FaqList } from "@/components/ui/faq-list";
 import { getEducationHomepageSpotlight } from "@/lib/education-tools";
 import { getTodayIndex } from "@/lib/engagement-store";
-import { buildBreadcrumbJsonLd, buildCollectionPageJsonLd, buildFaqJsonLd, buildMetadata } from "@/lib/seo";
+import { buildBreadcrumbJsonLd, buildCollectionPageJsonLd, buildFaqJsonLd, buildGraphJsonLd, buildMetadata } from "@/lib/seo";
 import { discoveryCategories, getDiscoveryEntries, getDiscoverySuggestedEntries } from "@/lib/tool-discovery";
 import { getIndexableTools, getPopularTools, getRecentTools, getTool, getTrendingTools, shouldIndexTool, type ToolDefinition } from "@/lib/tools";
 
@@ -132,12 +132,13 @@ export default function HomePage() {
     description:
       "A browsable collection of free online tools for PDFs, images, text, developers, generators, calculators, converters, and internet tasks.",
     pathname: "/",
-    items: mostUsedTools.map((tool) => ({
+    items: allIndexableTools.map((tool) => ({
       name: tool.name,
       pathname: `/tools/${tool.slug}`,
     })),
   });
   const homepageFaqJsonLd = buildFaqJsonLd(homepageFaq);
+  const homepageGraphJsonLd = buildGraphJsonLd([breadcrumbJsonLd, homepageCollectionJsonLd, homepageFaqJsonLd]);
 
   // Minimal shape for client-side lookups
   const toolMetas = allIndexableTools.map((t) => ({
@@ -151,15 +152,7 @@ export default function HomePage() {
     <div className="site-shell mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageCollectionJsonLd) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageFaqJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homepageGraphJsonLd) }}
       />
 
       <WelcomeBanner toolCount={publicTools.length} />
